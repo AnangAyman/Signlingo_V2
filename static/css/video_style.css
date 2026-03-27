@@ -1,0 +1,244 @@
+/* ============================================= */
+/* Base Styles & Page Wrapper                    */
+/* ============================================= */
+body {
+    /* Use the neutral background from the design system */
+    background-color: var(--neutral-light);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: var(--space-l);
+    box-sizing: border-box; /* Ensures padding doesn't add to width/height */
+}
+
+.video-page-wrapper {
+    width: 100%;
+    max-width: 900px; /* Sets a comfortable max width for the video player */
+}
+
+/* ============================================= */
+/* Back Button (from login_style.css)            */
+/* ============================================= */
+.back-button {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    width: 48px;
+    height: 48px;
+    border: none;
+    background: var(--white);
+    border-radius: 50%;
+    cursor: pointer;
+    /* Updated transition to include color */
+    transition: all 0.3s ease, color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    /* Set the initial color for the icon */
+    color: var(--charcoal);
+}
+
+.back-button:hover {
+    background-color: var(--primary); /* Electric Aqua */
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 194, 203, 0.3);
+    /* Change color on hover, which the SVG will now inherit */
+    color: var(--white);
+}
+
+/* ============================================= */
+/* Video Card (Inspired by home_style.css & DS)  */
+/* ============================================= */
+.video-card {
+    background: var(--white);
+    border-radius: 16px; /* Design System spec */
+    padding: var(--space-xl);
+    box-shadow: 0 4px 12px var(--card-shadow); /* Design System spec */
+    width: 100%;
+}
+
+/* ============================================= */
+/* Header & Progress Bar                         */
+/* ============================================= */
+.video-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-l);
+    margin-bottom: var(--space-l);
+    flex-wrap: wrap; /* Allows wrapping on smaller screens */
+}
+
+.header-text h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 28px;      /* H2 / Section Title from DS */
+    font-weight: 600;     /* Semi-Bold */
+    line-height: 1.3;     /* 130% */
+    color: var(--neutral-dark);
+    margin-top: var(--space-s);
+}
+
+/* Badge style from home_style.css */
+.module-badge {
+    display: inline-block;
+    background-color: var(--neutral-light);
+    color: var(--primary);
+    padding: 8px var(--space-m);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.progress-info {
+    flex-shrink: 0;
+    width: 200px;
+}
+
+.progress-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #6B7280; /* From .caption in home_style.css */
+    margin-bottom: var(--space-s);
+    display: block;
+}
+
+/* Progress bar style from home_style.css, adapted for DS */
+.progress-container {
+    height: 8px;
+    background-color: var(--neutral-light);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    /* DS: Aqua for neutral state, Lime Green for success */
+    background: var(--primary); /* Use Aqua for progress */
+    border-radius: 4px;
+    transition: width 0.6s ease;
+}
+
+
+/* ============================================= */
+/* Video Player                                  */
+/* ============================================= */
+.video-wrapper {
+    position: relative;
+    padding-top: 56.25%; /* 16:9 Aspect Ratio */
+    height: 0;
+    border-radius: 12px; /* Slightly less than card for a nice inset look */
+    overflow: hidden;
+    margin-bottom: var(--space-l);
+    /* FIX: Removed the black background color */
+}
+
+/* FIX: Changed selector from iframe to video */
+.video-wrapper video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* ============================================= */
+/* Action Button (Based on Design System)        */
+/* ============================================= */
+.video-actions {
+    display: flex;
+    justify-content: flex-end; /* Align button to the right */
+    margin-top: var(--space-l);
+}
+
+.btn.btn-primary-video {
+    /* Primary Button specs from Design System */
+    background: var(--primary); /* Electric Aqua */
+    color: var(--white);
+    border: none;
+    padding: 12px var(--space-l); /* 12px vertical, 24px horizontal */
+    border-radius: 8px;
+    font-weight: 700; /* Bold */
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-s);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn.btn-primary-video:hover {
+    /* Hover: Gradient Aqua → Teal as per DS */
+    background: linear-gradient(135deg, var(--primary) 0%, #00A8B0 100%);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.btn.btn-primary-video:active {
+    transform: scale(0.98);
+}
+
+/* ============================================= */
+/* Feedback Message & Responsive                 */
+/* ============================================= */
+.completion-feedback {
+    text-align: right;
+    margin-top: var(--space-s);
+    color: var(--accent); /* Lime Green for success */
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    body {
+        /* FIX: Increased top padding to avoid overlap with the back button */
+        padding: 80px var(--space-m) var(--space-m);
+        align-items: flex-start; /* Align to top on mobile */
+    }
+
+    .back-button {
+        top: 16px;
+        left: 16px;
+        /* Added for better scaling on mobile */
+        width: 40px;
+        height: 40px;
+    }
+    
+    .video-card {
+        padding: var(--space-l);
+    }
+    
+    .video-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-m);
+    }
+    
+    .progress-info {
+        width: 100%;
+    }
+
+    .header-text h1 {
+        font-size: 22px; /* H3 / Subheading from DS */
+    }
+
+    .video-actions {
+        justify-content: center; /* Center button on mobile */
+    }
+
+    .btn.btn-primary-video {
+        width: 100%;
+        justify-content: center;
+        font-size: 12px;
+    }
+    
+    .completion-feedback {
+        text-align: center;
+    }
+}

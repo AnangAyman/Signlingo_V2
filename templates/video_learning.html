@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignLingo - Video Learning</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="static/css/global_style.css">
+    <link rel="stylesheet" href="static/css/video_style.css">
+</head>
+<body>
+
+    <button class="back-button" onclick="window.location.href='/dashboard'">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </button>
+
+    {% set current_lesson = lessons|selectattr('url', 'equalto', request.path)|first %}
+
+    <div class="video-page-wrapper">
+        <div class="video-card" data-lesson-key="{{ current_lesson.lesson_key if current_lesson else 'KEY_NOT_FOUND' }}">
+            
+            <div class="video-header">
+                <div class="header-text">
+                    <span class="module-badge">VIDEO LESSON</span>
+                    <h1>{{ current_lesson.title if current_lesson else "Bisindo Letter" }}</h1>
+                </div>
+                <div class="progress-info">
+                    <span class="progress-label">Module Progress</span>
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width: {{ module_progress_percent }}%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="video-wrapper">
+                <video controls title="{{ current_lesson.title if current_lesson else 'Bisindo Letter' }} Tutorial">
+                    <source src="../static/Assets/Learn ASL Alphabet Video.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+
+            <div class="video-actions">
+                <button id="mark-video-completed-btn" class="btn btn-primary-video">
+                    <i class="fas fa-check"></i>
+                    Done
+                </button>
+            </div>
+            
+            <div id="video-completion-feedback" class="completion-feedback"></div>
+
+        </div>
+    </div>
+
+    <script src="/static/js/video_page.js" defer></script>
+
+</body>
+</html>

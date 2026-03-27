@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*egg-info/
+dist/
+build/
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Database files (the image will create its own)
+*.sqlite
+*.sqlite3
+*-journal
+
+# Git / IDE / OS specific
+.git/
+.gitignore
+.dockerignore
+README.md
+.vscode/
+.idea/
+.DS_Store
+
+# Instance folder (if you use one for secrets)
+/instance
+
+# Any local environment files
+.env

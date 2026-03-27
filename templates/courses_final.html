@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Language Courses - SignLingo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="static/css/global_style.css">
+    <link rel="stylesheet" href="static/css/course_style.css">
+</head>
+<body>
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a class="sidebar-brand" href="/dashboard">SignLingo</a>
+        </div>
+        <div class="sidebar-menu">
+            <a class="sidebar-link" href="/dashboard">
+                <i class="fas fa-house"></i>
+                <span>Dashboard</span>
+            </a>
+            <a class="sidebar-link active" href="/course">
+                <i class="fas fa-book"></i>
+                <span>Courses</span>
+            </a>
+            <a class="sidebar-link" href="/leaderboard">
+                <i class="fas fa-trophy"></i>
+                <span>Leaderboard</span>
+            </a>
+            <a class="sidebar-link" href="/shop">
+                <i class="fas fa-shopping-bag"></i>
+                <span>Shop</span>
+            </a>
+            <a class="sidebar-link" href="/premium">
+                <i class="fas fa-crown"></i>
+                <span>Premium</span>
+            </a>
+            <button class="more-options-button" id="moreOptionsButton">
+                <i class="fas fa-ellipsis-h"></i>
+            </button>
+        </div>
+        <div class="sidebar-footer">
+            <a class="profile-link" href="/edit-account" id="profileLink">
+                <div class="profile-circle-sidebar">{{ initials }}</div>
+                <div class="profile-info">
+                    <span id="profileName">{{ full_name }}</span>
+                    <span class="profile-id" id="profileUsername">{{user.username}}</span>
+                </div>
+            </a>
+            <a class="logout-link" href="/logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="dropup-menu" id="dropupMenu">
+        <a href="/edit-account">
+            <i class="fas fa-user-circle"></i>
+            <span id="profileName">{{ full_name }}</span>
+        </a>
+        <a href="/logout" class="logout-link-mobile">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+        </a>
+    </div>
+
+
+    <div class="main-content" id="mainContent">
+        <div class="content-wrapper">
+            <div class="page-header">
+                <h1 class="page-title">Explore Courses</h1>
+                <p class="page-subtitle">Learn sign language at your own pace with our comprehensive courses</p>
+            </div>
+
+            <div class="section-header">
+                <h2 class="section-title">Available Now</h2>
+            </div>
+            
+            <div class="course-grid">
+                <div class="course-card">
+                    <div class="course-visual course-visual-available">
+                        <div class="flag-container">
+                            <img src="../static/Assets/Indonesia.png" alt="Indonesia Flag" class="flag-image">
+                        </div>
+                    </div>
+                    <div class="course-content">
+                        <div class="course-badges">
+                            <span class="course-badge badge-available">Available</span>
+                        </div>
+                        <h3 class="course-title">Bisindo (Bahasa Isyarat Indonesia)</h3>
+                        <p class="course-description">Master the Indonesian sign language alphabet. Learn to fingerspell your name and spell out words letter by letter. Perfect for beginners starting their sign language journey.</p>
+                        <div class="course-meta">
+                            <div class="difficulty-badges">
+                                <div class="difficulty-badge active"></div>
+                                <div class="difficulty-badge active"></div>
+                                <div class="difficulty-badge"></div>
+                                <div class="difficulty-badge"></div>
+                                <div class="difficulty-badge"></div>
+                            </div>
+                            <div class="course-stats">
+                                <span class="course-stat">
+                                    <i class="fas fa-clock"></i>
+                                    16–20 weeks
+                                </span>
+                            </div>
+                        </div>
+                        <div class="learners-count">
+                            <i class="fas fa-users"></i>
+                            <span><strong>1,247</strong> learners currently enrolled</span>
+                        </div>
+                        <button class="learn-button" onclick="window.location.href='/roadmap'">
+                            Start Learning
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-header">
+                <h2 class="section-title">Coming Soon</h2>
+            </div>
+            
+            <div class="course-grid">
+                <div class="course-card">
+                    <div class="course-visual course-visual-coming">
+                        <div class="flag-container">
+                            <img src="../static/Assets/America.png" alt="USA Flag" class="flag-image">
+                        </div>
+                    </div>
+                    <div class="course-content">
+                        <div class="course-badges">
+                            <span class="course-badge badge-coming">Coming Soon</span>
+                        </div>
+                        <h3 class="course-title">American Sign Language (ASL)</h3>
+                        <p class="course-description">Learn the most widely used sign language in North America. Master ASL alphabet, common phrases, and conversational skills used by millions of deaf and hard-of-hearing individuals.</p>
+                        <div class="course-meta">
+                            <div class="difficulty-badges">
+                                <div class="difficulty-badge active"></div>
+                                <div class="difficulty-badge active"></div>
+                                <div class="difficulty-badge active"></div>
+                                <div class="difficulty-badge active"></div>
+                                <div class="difficulty-badge"></div>
+                            </div>
+                            <div class="course-stats">
+                                <span class="course-stat">
+                                    <i class="fas fa-clock"></i>
+                                    24–30 weeks
+                                </span>
+                            </div>
+                        </div>
+                        <div class="learners-count">
+                            <i class="fas fa-bell"></i>
+                            <span>Be notified when this course launches</span>
+                        </div>
+                        <button class="learn-button" disabled>
+                            Coming Soon
+                            <i class="fas fa-lock"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="course-card">
+                    <div class="course-visual course-visual-coming">
+                        <div class="flag-container">
+                            <img src="../static/Assets/British.png" alt="UK Flag" class="flag-image">
+                        </div>
+                    </div>
+                    <div class="course-content">
+                        <div class="course-badges">
+                            <span class="course-badge badge-coming">Coming Soon</span>
+                        </div>
+                        <h3 class="course-title">British Sign Language (BSL)</h3>
+                        <p class="course-description">Discover the official sign language of the United Kingdom. BSL has its own grammar and is used by over 150,000 people. Learn the fundamentals of this rich visual language.</p>
+                        <div class="course-meta">
+                            <div class="difficulty-badges">
+                                <div class="difficulty-badge active"></div>
+                                <div class="difficulty-badge active"></div>
+                                <div class="difficulty-badge active"></div>
+                                <div class="difficulty-badge active"></div>
+                                <div class="difficulty-badge active"></div>
+                            </div>
+                            <div class="course-stats">
+                                <span class="course-stat">
+                                    <i class="fas fa-clock"></i>
+                                    70–80 weeks
+                                </span>
+                            </div>
+                        </div>
+                        <div class="learners-count">
+                            <i class="fas fa-bell"></i>
+                            <span>Be notified when this course launches</span>
+                        </div>
+                        <button class="learn-button" disabled>
+                            Coming Soon
+                            <i class="fas fa-lock"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="course-card">
+                    <div class="course-visual course-visual-coming">
+                        <div class="flag-container">
+                            <img src="../static/Assets/France.png" alt="France Flag" class="flag-image">
+                        </div>
+                    </div>
+                    <div class="course-content">
+                        <div class="course-badges">
+                            <span class="course-badge badge-coming">Coming Soon</span>
+                        </div>
+                        <h3 class="course-title">French Sign Language (LSF)</h3>
+                        <p class="course-description">Explore Langue des Signes Française, the sign language used in France and French-speaking regions. LSF influenced many other sign languages including ASL.</p>
+                        <div class="course-meta">
+                            <div class="difficulty-badges">
+                                <div class="difficulty-badge active"></div>
+                                <div class="difficulty-badge active"></div>
+                                <div class="difficulty-badge active"></div>
+                                <div class="difficulty-badge"></div>
+                                <div class="difficulty-badge"></div>
+                            </div>
+                            <div class="course-stats">
+                                <span class="course-stat">
+                                    <i class="fas fa-clock"></i>
+                                    20–24 weeks
+                                </span>
+                            </div>
+                        </div>
+                        <div class="learners-count">
+                            <i class="fas fa-bell"></i>
+                            <span>Be notified when this course launches</span>
+                        </div>
+                        <button class="learn-button" disabled>
+                            Coming Soon
+                            <i class="fas fa-lock"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="course-card">
+                    <div class="course-visual course-visual-coming">
+                        <div class="flag-container">
+                            <img src="../static/Assets/China.png" alt="China Flag" class="flag-image">
+                        </div>
+                    </div>
+                    <div class="course-content">
+                        <div class="course-badges">
+                            <span class="course-badge badge-coming">Coming Soon</span>
+                        </div>
+                        <h3 class="course-title">Chinese Sign Language (CSL)</h3>
+                        <p class="course-description">Learn the sign language used by millions in China. CSL combines visual signs with unique grammatical structures distinct from spoken Chinese languages.</p>
+                        <div class="course-meta">
+                            <div class="difficulty-badges">
+                                <div class="difficulty-badge active"></div>
+                                <div class="difficulty-badge active"></div>
+                                <div class="difficulty-badge active"></div>
+                                <div class="difficulty-badge active"></div>
+                                <div class="difficulty-badge"></div>
+                            </div>
+                            <div class="course-stats">
+                                <span class="course-stat">
+                                    <i class="fas fa-clock"></i>
+                                    30–36 weeks
+                                </span>
+                            </div>
+                        </div>
+                        <div class="learners-count">
+                            <i class="fas fa-bell"></i>
+                            <span>Be notified when this course launches</span>
+                        </div>
+                        <button class="learn-button" disabled>
+                            Coming Soon
+                            <i class="fas fa-lock"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../static/js/navbar_logic.js"></script>
+</body>
+</html>

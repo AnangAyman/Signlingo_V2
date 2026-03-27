@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  web:
+    build: .
+    ports:
+      - "5001:5000"
+    volumes:
+      # This new line syncs all your project files
+      - .:/app 
+      # This line already persists your SQLite database
+      - ./instance:/app/instance

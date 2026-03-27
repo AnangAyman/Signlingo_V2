@@ -1,0 +1,560 @@
+/* ============================================= */
+/* Leaderboard Page Styles                       */
+/* ============================================= */
+
+/* Page Header */
+.page-header {
+    margin-bottom: var(--space-xl);
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: var(--space-m);
+    margin-bottom: var(--space-s);
+}
+
+.page-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--neutral-dark);
+    margin: 0;
+}
+
+.page-subtitle {
+    font-size: 18px;
+    color: #6B7280;
+    margin: 0;
+}
+
+/* Leaderboard Cards */
+.leaderboard-card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: var(--space-xl);
+    box-shadow: 0 4px 12px var(--card-shadow);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.leaderboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px var(--hover-shadow);
+}
+
+.leaderboard-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-m);
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-l);
+    border-bottom: 2px solid var(--border);
+}
+
+.header-icon-wrapper {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: var(--white);
+    flex-shrink: 0;
+}
+
+/* League-specific gradient colors based on tier */
+.header-icon-wrapper.league.league-bronze {
+    background: linear-gradient(135deg, var(--bronze), #B8860B);
+}
+
+.header-icon-wrapper.league.league-silver {
+    background: linear-gradient(135deg, #C0C0C0, #A8A8A8);
+}
+
+.header-icon-wrapper.league.league-gold {
+    background: linear-gradient(135deg, var(--gold), #FFA500);
+}
+
+.header-icon-wrapper.league.league-gold {
+    background: linear-gradient(135deg, #E5E4E2, #BCC6CC);
+}
+
+.header-icon-wrapper.league.league-diamond {
+    background: linear-gradient(135deg, #00CED1, #4169E1);
+}
+
+/* Default league color (fallback) */
+.header-icon-wrapper.league {
+    background: linear-gradient(135deg, var(--bronze), #B8860B);
+}
+
+.header-icon-wrapper.friends {
+    background: linear-gradient(135deg, var(--secondary), #FF8A80);
+}
+
+.leaderboard-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--neutral-dark);
+    margin: 0;
+}
+
+.leaderboard-subtitle {
+    font-size: 14px;
+    color: #6B7280;
+    margin: 0;
+}
+
+/* Players List */
+.players-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+}
+
+.player-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-m);
+    border-radius: 12px;
+    background: var(--neutral-light);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.player-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: transparent;
+    transition: all 0.3s ease;
+}
+
+.player-card:hover {
+    transform: translateX(4px);
+    background: #F3F4F6;
+}
+
+.player-card.current-user {
+    background: linear-gradient(135deg, rgba(0, 194, 203, 0.1), rgba(0, 194, 203, 0.05));
+    border: 2px solid var(--primary);
+}
+
+.player-card.current-user::before {
+    background: var(--primary);
+}
+
+/* Player Info Section */
+.player-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-m);
+}
+
+.player-rank {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    flex-shrink: 0;
+    background: #E5E7EB;
+    color: #6B7280;
+}
+
+/* Top 3 Rank Styling */
+.player-rank.rank-1 {
+    background: linear-gradient(135deg, var(--gold), #FFA500);
+    color: var(--white);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.player-rank.rank-2 {
+    background: linear-gradient(135deg, #C0C0C0, #A8A8A8);
+    color: var(--white);
+}
+
+.player-rank.rank-3 {
+    background: linear-gradient(135deg, var(--bronze), #B8860B);
+    color: var(--white);
+}
+
+@keyframes pulse {
+    0%, 100% { 
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4);
+    }
+    50% { 
+        transform: scale(1.05);
+        box-shadow: 0 0 0 8px rgba(255, 215, 0, 0);
+    }
+}
+
+.player-rank i {
+    font-size: 20px;
+}
+
+.player-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), #00A8B0);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.player-name {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--neutral-dark);
+}
+
+/* Player Points Section */
+.player-points {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    text-align: right;
+}
+
+.points-value {
+    font-family: 'Poppins', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+}
+
+.points-label {
+    font-size: 12px;
+    color: #6B7280;
+    font-weight: 500;
+}
+
+
+
+/* --- Add Friend Button & Modal Styles --- */
+
+.btn-primary-custom {
+    /* Default State: Transparent with a border */
+    background-color: transparent;
+    border: 0.8px solid #d5d5d5;
+    color: #000000; /* Electric Aqua text */
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    
+    
+    transition: all 0.3s ease; /* Smooth transition for hover */
+}
+
+.btn-primary-custom:hover {
+    /* Hover State: Fills with a darker color */
+    background-color: #00C2CB; /* Fill with Electric Aqua */
+    color: #FFFFFF; /* Make text white for contrast */ 
+}
+
+.btn-primary-custom:active {
+    transform: scale(1); /* Return to original size on click */
+}
+
+
+/* 2.2 Cards: Modal Styling */
+.modal-content {
+    background-color: #FAFAFA; /* Soft White */
+    border-radius: 16px; /* Card border-radius */
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* Card shadow */
+    padding: 8px; /* S spacing */
+}
+
+.modal-header {
+    border-bottom: none;
+    padding: 24px 24px 16px; /* L padding internal */
+}
+
+.modal-body {
+    padding: 0 24px 24px; /* L padding internal */
+}
+
+/* 1.2 Typography: H3 / Subheading */
+.modal-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 22px;
+    font-weight: 500; /* Medium */
+    color: #2D2D2D; /* Charcoal */
+    line-height: 1.3;
+}
+
+/* 1.2 Typography: Body Default */
+.modal-body .form-control {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    color: #2D2D2D;
+}
+
+/* 1.2 Typography: Caption / Helper */
+.caption-helper {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: #6c757d; /* Muted gray for helper text */
+    text-align: center;
+    padding: 16px 0; /* M padding */
+}
+
+.btn-close {
+    --bs-btn-close-focus-shadow: 0 0 0 0.25rem rgba(0, 194, 203, 0.25);
+}
+#friendsLeaderboardList {
+    /* 1. Set a fixed maximum height. This is the key.
+       The container can NEVER grow taller than this value.
+       Adjust the number of pixels to your preference. */
+    max-height: 700px;
+
+    /* 2. Enable a vertical scrollbar ONLY when the content
+       is taller than the max-height defined above. */
+    overflow-y: auto;
+
+    /* 3. (Recommended) Add a little padding on the right
+       to prevent the scrollbar from overlapping the text. */
+    padding-right: 10px;
+}
+
+#friendsLeaderboardList {
+    gap: 12px; /* This increases the vertical space BETWEEN each friend. */
+
+}
+
+/* Target the cards within the friends list to add more internal padding. */
+#friendsLeaderboardList .player-card {
+    min-height: 79px;
+    padding-top: 16px;    
+    padding-bottom: 16px; 
+}
+
+
+
+/*
+ * ===============================================
+ * Modal Scroll & Search Result Styling
+ * ===============================================
+ */
+
+
+/* 1. Make the search results container scrollable with a fixed default height */
+#friendsListContainer {
+    min-height: 58vh; 
+    max-height: 58vh;
+    overflow-y: auto;
+    background-color: #f8f9fa; 
+    border-radius: 8px;
+    padding: 8px;
+    display: flex; 
+    flex-direction: column; 
+    justify-content: flex-start; 
+}
+
+/* 2. Center the helper text ONLY when the container is empty */
+#friendsListContainer .caption-helper:only-child {
+    margin: auto; /* This vertically centers the text when it's the only element */
+    text-align: center;
+}
+
+/* Custom scrollbar for a cleaner look */
+#friendsListContainer::-webkit-scrollbar {
+    width: 6px;
+}
+#friendsListContainer::-webkit-scrollbar-track {
+    background: transparent;
+}
+#friendsListContainer::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+#friendsListContainer::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
+}
+
+
+/* 3. Improve the design of the search result items */
+#friendsListContainer .player-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 8px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+    background-color: #fff; /* Give cards a white background */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* (The rest of the styles remain the same) */
+#friendsListContainer .player-card:hover {
+    background-color: #f0f0f0;
+}
+
+#friendsListContainer .btn-add-friend {
+    background: none;
+    border: 2px solid #A6E22E; /* Accent: Lime Green */
+    color: #A6E22E;
+    border-radius: 10px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+#friendsListContainer .btn-add-friend:hover {
+    background-color: #A6E22E;
+    color: #2D2D2D;
+    transform: scale(1.1);
+}
+
+.player-card--removing {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 0;
+    transform: translateX(20px);
+}
+/* Target the specific modal dialog by its parent ID */
+#addFriendModal .modal-dialog {
+    max-width: 600px; /* Adjust this value to make it wider or narrower */
+}
+
+/* We also need to ensure the content within the modal can grow */
+#addFriendModal .modal-content {
+    min-height: 80vh; /* Sets the minimum height to 65% of the viewport height */
+    display: flex;
+    flex-direction: column;
+}
+
+/* ============================================= */
+/* Responsive Styles                              */
+/* ============================================= */
+@media (max-width: 992px) {
+    .page-title {
+        font-size: 36px;
+    }
+    
+    .leaderboard-title {
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 32px;
+    }
+    
+    .page-subtitle {
+        font-size: 16px;
+    }
+    
+    .header-icon {
+        font-size: 32px;
+    }
+    
+    .leaderboard-card {
+        padding: var(--space-l);
+    }
+    
+    .header-icon-wrapper {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+    }
+    
+    .leaderboard-title {
+        font-size: 22px;
+    }
+    
+    .player-card {
+        padding: var(--space-s) var(--space-m);
+    }
+}
+
+@media (max-width: 576px) {
+    .page-title {
+        font-size: 28px;
+    }
+    
+    .page-subtitle {
+        font-size: 14px;
+    }
+    
+    .header-icon {
+        font-size: 28px;
+    }
+    
+    .leaderboard-card {
+        padding: var(--space-m);
+    }
+    
+    .leaderboard-header {
+        gap: var(--space-s);
+    }
+    
+    .header-icon-wrapper {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+    
+    .leaderboard-title {
+        font-size: 20px;
+    }
+    
+    .leaderboard-subtitle {
+        font-size: 12px;
+    }
+    
+    .player-rank {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
+    
+    .player-rank i {
+        font-size: 16px;
+    }
+    
+    .player-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+    }
+    
+    .player-name {
+        font-size: 14px;
+    }
+    
+    .points-value {
+        font-size: 20px;
+    }
+    
+    .points-label {
+        font-size: 11px;
+    }
+}

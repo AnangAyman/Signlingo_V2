@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Friends</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/course_style.css') }}">
+    <style>
+        .user-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .user-item form button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+        }
+        .add-btn { background-color: #28a745; }
+        .remove-btn { background-color: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Find Friends</h1>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <ul class="user-list">
+            {% for user in all_users %}
+            <li class="user-item">
+                <span>{{ user.name }} ({{ user.points }} points)</span>
+                
+                {% if current_user.is_friends_with(user) %}
+                    <form action="{{ url_for('auth.remove_friend', friend_id=user.id) }}" method="post">
+                        <button type="submit" class="remove-btn">Remove Friend</button>
+                    </form>
+                {% else %}
+                    <form action="{{ url_for('auth.add_friend', friend_id=user.id) }}" method="post">
+                        <button type="submit" class="add-btn">Add Friend</button>
+                    </form>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>

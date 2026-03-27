@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Course - SignLingo</title>
+    <!-- External Fonts and Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/global_style.css">
+    <link rel="stylesheet" href="/static/css/start_style.css">
+</head>
+<body>
+
+    <div class="start-container">
+        <!-- Page Header -->
+        <header class="page-header">
+            <h1 class="page-title">Welcome! Choose Your <span class="highlight">First Course</span></h1>
+            <p class="page-subtitle">Select a sign language to begin your learning journey. You can always explore other courses later.</p>
+        </header>
+
+        <!-- Course Selection Grid -->
+        <div class="course-selection-grid">
+
+            <!-- Available Course -->
+            <a href="/dashboard" class="course-card">
+                <div class="flag-container">
+                    <img src="../static/Assets/Indonesia.png" alt="Indonesia Flag" class="flag-image">
+                </div>
+                <div class="course-info">
+                    <h3 class="course-title">Bisindo</h3>
+                    <p class="learners-count">
+                        <i class="fas fa-users"></i>
+                        <span>1,247 learners</span>
+                    </p>
+                </div>
+            </a>
+
+            <!-- Locked Course -->
+            <div class="course-card locked">
+                <div class="flag-container">
+                    <div class="lock-overlay"><i class="fas fa-lock"></i></div>
+                    <img src="../static/Assets/America.png" alt="USA Flag" class="flag-image">
+                </div>
+                <div class="course-info">
+                    <h3 class="course-title">ASL</h3>
+                    <p class="learners-count">
+                        <span>Coming Soon</span>
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Locked Course -->
+            <div class="course-card locked">
+                <div class="flag-container">
+                    <div class="lock-overlay"><i class="fas fa-lock"></i></div>
+                    <img src="../static/Assets/British.png" alt="UK Flag" class="flag-image">
+                </div>
+                <div class="course-info">
+                    <h3 class="course-title">BSL</h3>
+                    <p class="learners-count">
+                        <span>Coming Soon</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Locked Course -->
+            <div class="course-card locked">
+                <div class="flag-container">
+                    <div class="lock-overlay"><i class="fas fa-lock"></i></div>
+                    <img src="../static/Assets/France.png" alt="France Flag" class="flag-image">
+                </div>
+                <div class="course-info">
+                    <h3 class="course-title">LSF</h3>
+                    <p class="learners-count">
+                        <span>Coming Soon</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Locked Course -->
+            <div class="course-card locked">
+                <div class="flag-container">
+                    <div class="lock-overlay"><i class="fas fa-lock"></i></div>
+                    <img src="../static/Assets/China.png" alt="China Flag" class="flag-image">
+                </div>
+                <div class="course-info">
+                    <h3 class="course-title">CSL</h3>
+                    <p class="learners-count">
+                        <span>Coming Soon</span>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

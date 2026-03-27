@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roadmap</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="static/css/global_style.css">
+    <link rel="stylesheet" href="static/css/roadmap_style.css">
+</head>
+<body>
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a class="sidebar-brand" href="/dashboard">SignLingo</a>
+        </div>
+        <div class="sidebar-menu">
+            <a class="sidebar-link active" href="/dashboard">
+                <i class="fas fa-house"></i>
+                <span>Dashboard</span>
+            </a>
+            <a class="sidebar-link" href="/course">
+                <i class="fas fa-book"></i>
+                <span>Courses</span>
+            </a>
+            <a class="sidebar-link" href="/leaderboard">
+                <i class="fas fa-trophy"></i>
+                <span>Leaderboard</span>
+            </a>
+            <a class="sidebar-link" href="/shop">
+                <i class="fas fa-shopping-bag"></i>
+                <span>Shop</span>
+            </a>
+            <a class="sidebar-link" href="/premium">
+                <i class="fas fa-crown"></i>
+                <span>Premium</span>
+            </a>
+            <button class="more-options-button" id="moreOptionsButton">
+                <i class="fas fa-ellipsis-h"></i>
+            </button>
+        </div>
+        <div class="sidebar-footer">
+            <a class="profile-link" href="/edit-account" id="profileLink">
+                <div class="profile-circle-sidebar">{{ initials }}</div>
+                <div class="profile-info">
+                    <span id="profileName">{{ full_name }}</span>
+                    <span class="profile-id" id="profileUsername">{{user.username}}</span>
+                </div>
+            </a>
+            <a class="logout-link" href="/logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="dropup-menu" id="dropupMenu">
+        <a href="/edit-account">
+            <i class="fas fa-user-circle"></i>
+            <span id="profileName">{{ full_name }}</span>
+        </a>
+        <a href="/logout" class="logout-link-mobile">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+        </a>
+    </div>
+
+    {% macro ordinal(n) -%}
+        {%- set n = n|int -%}
+        {%- set last = n % 10 -%}
+        {%- set last_two = n % 100 -%}
+        {%- if 11 <= last_two <= 13 -%}
+            #{{ n }}th
+        {%- elif last == 1 -%}
+            #{{ n }}st
+        {%- elif last == 2 -%}
+            #{{ n }}nd
+        {%- elif last == 3 -%}
+            #{{ n }}rd
+        {%- else -%}
+            #{{ n }}th
+        {%- endif -%}
+    {%- endmacro %}
+
+    <div class="main-content">
+        <div class="content-wrapper">
+            <div class="roadmap-container">
+                <div class="roadmap-header">
+                    <h1>Module 1</h1>
+                    <p>Master Bisindo one step at a time</p>
+                </div>
+
+                <div class="unit-section">
+                    <div class="unit-header">
+                        <h2 class="unit-title">Unit 1: Basics</h2>
+                    </div>
+
+                    <div class="roadmap-path">
+                        <div class="lesson-node current">
+                            <button class="lesson-button" onclick="window.location.href='/video_learning'">
+                                <i class="fas fa-star"></i>
+                            </button>
+                        </div>
+
+                        <div class="lesson-node locked">
+                            <button class="lesson-button">
+                                <i class="fas fa-lock"></i>
+                            </button>
+                        </div>
+
+                        <div class="lesson-node locked">
+                            <button class="lesson-button">
+                                <i class="fas fa-lock"></i>
+                            </button>
+                        </div>
+
+                        <div class="lesson-node locked">
+                            <button class="lesson-button">
+                                <i class="fas fa-lock"></i>
+                            </button>
+                        </div>
+
+                        <div class="lesson-node treasure">
+                            <button class="lesson-button">
+                                <i class="fas fa-trophy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="details-sidebar">
+                <div class="summary-card mb-4">
+                    <div class="summary-item">
+                        <i class="fas fa-book-open summary-icon"></i>
+                        <div>
+                            <div class="summary-label">Current Course</div>
+                            <div class="summary-value">Bisindo</div>
+                        </div>
+                    </div>
+                    <div class="summary-item">
+                        <i class="fas fa-star summary-icon"></i>
+                        <div>
+                            <div class="summary-label">Total XP</div>
+                            <div class="summary-value">{{user_points}} XP</div>
+                        </div>
+                    </div>
+                    <div class="summary-item">
+                        <i class="fas fa-heart summary-icon-heart"></i>
+                        <div>
+                            <div class="summary-label">Lives</div>
+                            <div class="summary-value">{{user.lives}}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="premium-card mb-4">
+                    <div class="premium-icon">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <h3 class="subheading mb-2">Try Premium</h3>
+                    <p class="caption-white mb-3">No ads, daily quiz & unlimited hearts</p>
+                    <button class="btn-premium" onclick="window.location.href='/premium'">
+                        Upgrade Now
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <div class="streak-card mb-4">
+                    <div class="streak-header">
+                        <div class="streak-flame-icon">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <div class="streak-count">
+                            <div class="streak-number">{{ current_streak }}</div>
+                            <div class="streak-label">day streak</div>
+                        </div>
+                    </div>
+                    
+                    <div class="streak-days-container">
+                        <div class="streak-day-labels">
+                            {% for day in streak_data %}
+                            <div class="streak-day-label">{{ day.day }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="streak-days">
+                            {% for day in streak_data %}
+                            <div class="streak-day {% if day.is_active %}active{% endif %} {% if day.is_streak_saver %}streak-saver{% endif %} {% if day.date == today %}today{% endif %}"
+                                data-date="{{ day.date }}"
+                                title="{{ day.date.strftime('%b %d, %Y') }}">
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    {% if current_streak >= 7 %}
+                    <div class="streak-message success">
+                        <i class="fas fa-trophy"></i>
+                        <strong>Amazing!</strong> You've maintained a full week streak! Keep it up!
+                    </div>
+                    {% elif current_streak >= 3 %}
+                    <div class="streak-message success">
+                        <i class="fas fa-fire"></i>
+                        <strong>Great work!</strong> You're building a solid learning habit!
+                    </div>
+                    {% elif current_streak == 0 %}
+                    <div class="streak-message warning">
+                        <i class="fas fa-info-circle"></i>Complete a lesson today to start your streak!
+                    </div>
+                    {% else %}
+                    <div class="streak-message">
+                        <i class="fas fa-thumbs-up"></i>Keep going! Complete lessons daily to build your streak.
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="rank-card mb-4">
+                    <div class="rank-header">
+                        <i class="fas fa-trophy"></i>
+                        <h3 class="subheading">Your League</h3>
+                    </div>
+                    <div class="rank-content">
+                        <div class="rank-badge {{ user_league|lower }}">
+                            <i class="fas fa-medal"></i>
+                        </div>
+                        <div class="rank-info">
+                            <div class="rank-league">{{ user_league }} league</div>
+                            <div class="rank-position rank-{{ user_rank }}">
+                                {{ ordinal(user_rank) }} · {{ user_points }} XP
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="inspiration-card">
+                    <h3 class="subheading mb-4">If you put your mind to it, you can accomplish anything.</h3>
+                    <div class="inspiration-footer">
+                        <i class="fas fa-quote-left"></i>
+                        <p class="caption mb-0">MARTY MCFLY</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../static/js/navbar_logic.js"></script>
+</body>
+</html>
