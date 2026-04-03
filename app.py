@@ -4,17 +4,20 @@ from models import db
 from initialization import get_or_create_lessons_from_json, create_admin_user, seed_shop_items
 import os
 from flask_mail import Mail
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.sqlite'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI', 'sqlite:///users.sqlite')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'supersecretkey'  # Required for session management
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'supersecretkey')
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'signlingolanguage@gmail.com'         # <-- your email
-app.config['MAIL_PASSWORD'] = 'frpk wyzu xdlf tyyj'      # <-- app password
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', 'signlingolanguage@gmail.com')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', 'frpk wyzu xdlf tyyj')
 mail = Mail(app)
 
 
