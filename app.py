@@ -27,6 +27,11 @@ db.init_app(app)
 from flask_migrate import Migrate
 migrate = Migrate(app, db)
 
+if os.environ.get('WERKZEUG_RUN_MAIN') == 'true' or not app.debug:
+    print(" * Running on all addresses (0.0.0.0)")
+    print(" * Running on http://127.0.0.1:5001  <-- Click here for dev")
+    print(" * Running on http://172.21.0.2:5001")
+
 # This command is for resetting the database during the build.
 @app.cli.command("init-app")
 def init_app_command():
