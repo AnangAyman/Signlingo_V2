@@ -85,7 +85,7 @@ def register():
         first_name, initials = get_initials(name)
         username = generate_username(first_name)
         print(username)
-        new_user = User(age=age, name=name, email=email, password=password, username=username)
+        new_user = User(age=age, xname=name, email=email, password=password, username=username)
         # EMAIL VERIFICATION TEMPORARILY DISABLED
         # new_user.is_verified = False
         new_user.is_verified = True
