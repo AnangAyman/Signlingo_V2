@@ -85,23 +85,26 @@ def register():
         first_name, initials = get_initials(name)
         username = generate_username(first_name)
         print(username)
-        new_user = User(age=age, name=name, email=email, password=password, username=username)
-        new_user.is_verified = False
+        new_user = User(age=age, xname=name, email=email, password=password, username=username)
+        # EMAIL VERIFICATION TEMPORARILY DISABLED
+        # new_user.is_verified = False
+        new_user.is_verified = True
         db.session.add(new_user)
         db.session.commit()
 
         session['user'] = new_user.email
         session['user_id'] = new_user.id 
 
-        token = generate_token(email)
-        verify_url = url_for('auth.verify_email', token=token, _external=True)
-        msg = Message('Verify your email for SignLingo', sender=app.config['MAIL_USERNAME'], recipients=[email])
-        msg.body = f"Hi {name}, please verify your email by clicking this link: {verify_url}"
-        
-        if safe_send_email(msg):
-            flash("Verification email sent! Please check your inbox.")
-        else:
-            flash("Registered successfully, but we couldn’t send the verification email. Please try again later.")
+        # token = generate_token(email)
+        # verify_url = url_for('auth.verify_email', token=token, _external=True)
+        # msg = Message('Verify your email for SignLingo', sender=app.config['MAIL_USERNAME'], recipients=[email])
+        # msg.body = f"Hi {name}, please verify your email by clicking this link: {verify_url}"
+        # 
+        # if safe_send_email(msg):
+        #     flash("Verification email sent! Please check your inbox.")
+        # else:
+        #     flash("Registered successfully, but we couldn’t send the verification email. Please try again later.")
+        flash("Registered successfully!")
 
         return redirect(url_for('auth.start'))
     return render_template('sign_up.html')
@@ -130,22 +133,28 @@ def login():
         user = User.query.filter_by(email=email, password=password).first()
 
         if user:
+            # EMAIL VERIFICATION TEMPORARILY DISABLED
+            # Auto-verify existing unverified users so they are not blocked
+            if not user.is_verified:
+                user.is_verified = True
+                db.session.commit()
+
             if user.is_verified:
                 session['user'] = email
                 session['user_id'] = user.id 
                 return redirect(url_for('auth.dashboard'))
-            else:
-                error_message =  "Account is not verified, please check your inbox and finish verification."
-
-                token = generate_token(email)
-
-                verify_url = url_for('auth.verify_email', token=token, _external=True)
-                msg = Message('Verify your email for SignLingo', sender=app.config['MAIL_USERNAME'], recipients=[email])
-                msg.body = f"Hi {user.name}, please verify your email by clicking this link: {verify_url}"
-                
-                safe_send_email(msg)
-
-                return render_template('login.html', error=error_message)
+            # else:
+            #     error_message =  "Account is not verified, please check your inbox and finish verification."
+            # 
+            #     token = generate_token(email)
+            # 
+            #     verify_url = url_for('auth.verify_email', token=token, _external=True)
+            #     msg = Message('Verify your email for SignLingo', sender=app.config['MAIL_USERNAME'], recipients=[email])
+            #     msg.body = f"Hi {user.name}, please verify your email by clicking this link: {verify_url}"
+            #     
+            #     safe_send_email(msg)
+            # 
+            #     return render_template('login.html', error=error_message)
         else:
             error_message =  "Invalid credentials."
             return render_template('login.html', error=error_message)
