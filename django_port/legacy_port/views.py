@@ -1,10 +1,12 @@
 import json
+import os
 import random
 from datetime import timedelta
+from pathlib import Path
 
 from django.contrib import messages
 from django.core import signing
-from django.db.models import F, Q
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -13,6 +15,11 @@ from email_validator import EmailNotValidError, validate_email
 
 from .models import Lesson, ShopItem, User, UserItem, UserLessonStatus
 from .services import generate_username, get_initials, load_ml_questions, load_questions
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+UPLOAD_DIR = PROJECT_ROOT / "static" / "uploads"
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def _current_user(request):
@@ -50,13 +57,25 @@ def _user_shell_context(user):
 def _lesson_context(user):
     lessons = list(Lesson.objects.order_by("order"))
     current_lesson = None
+    completed_lessons_count = 0
     current_statuses = {status.lesson_id: status for status in user.lesson_statuses.select_related("lesson")}
     for lesson in lessons:
         status = current_statuses.get(lesson.id)
         lesson.status = status.status if status else "not_started"
+        if lesson.status == "completed":
+            completed_lessons_count += 1
         if current_lesson is None and lesson.status != "completed":
             current_lesson = lesson
-    return lessons, current_lesson or (lessons[0] if lessons else None)
+
+    total_lessons_count = len(lessons)
+    module_progress_percent = (completed_lessons_count / total_lessons_count) * 100 if total_lessons_count else 0
+    return (
+        lessons,
+        current_lesson or (lessons[0] if lessons else None),
+        completed_lessons_count,
+        total_lessons_count,
+        module_progress_percent,
+    )
 
 
 def _build_streak_data(user):
@@ -84,6 +103,13 @@ def _build_streak_data(user):
 
 
 def _store_session_results(request, payload):
+    session_type = payload.get("type")
+    if session_type in {"game", "ml"}:
+        request.session[f"{session_type}_results"] = {
+            "xp": payload.get("xp", 0),
+            "accuracy": payload.get("accuracy", 0),
+            "skipped": payload.get("skipped", False),
+        }
     request.session["result_summary"] = payload
     request.session.modified = True
 
@@ -99,6 +125,36 @@ def _pick_question(request, question_key, questions):
     request.session[asked_key] = asked
     request.session.modified = True
     return question
+
+
+def _predict_fallback():
+    return {"result": random.choice([chr(code) for code in range(ord("A"), ord("Z") + 1)]), "confidence": 0.0, "fallback": True}
+
+
+def _make_signed_token(payload, salt):
+    return signing.dumps(payload, salt=salt)
+
+
+def _load_signed_token(token, salt, max_age=300):
+    return signing.loads(token, salt=salt, max_age=max_age)
+
+
+def _wants_json_response(request):
+    accept_header = request.headers.get("Accept", "")
+    content_type = request.headers.get("Content-Type", "")
+    requested_with = request.headers.get("X-Requested-With", "")
+    return (
+        "application/json" in accept_header
+        or "application/json" in content_type
+        or requested_with.lower() == "xmlhttprequest"
+    )
+
+
+def _leaderboard_lists(user):
+    friends = [friendship.friend for friendship in user.friendships.select_related("friend")]
+    friends_leaderboard = sorted(friends + [user], key=lambda item: (-item.points, item.id))
+    league_users = [item for item in User.objects.order_by("-points", "id") if item.league == user.league]
+    return friends_leaderboard, league_users
 
 
 def home(request):
@@ -138,6 +194,22 @@ def register(request):
         request.session["user_id"] = user.id
         return redirect("auth:start")
     return _render(request, "sign_up.html")
+
+
+def verify_email(request, token):
+    try:
+        payload = _load_signed_token(token, salt="email-confirm", max_age=300)
+        user = User.objects.get(email=payload["email"])
+    except Exception:
+        messages.error(request, "Invalid or expired verification link.")
+        return redirect("auth:login")
+
+    if not user.is_verified:
+        user.is_verified = True
+        user.save(update_fields=["is_verified"])
+
+    messages.success(request, "Email verified successfully. You can now log in.")
+    return redirect("auth:login")
 
 
 @csrf_exempt
@@ -243,8 +315,12 @@ def forgot_password(request):
         email = request.POST.get("email", "")
         user = User.objects.filter(email=email).first()
         if user:
-            token = signing.dumps({"user_id": user.id})
-            messages.success(request, f"If an account with {email} exists, a reset token was generated for development: {token}")
+            token = _make_signed_token({"user_id": user.id}, salt="password-reset")
+            reset_url = request.build_absolute_uri(f"/reset_password/{token}")
+            messages.success(
+                request,
+                f"If an account with {email} exists, a reset link was generated for development: {reset_url}",
+            )
         else:
             messages.success(request, f"If an account with {email} exists, a password reset link has been sent.")
         return redirect("auth:forgot_password")
@@ -254,7 +330,7 @@ def forgot_password(request):
 @csrf_exempt
 def reset_password(request, token):
     try:
-        payload = signing.loads(token, max_age=300)
+        payload = _load_signed_token(token, salt="password-reset", max_age=300)
         user = User.objects.get(id=payload["user_id"])
     except Exception:
         messages.error(request, "Invalid or expired password reset token.")
@@ -282,9 +358,17 @@ def leaderboard(request):
     if redirect_response:
         return redirect_response
 
-    all_users = list(User.objects.order_by("-points", "id"))
+    friends_leaderboard, league_users = _leaderboard_lists(user)
     context = _user_shell_context(user)
-    context.update({"leaderboard_users": all_users, "current_user": user})
+    context.update(
+        {
+            "leaderboard_users": league_users,
+            "friends_leaderboard": friends_leaderboard,
+            "league_users": league_users,
+            "league_name": user.league,
+            "current_user": user,
+        }
+    )
     return _render(request, "leaderboard.html", context)
 
 
@@ -307,7 +391,16 @@ def add_friend(request, friend_id):
 
     friend = get_object_or_404(User, id=friend_id)
     user.add_friend(friend)
-    messages.success(request, f"You are now friends with {friend.name}!")
+    message = f"You are now friends with {friend.name}!"
+    if _wants_json_response(request):
+        return JsonResponse(
+            {
+                "success": True,
+                "message": message,
+                "friend": {"id": friend.id, "name": friend.name, "points": friend.points},
+            }
+        )
+    messages.success(request, message)
     return redirect("auth:list_users")
 
 
@@ -319,7 +412,10 @@ def remove_friend(request, friend_id):
 
     friend = get_object_or_404(User, id=friend_id)
     user.remove_friend(friend)
-    messages.info(request, f"You have removed {friend.name} from your friends.")
+    message = f"You have removed {friend.name} from your friends."
+    if _wants_json_response(request):
+        return JsonResponse({"success": True, "message": message})
+    messages.info(request, message)
     return redirect("auth:list_users")
 
 
@@ -329,10 +425,13 @@ def search_users(request):
         return JsonResponse({"error": "unauthorized"}, status=401)
 
     query = request.GET.get("q", "").strip()
+    if len(query) < 2:
+        return JsonResponse([], safe=False)
+
     users = User.objects.exclude(id=user.id)
     if query:
         users = users.filter(Q(name__icontains=query) | Q(email__icontains=query) | Q(username__icontains=query))
-    payload = [{"id": item.id, "name": item.name, "email": item.email, "username": item.username} for item in users[:10]]
+    payload = [{"id": item.id, "name": item.name} for item in users[:10]]
     return JsonResponse(payload, safe=False)
 
 
@@ -351,16 +450,37 @@ def result_summary(request):
 
 
 def get_summary_results(request):
-    return JsonResponse(request.session.get("result_summary", {}))
+    game_data = request.session.get("game_results", {"xp": 0, "accuracy": 0, "skipped": True})
+    ml_data = request.session.get("ml_results", {"xp": 0, "accuracy": 0, "skipped": True})
+
+    total_xp = 0
+    total_accuracy = 0
+    completed_count = 0
+    for data in (game_data, ml_data):
+        if not data.get("skipped", False):
+            total_xp += data.get("xp", 0)
+            total_accuracy += data.get("accuracy", 0)
+            completed_count += 1
+
+    average_accuracy = (total_accuracy / completed_count) if completed_count else 0
+    return JsonResponse({"total_xp": total_xp, "average_accuracy": average_accuracy})
 
 
 def ml_game(request):
     user, redirect_response = _require_user(request)
     if redirect_response:
         return redirect_response
-    lessons, current_lesson = _lesson_context(user)
+    lessons, current_lesson, completed_lessons_count, total_lessons_count, module_progress_percent = _lesson_context(user)
     context = _user_shell_context(user)
-    context.update({"lessons": lessons, "current_lesson": current_lesson})
+    context.update(
+        {
+            "lessons": lessons,
+            "current_lesson": current_lesson,
+            "completed_lessons_count": completed_lessons_count,
+            "total_lessons_count": total_lessons_count,
+            "module_progress_percent": module_progress_percent,
+        }
+    )
     return _render(request, "ml_game.html", context)
 
 
@@ -372,16 +492,24 @@ def decrement_life(request):
 
     user.lives = max(user.lives - 1, 0)
     user.save(update_fields=["lives"])
-    return JsonResponse({"lives": user.lives})
+    return JsonResponse({"success": True, "new_lives": user.lives})
 
 
 def video_learning(request):
     user, redirect_response = _require_user(request)
     if redirect_response:
         return redirect_response
-    lessons, current_lesson = _lesson_context(user)
+    lessons, current_lesson, completed_lessons_count, total_lessons_count, module_progress_percent = _lesson_context(user)
     context = _user_shell_context(user)
-    context.update({"lessons": lessons, "current_lesson": current_lesson})
+    context.update(
+        {
+            "lessons": lessons,
+            "current_lesson": current_lesson,
+            "completed_lessons_count": completed_lessons_count,
+            "total_lessons_count": total_lessons_count,
+            "module_progress_percent": module_progress_percent,
+        }
+    )
     return _render(request, "video_learning.html", context)
 
 
@@ -389,9 +517,17 @@ def gamepage(request):
     user, redirect_response = _require_user(request)
     if redirect_response:
         return redirect_response
-    lessons, current_lesson = _lesson_context(user)
+    lessons, current_lesson, completed_lessons_count, total_lessons_count, module_progress_percent = _lesson_context(user)
     context = _user_shell_context(user)
-    context.update({"lessons": lessons, "current_lesson": current_lesson})
+    context.update(
+        {
+            "lessons": lessons,
+            "current_lesson": current_lesson,
+            "completed_lessons_count": completed_lessons_count,
+            "total_lessons_count": total_lessons_count,
+            "module_progress_percent": module_progress_percent,
+        }
+    )
     return _render(request, "game_page.html", context)
 
 
@@ -402,27 +538,44 @@ def mark_lesson_status(request):
         return JsonResponse({"error": "unauthorized"}, status=401)
 
     payload = json.loads(request.body or "{}")
-    lesson = get_object_or_404(Lesson, id=payload.get("lesson_id"))
+    lesson = None
+    if payload.get("lesson_id"):
+        lesson = Lesson.objects.filter(id=payload.get("lesson_id")).first()
+    if lesson is None and payload.get("lesson_key"):
+        lesson = Lesson.objects.filter(lesson_key=payload.get("lesson_key")).first()
+    if lesson is None:
+        return JsonResponse({"success": False, "error": "Lesson not found"}, status=404)
+
     item, _ = UserLessonStatus.objects.update_or_create(
         user=user,
         lesson=lesson,
         defaults={"status": payload.get("status", "not_started"), "score": payload.get("score")},
     )
-    return JsonResponse({"id": item.id, "status": item.status})
+    return JsonResponse({"success": True, "id": item.id, "status": item.status, "message": f"Lesson {lesson.title} marked as {item.status}"})
 
 
 def course(request):
     user, redirect_response = _require_user(request)
     if redirect_response:
         return redirect_response
-    lessons, _ = _lesson_context(user)
+    lessons, _, completed_lessons_count, total_lessons_count, module_progress_percent = _lesson_context(user)
     context = _user_shell_context(user)
-    context.update({"lessons": lessons})
+    context.update(
+        {
+            "lessons": lessons,
+            "completed_lessons_count": completed_lessons_count,
+            "total_lessons_count": total_lessons_count,
+            "module_progress_percent": module_progress_percent,
+        }
+    )
     return _render(request, "courses_final.html", context)
 
 
 def get_question(request):
-    return JsonResponse(_pick_question(request, "quiz", load_questions()))
+    question = dict(_pick_question(request, "quiz", load_questions()))
+    if question.get("choices"):
+        question["choices"] = random.sample(question["choices"], len(question["choices"]))
+    return JsonResponse(question)
 
 
 def get_question_ml(request):
@@ -436,23 +589,15 @@ def check_answer(request):
         return JsonResponse({"error": "unauthorized"}, status=401)
 
     payload = json.loads(request.body or "{}")
-    correct = payload.get("selectedAnswer") == payload.get("correctAnswer")
+    selected = payload.get("selectedAnswer", payload.get("selected"))
+    expected = payload.get("correctAnswer", payload.get("correct"))
+    correct = selected == expected
     if correct:
-        user.points = (user.points or 0) + 100
+        user.points = (user.points or 0) + 10
         user.save(update_fields=["points"])
 
     request.session["today_login"] = True
-    _store_session_results(
-        request,
-        {
-            "question": payload.get("question"),
-            "selectedAnswer": payload.get("selectedAnswer"),
-            "correctAnswer": payload.get("correctAnswer"),
-            "correct": correct,
-            "points": user.points,
-        },
-    )
-    return JsonResponse({"correct": correct, "points": user.points})
+    return JsonResponse({"result": correct, "points": user.points})
 
 
 @csrf_exempt
@@ -520,16 +665,170 @@ def buy_item(request):
         return JsonResponse({"error": "unauthorized"}, status=401)
 
     payload = json.loads(request.body or "{}")
-    item = get_object_or_404(ShopItem, item_key=payload.get("itemKey"))
+    item = None
+    if payload.get("item_id"):
+        item = ShopItem.objects.filter(id=payload.get("item_id")).first()
+    if item is None and payload.get("itemKey"):
+        item = ShopItem.objects.filter(item_key=payload.get("itemKey")).first()
+    if item is None:
+        return JsonResponse({"success": False, "message": "Item not found."}, status=404)
+
+    if item.item_key == "refill_hearts" and user.lives >= 5:
+        return JsonResponse({"success": False, "message": "Your health is already full!"}, status=400)
     if user.points < item.price:
         return JsonResponse({"success": False, "message": "Not enough points."}, status=400)
 
     user.points -= item.price
+    if item.item_key == "refill_hearts":
+        user.lives = 5
+        user.save(update_fields=["points", "lives"])
+        return JsonResponse(
+            {
+                "success": True,
+                "message": f"Successfully purchased {item.name}!",
+                "new_balance": user.points,
+                "new_lives": user.lives,
+            }
+        )
+
     user.save(update_fields=["points"])
     inventory, _ = UserItem.objects.get_or_create(user=user, item=item, defaults={"quantity": 0})
     inventory.quantity += 1
     inventory.save(update_fields=["quantity"])
-    return JsonResponse({"success": True, "points": user.points, "quantity": inventory.quantity})
+    return JsonResponse(
+        {
+            "success": True,
+            "message": f"Successfully purchased {item.name}!",
+            "new_balance": user.points,
+            "new_lives": user.lives,
+            "quantity": inventory.quantity,
+        }
+    )
+
+
+def capture_page(request):
+    return redirect("auth:ml_game")
+
+
+@csrf_exempt
+def predict(request):
+    file_obj = request.FILES.get("image")
+    if not file_obj:
+        return JsonResponse({"error": "No image provided"}, status=400)
+
+    try:
+        import cv2
+        import h5py
+        import mediapipe as mp
+        import numpy as np
+        from tensorflow.keras.layers import BatchNormalization, Dense, Dropout, Input
+        from tensorflow.keras.models import Sequential
+    except Exception:
+        payload = _predict_fallback()
+        return JsonResponse(payload)
+
+    model_path = PROJECT_ROOT / "models" / "bisindo_static_model.h5"
+    if not model_path.exists():
+        payload = _predict_fallback()
+        return JsonResponse(payload)
+
+    def build_model():
+        model = Sequential(
+            [
+                Input(shape=(126,)),
+                Dense(256, activation="relu"),
+                BatchNormalization(momentum=0.99, epsilon=0.001),
+                Dropout(0.4),
+                Dense(128, activation="relu"),
+                BatchNormalization(momentum=0.99, epsilon=0.001),
+                Dropout(0.3),
+                Dense(64, activation="relu"),
+                Dropout(0.2),
+                Dense(26, activation="softmax"),
+            ]
+        )
+        model.compile(optimizer="adam", loss="categorical_crossentropy")
+        with h5py.File(model_path, "r") as file_handle:
+            weight_group = file_handle["model_weights"]
+            layer_names = [name.decode("utf-8") if isinstance(name, bytes) else name for name in weight_group.attrs.get("layer_names", [])]
+            keras_layers = [layer for layer in model.layers if layer.weights]
+            layer_index = 0
+            for layer_name in layer_names:
+                if layer_name not in weight_group:
+                    continue
+                group = weight_group[layer_name]
+                weight_names = [name.decode("utf-8") if isinstance(name, bytes) else name for name in group.attrs.get("weight_names", [])]
+                weights = [group[weight_name][()] for weight_name in weight_names]
+                if weights and layer_index < len(keras_layers):
+                    keras_layers[layer_index].set_weights(weights)
+                    layer_index += 1
+        return model
+
+    def normalize_landmarks(landmarks):
+        wrist = landmarks[0].copy()
+        landmarks = landmarks - wrist
+        scale = np.linalg.norm(landmarks[9])
+        if scale > 0:
+            landmarks = landmarks / scale
+        return landmarks
+
+    def extract_keypoints(hand_landmarks_list):
+        keypoints = []
+        for index in range(2):
+            if index < len(hand_landmarks_list):
+                landmarks = hand_landmarks_list[index].landmark
+                array = np.array([[landmark.x, landmark.y, landmark.z] for landmark in landmarks], dtype=np.float32)
+                array = normalize_landmarks(array)
+                keypoints.extend(array.flatten().tolist())
+            else:
+                keypoints.extend([0.0] * (21 * 3))
+        return np.array(keypoints, dtype=np.float32).reshape(1, 126)
+
+    try:
+        file_bytes = file_obj.read()
+        frame = cv2.imdecode(np.frombuffer(file_bytes, np.uint8), cv2.IMREAD_COLOR)
+        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        hands_detector = mp.solutions.hands.Hands(static_image_mode=True, max_num_hands=2, min_detection_confidence=0.3)
+        results = hands_detector.process(rgb_frame)
+        if not results.multi_hand_landmarks:
+            return JsonResponse({"error": "No hand detected"}, status=400)
+
+        input_tensor = extract_keypoints(results.multi_hand_landmarks)
+        model = build_model()
+        prediction = model.predict(input_tensor, verbose=0)
+        classes = [chr(code) for code in range(ord("A"), ord("Z") + 1)]
+        letter = classes[int(np.argmax(prediction, axis=1)[0])]
+        confidence = float(np.max(prediction))
+
+        debug_crop_path = UPLOAD_DIR / "last_crop.jpg"
+        debug_overlay_path = UPLOAD_DIR / "last_debug.jpg"
+        h, w, _ = frame.shape
+        all_xs, all_ys = [], []
+        debug_frame = frame.copy()
+        for hand_landmarks in results.multi_hand_landmarks:
+            all_xs.extend([landmark.x for landmark in hand_landmarks.landmark])
+            all_ys.extend([landmark.y for landmark in hand_landmarks.landmark])
+            mp.solutions.drawing_utils.draw_landmarks(debug_frame, hand_landmarks, mp.solutions.hands.HAND_CONNECTIONS)
+        xmin = max(0, int(min(all_xs) * w) - 20)
+        ymin = max(0, int(min(all_ys) * h) - 20)
+        xmax = min(w, int(max(all_xs) * w) + 20)
+        ymax = min(h, int(max(all_ys) * h) + 20)
+        crop = frame[ymin:ymax, xmin:xmax]
+        if crop.size > 0:
+            cv2.imwrite(str(debug_crop_path), crop)
+        cv2.imwrite(str(debug_overlay_path), debug_frame)
+        request.session["today_login"] = True
+        return JsonResponse(
+            {
+                "result": letter,
+                "confidence": confidence,
+                "debug_crop_url": "/static/uploads/last_crop.jpg",
+                "debug_overlay_url": "/static/uploads/last_debug.jpg",
+            }
+        )
+    except Exception:
+        payload = _predict_fallback()
+        return JsonResponse(payload)
 
 
 def magic_touch(request):

@@ -1,0 +1,22 @@
+FROM python:3.10.4-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt django_requirements.txt ./
+
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir -r django_requirements.txt
+
+COPY . .
+
+EXPOSE 8000
+
+CMD ["sh", "-c", "python django_port/manage.py migrate && python django_port/manage.py bootstrap_legacy_data && python django_port/manage.py runserver 0.0.0.0:8000 --noreload"]

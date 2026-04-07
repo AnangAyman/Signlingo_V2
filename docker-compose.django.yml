@@ -1,0 +1,10 @@
+services:
+  django_web:
+    build:
+      context: .
+      dockerfile: Dockerfile.django
+    ports:
+      - "8001:8000"
+    volumes:
+      - .:/app
+      - ./django_instance:/app/django_instance
