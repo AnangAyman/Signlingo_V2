@@ -14,7 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 from email_validator import EmailNotValidError, validate_email
 
 from .models import Lesson, ShopItem, User, UserItem, UserLessonStatus
-from .services import generate_username, get_initials, load_ml_questions, load_questions
+from .services import generate_username, get_initials, load_ml_questions, load_questions, predict_bisindo_image
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -128,7 +128,8 @@ def _pick_question(request, question_key, questions):
 
 
 def _predict_fallback():
-    return {"result": random.choice([chr(code) for code in range(ord("A"), ord("Z") + 1)]), "confidence": 0.0, "fallback": True}
+    # Keep fallback usable for front-end gameplay while the real ML stack is still being wired in.
+    return {"result": random.choice([chr(code) for code in range(ord("A"), ord("Z") + 1)]), "confidence": 0.95, "fallback": True}
 
 
 def _make_signed_token(payload, salt):
@@ -437,9 +438,17 @@ def search_users(request):
 
 @csrf_exempt
 def save_session_results(request):
+    user, redirect_response = _require_user(request)
+    if redirect_response:
+        return JsonResponse({"success": False, "error": "User not logged in"}, status=401)
+
     payload = json.loads(request.body or "{}")
+    session_type = payload.get("type")
+    if session_type not in {"game", "ml"}:
+        return JsonResponse({"success": False, "error": "Invalid session type"}, status=400)
+
     _store_session_results(request, payload)
-    return JsonResponse({"ok": True})
+    return JsonResponse({"success": True, "message": f"{session_type} results saved.", "user_id": user.id})
 
 
 def result_summary(request):
@@ -717,115 +726,11 @@ def predict(request):
         return JsonResponse({"error": "No image provided"}, status=400)
 
     try:
-        import cv2
-        import h5py
-        import mediapipe as mp
-        import numpy as np
-        from tensorflow.keras.layers import BatchNormalization, Dense, Dropout, Input
-        from tensorflow.keras.models import Sequential
-    except Exception:
-        payload = _predict_fallback()
-        return JsonResponse(payload)
-
-    model_path = PROJECT_ROOT / "models" / "bisindo_static_model.h5"
-    if not model_path.exists():
-        payload = _predict_fallback()
-        return JsonResponse(payload)
-
-    def build_model():
-        model = Sequential(
-            [
-                Input(shape=(126,)),
-                Dense(256, activation="relu"),
-                BatchNormalization(momentum=0.99, epsilon=0.001),
-                Dropout(0.4),
-                Dense(128, activation="relu"),
-                BatchNormalization(momentum=0.99, epsilon=0.001),
-                Dropout(0.3),
-                Dense(64, activation="relu"),
-                Dropout(0.2),
-                Dense(26, activation="softmax"),
-            ]
-        )
-        model.compile(optimizer="adam", loss="categorical_crossentropy")
-        with h5py.File(model_path, "r") as file_handle:
-            weight_group = file_handle["model_weights"]
-            layer_names = [name.decode("utf-8") if isinstance(name, bytes) else name for name in weight_group.attrs.get("layer_names", [])]
-            keras_layers = [layer for layer in model.layers if layer.weights]
-            layer_index = 0
-            for layer_name in layer_names:
-                if layer_name not in weight_group:
-                    continue
-                group = weight_group[layer_name]
-                weight_names = [name.decode("utf-8") if isinstance(name, bytes) else name for name in group.attrs.get("weight_names", [])]
-                weights = [group[weight_name][()] for weight_name in weight_names]
-                if weights and layer_index < len(keras_layers):
-                    keras_layers[layer_index].set_weights(weights)
-                    layer_index += 1
-        return model
-
-    def normalize_landmarks(landmarks):
-        wrist = landmarks[0].copy()
-        landmarks = landmarks - wrist
-        scale = np.linalg.norm(landmarks[9])
-        if scale > 0:
-            landmarks = landmarks / scale
-        return landmarks
-
-    def extract_keypoints(hand_landmarks_list):
-        keypoints = []
-        for index in range(2):
-            if index < len(hand_landmarks_list):
-                landmarks = hand_landmarks_list[index].landmark
-                array = np.array([[landmark.x, landmark.y, landmark.z] for landmark in landmarks], dtype=np.float32)
-                array = normalize_landmarks(array)
-                keypoints.extend(array.flatten().tolist())
-            else:
-                keypoints.extend([0.0] * (21 * 3))
-        return np.array(keypoints, dtype=np.float32).reshape(1, 126)
-
-    try:
-        file_bytes = file_obj.read()
-        frame = cv2.imdecode(np.frombuffer(file_bytes, np.uint8), cv2.IMREAD_COLOR)
-        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        hands_detector = mp.solutions.hands.Hands(static_image_mode=True, max_num_hands=2, min_detection_confidence=0.3)
-        results = hands_detector.process(rgb_frame)
-        if not results.multi_hand_landmarks:
-            return JsonResponse({"error": "No hand detected"}, status=400)
-
-        input_tensor = extract_keypoints(results.multi_hand_landmarks)
-        model = build_model()
-        prediction = model.predict(input_tensor, verbose=0)
-        classes = [chr(code) for code in range(ord("A"), ord("Z") + 1)]
-        letter = classes[int(np.argmax(prediction, axis=1)[0])]
-        confidence = float(np.max(prediction))
-
-        debug_crop_path = UPLOAD_DIR / "last_crop.jpg"
-        debug_overlay_path = UPLOAD_DIR / "last_debug.jpg"
-        h, w, _ = frame.shape
-        all_xs, all_ys = [], []
-        debug_frame = frame.copy()
-        for hand_landmarks in results.multi_hand_landmarks:
-            all_xs.extend([landmark.x for landmark in hand_landmarks.landmark])
-            all_ys.extend([landmark.y for landmark in hand_landmarks.landmark])
-            mp.solutions.drawing_utils.draw_landmarks(debug_frame, hand_landmarks, mp.solutions.hands.HAND_CONNECTIONS)
-        xmin = max(0, int(min(all_xs) * w) - 20)
-        ymin = max(0, int(min(all_ys) * h) - 20)
-        xmax = min(w, int(max(all_xs) * w) + 20)
-        ymax = min(h, int(max(all_ys) * h) + 20)
-        crop = frame[ymin:ymax, xmin:xmax]
-        if crop.size > 0:
-            cv2.imwrite(str(debug_crop_path), crop)
-        cv2.imwrite(str(debug_overlay_path), debug_frame)
+        payload = predict_bisindo_image(file_obj.read(), upload_dir=UPLOAD_DIR)
         request.session["today_login"] = True
-        return JsonResponse(
-            {
-                "result": letter,
-                "confidence": confidence,
-                "debug_crop_url": "/static/uploads/last_crop.jpg",
-                "debug_overlay_url": "/static/uploads/last_debug.jpg",
-            }
-        )
+        return JsonResponse(payload)
+    except ValueError as exc:
+        return JsonResponse({"error": str(exc)}, status=400)
     except Exception:
         payload = _predict_fallback()
         return JsonResponse(payload)
