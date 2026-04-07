@@ -10,13 +10,12 @@ RUN apt-get update && apt-get install -y \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt django_requirements.txt ./
+COPY django_requirements.txt ./
 
-RUN pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir -r django_requirements.txt
+RUN pip install --no-cache-dir -r django_requirements.txt
 
 COPY . .
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "python django_port/manage.py migrate && python django_port/manage.py bootstrap_legacy_data && python django_port/manage.py runserver 0.0.0.0:8000 --noreload"]
+CMD ["sh", "-c", "python django_port/manage.py migrate && python django_port/manage.py bootstrap_legacy_data && python django_port/manage.py collectstatic --noinput && gunicorn signlingo_django.wsgi:application --chdir django_port --bind 0.0.0.0:${PORT:-8000}"]

@@ -158,6 +158,10 @@ def _leaderboard_lists(user):
     return friends_leaderboard, league_users
 
 
+def _normalize_plan(plan):
+    return plan if plan in {"family", "yearly", "monthly"} else "yearly"
+
+
 def home(request):
     request.session.flush()
     return _render(request, "landing_page.html", {"user": None})
@@ -243,6 +247,7 @@ def dashboard(request):
     all_users = list(User.objects.order_by("-points", "id"))
     user_rank = next((index + 1 for index, row in enumerate(all_users) if row.id == user.id), None)
     today, streak_data, current_streak = _build_streak_data(user)
+    lessons, current_lesson, completed_lessons_count, total_lessons_count, module_progress_percent = _lesson_context(user)
     context = _user_shell_context(user)
     context.update(
         {
@@ -253,6 +258,12 @@ def dashboard(request):
             "streak_data": streak_data,
             "current_streak": current_streak,
             "today": today,
+            "lessons": lessons,
+            "current_lesson": current_lesson,
+            "completed_lessons_count": completed_lessons_count,
+            "total_lessons_count": total_lessons_count,
+            "module_progress_percent": module_progress_percent,
+            "module_complete": total_lessons_count > 0 and completed_lessons_count == total_lessons_count,
         }
     )
     return _render(request, "dashboard.html", context)
@@ -270,6 +281,7 @@ def roadmap(request):
     all_users = list(User.objects.order_by("-points", "id"))
     user_rank = next((index + 1 for index, row in enumerate(all_users) if row.id == user.id), None)
     today, streak_data, current_streak = _build_streak_data(user)
+    lessons, current_lesson, completed_lessons_count, total_lessons_count, module_progress_percent = _lesson_context(user)
     context = _user_shell_context(user)
     context.update(
         {
@@ -280,6 +292,12 @@ def roadmap(request):
             "streak_data": streak_data,
             "current_streak": current_streak,
             "today": today,
+            "lessons": lessons,
+            "current_lesson": current_lesson,
+            "completed_lessons_count": completed_lessons_count,
+            "total_lessons_count": total_lessons_count,
+            "module_progress_percent": module_progress_percent,
+            "module_complete": total_lessons_count > 0 and completed_lessons_count == total_lessons_count,
         }
     )
     return _render(request, "roadmap.html", context)
@@ -298,15 +316,21 @@ def package(request):
     if redirect_response:
         return redirect_response
     context = _user_shell_context(user)
+    selected_plan = _normalize_plan(request.session.get("selected_plan"))
     if request.method == "POST":
-        context["plan"] = request.POST.get("plan")
+        selected_plan = _normalize_plan(request.POST.get("plan"))
+        request.session["selected_plan"] = selected_plan
+        request.session.modified = True
+        context["plan"] = selected_plan
         return _render(request, "payment.html", context)
+    context["plan"] = selected_plan
     return _render(request, "package.html", context)
 
 
 def payment(request):
     user = _current_user(request)
     context = _user_shell_context(user) if user else {}
+    context["plan"] = _normalize_plan(request.session.get("selected_plan"))
     return _render(request, "payment.html", context)
 
 

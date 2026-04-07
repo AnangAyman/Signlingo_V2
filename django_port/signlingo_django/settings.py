@@ -1,4 +1,7 @@
+import os
 from pathlib import Path
+
+import dj_database_url
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -6,9 +9,14 @@ PROJECT_ROOT = BASE_DIR.parent
 DJANGO_INSTANCE_DIR = PROJECT_ROOT / "django_instance"
 DJANGO_INSTANCE_DIR.mkdir(exist_ok=True)
 
-SECRET_KEY = "django-insecure-signlingo-dev-key"
-DEBUG = True
-ALLOWED_HOSTS = ["*"]
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-signlingo-dev-key")
+DEBUG = os.environ.get("DJANGO_DEBUG", "true").lower() == "true"
+
+render_hostname = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+allowed_hosts = [host.strip() for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "*").split(",") if host.strip()]
+if render_hostname and render_hostname not in allowed_hosts and "*" not in allowed_hosts:
+    allowed_hosts.append(render_hostname)
+ALLOWED_HOSTS = allowed_hosts or ["*"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -22,6 +30,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -59,10 +68,10 @@ WSGI_APPLICATION = "signlingo_django.wsgi.application"
 ASGI_APPLICATION = "signlingo_django.asgi.application"
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": DJANGO_INSTANCE_DIR / "db.sqlite3",
-    }
+    "default": dj_database_url.config(
+        default=f"sqlite:///{(DJANGO_INSTANCE_DIR / 'db.sqlite3').as_posix()}",
+        conn_max_age=600,
+    )
 }
 
 LANGUAGE_CODE = "en-us"
@@ -73,5 +82,6 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [PROJECT_ROOT / "static"]
 STATIC_ROOT = DJANGO_INSTANCE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
