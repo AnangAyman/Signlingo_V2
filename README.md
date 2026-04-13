@@ -72,6 +72,13 @@ conda activate signlingo
 flask --app app.py db upgrade
 ```
 
+To seed the initial lessons, admin user, and shop items without dropping existing tables:
+
+```bash
+conda activate signlingo
+flask --app app.py seed-data
+```
+
 ### Method 1: Running with Docker (Recommended)
 
 This runs the application in a container while reading environment variables from `.env`.
@@ -138,6 +145,11 @@ If you prefer to run the application directly on your machine, use the existing 
     For an existing database, apply migrations instead:
     ```bash
     flask --app app.py db upgrade
+    ```
+
+    To seed initial data without dropping tables:
+    ```bash
+    flask --app app.py seed-data
     ```
 
 * **e. Run the Application:**

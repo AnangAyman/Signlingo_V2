@@ -58,5 +58,19 @@ def init_app_command():
         print("Shop items seeded")
     print("Application initialization finished!")
 
+@app.cli.command("seed-data")
+def seed_data_command():
+    """Seeds initial lessons, admin user, and shop items without dropping tables."""
+    with app.app_context():
+        get_or_create_lessons_from_json()
+        print("Lessons seeded successfully!")
+
+        create_admin_user()
+        print("Admin user checked.")
+
+        seed_shop_items()
+        print("Shop items seeded.")
+    print("Seed data finished!")
+
 if __name__ == '__main__':
     app.run(debug=True)
