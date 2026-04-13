@@ -44,11 +44,12 @@ def register(request):
             name=name,
             age=int(age) if age else None,
             email=email,
-            password=password,
             username=generate_username(first_name),
             # EMAIL VERIFICATION TEMPORARILY DISABLED
             is_verified=True,
         )
+        user.set_password(password)
+        user.save(update_fields=["password"])
         request.session["user"] = user.email
         request.session["user_id"] = user.id
         return redirect("auth:start")
@@ -78,14 +79,17 @@ def login(request):
     if request.method == "POST":
         email = request.POST.get("email", "")
         password = request.POST.get("password", "")
-        user = User.objects.filter(email=email, password=password).first()
-        if user is None:
+        user = User.objects.filter(email=email).first()
+        if user is None or not user.check_password(password, upgrade_legacy=True):
             return _render(request, "login.html", {"error": "Invalid credentials."})
         # EMAIL VERIFICATION TEMPORARILY DISABLED
         # Auto-verify existing unverified users so they are not blocked.
         user.is_verified = True
         user.last_login_date = timezone.localdate()
-        user.save(update_fields=["is_verified", "last_login_date"])
+        update_fields = ["is_verified", "last_login_date"]
+        if user.password_is_hashed():
+            update_fields.append("password")
+        user.save(update_fields=update_fields)
         request.session["user"] = user.email
         request.session["user_id"] = user.id
         return redirect("auth:dashboard")
@@ -138,7 +142,7 @@ def reset_password(request, token):
             # Example: enforce minimum password length.
             messages.error(request, "Password must be at least 6 characters long.")
             return _render(request, "reset_password.html", {"token": token})
-        user.password = new_password
+        user.set_password(new_password)
         user.save(update_fields=["password"])
         messages.success(request, "Your password has been successfully reset! Please log in.")
         return redirect("auth:login")
@@ -172,8 +176,8 @@ def edit_account(request):
             user.age = int(age) if age else None
             user.email = email
             if new_password:
-                # The legacy project still stores raw passwords; preserve behavior for parity during migration.
-                if current_password != user.password:
+                # Some legacy accounts may still have plain-text passwords until they log in and get upgraded.
+                if not user.check_password(current_password):
                     messages.error(request, "Incorrect current password.")
                     context["current_user_data"] = current_user_data
                     return _render(request, "edit_account.html", context)
@@ -181,8 +185,7 @@ def edit_account(request):
                     messages.error(request, "New passwords do not match.")
                     context["current_user_data"] = current_user_data
                     return _render(request, "edit_account.html", context)
-                # Storing the new password directly is legacy behavior and should be replaced later.
-                user.password = new_password
+                user.set_password(new_password)
             user.save()
             request.session["user"] = user.email
             messages.success(request, "Profile updated successfully!")

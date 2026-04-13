@@ -3,7 +3,7 @@ services:
     name: signlingo-django
     runtime: docker
     plan: free
-    dockerfilePath: ./Dockerfile.django
+    dockerfilePath: ./Dockerfile
     autoDeploy: true
     healthCheckPath: /health/
     envVars:

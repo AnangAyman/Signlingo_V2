@@ -1,38 +1,30 @@
-# Use the specific Python 3.10.4 runtime as the base image. 'slim' is smaller.
+# Use the specific Python 3.10.4 runtime as the base image. Keep parity with the Django container.
 FROM python:3.10.4-slim
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-ENV FLASK_APP=app.py
-ENV FLASK_RUN_HOST=0.0.0.0
-ENV FLASK_DEBUG=1
+# Set environment variables.
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# Set the working directory inside the container
+# Set the working directory inside the container.
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies.
 RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy your requirements file
-COPY requirements.txt .
+# Copy the Python requirements file.
+COPY requirements.txt ./
 
-# Install your Python dependencies
+# Install Python dependencies.
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of your application's code
+# Copy the rest of the application's code.
 COPY . .
 
-# --- NEW CHANGES ---
-# Run the database reset command ONLY during the image build process.
-RUN flask init-app
+# Expose the port that the Django app runs on.
+EXPOSE 8000
 
-# Expose the port that the app runs on
-EXPOSE 5000
-
-# The command to run your application when the container starts
-# (Watches all files for changes, including HTML)
-CMD ["flask", "run", "--extra-files", "templates/:static/"]
+# Run migrations, seed starter data, collect static files, and launch Gunicorn.
+CMD ["sh", "-c", "python django_port/manage.py migrate && python django_port/manage.py bootstrap_legacy_data && python django_port/manage.py collectstatic --noinput && gunicorn signlingo_django.wsgi:application --chdir django_port --bind 0.0.0.0:${PORT:-8000}"]

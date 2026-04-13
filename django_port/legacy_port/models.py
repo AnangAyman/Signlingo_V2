@@ -1,6 +1,9 @@
 from datetime import date
+from hmac import compare_digest
 
 from django.db import models
+from django.contrib.auth.hashers import check_password as django_check_password
+from django.contrib.auth.hashers import identify_hasher, make_password
 
 
 # Association table for friendships.
@@ -9,7 +12,7 @@ class User(models.Model):
     name = models.CharField(max_length=80)
     age = models.IntegerField(blank=True, null=True)
     email = models.EmailField(unique=True)
-    password = models.CharField(max_length=80)
+    password = models.CharField(max_length=128)
     points = models.IntegerField(default=0)
     is_verified = models.BooleanField(default=False)
     lives = models.IntegerField(default=5)
@@ -46,6 +49,29 @@ class User(models.Model):
 
     def is_friends_with(self, other_user: "User") -> bool:
         return Friendship.objects.filter(user=self, friend=other_user).exists()
+
+    def password_is_hashed(self) -> bool:
+        try:
+            identify_hasher(self.password)
+            return True
+        except Exception:
+            return False
+
+    def set_password(self, raw_password: str) -> None:
+        self.password = make_password(raw_password)
+
+    def check_password(self, raw_password: str, upgrade_legacy: bool = False) -> bool:
+        if not self.password:
+            return False
+
+        if self.password_is_hashed():
+            return django_check_password(raw_password, self.password)
+
+        is_valid = compare_digest(self.password, raw_password)
+        if is_valid and upgrade_legacy:
+            # Upgrade old plain-text passwords in place after a successful legacy login.
+            self.set_password(raw_password)
+        return is_valid
 
 
 class Friendship(models.Model):

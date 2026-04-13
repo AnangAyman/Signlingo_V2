@@ -92,12 +92,12 @@ and where their comments now live in the Django port.
 ### `Dockerfile`
 
 - Base image, env vars, workdir, dependency install, copy, expose, and startup comments
-  Preserved in `Dockerfile.django`.
+  Preserved in the repository root `Dockerfile`.
 
 ### `docker-compose.yml`
 
 - File sync and SQLite persistence comments
-  Preserved in `docker-compose.django.yml`.
+  Preserved in the repository root `docker-compose.yml`.
 
 ## Notes
 

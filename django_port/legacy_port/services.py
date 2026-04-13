@@ -280,15 +280,19 @@ def seed_initial_data():
         ShopItem.objects.update_or_create(item_key=item["item_key"], defaults=item)
 
     # Checks for an existing admin user and creates one if not found.
-    User.objects.get_or_create(
+    admin_user, created = User.objects.get_or_create(
         email="admin@example.com",
         defaults={
             "name": "Admin",
             "age": 99,
-            "password": "admin",  # IMPORTANT: In a real application, you must hash this password!
+            "password": "",
             "is_verified": True,
             "username": "@admin",
             "lives": 100000,
             "points": 10000,
         },
     )
+    if created:
+        # IMPORTANT: In a real application, you must protect and rotate this default admin credential.
+        admin_user.set_password("admin")
+        admin_user.save(update_fields=["password"])

@@ -85,5 +85,9 @@ losing the original implementation notes.
   `legacy_port/services.py` and `shared_port/view_helpers.py`.
 
 - `Dockerfile`
-  Container setup comments were carried into `Dockerfile.django` so the Django container
+  Container setup comments were carried into the repository root `Dockerfile` so the Django container
   remains as understandable as the Flask one.
+
+- `docker-compose.yml`
+  Local container workflow comments were preserved in the repository root `docker-compose.yml`
+  so the Docker-based setup stays understandable after the Django migration.

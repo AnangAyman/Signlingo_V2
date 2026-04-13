@@ -219,6 +219,75 @@ class LegacyPortFlowTests(TestCase):
         self.assertIn("Family Plan", package_response.content.decode("utf-8"))
         self.assertIn("Family Plan", payment_response.content.decode("utf-8"))
 
+    def test_register_hashes_password_before_saving(self):
+        response = self.client.post(
+            "/register",
+            {
+                "name": "New User",
+                "age": "22",
+                "email": "newuser@example.com",
+                "password": "securepass",
+                "confirm-password": "securepass",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        created_user = User.objects.get(email="newuser@example.com")
+        self.assertNotEqual(created_user.password, "securepass")
+        self.assertTrue(created_user.check_password("securepass"))
+
+    def test_legacy_plain_text_login_upgrades_password_hash(self):
+        legacy_user = User.objects.create(
+            name="Legacy User",
+            age=26,
+            email="legacy@example.com",
+            password="legacy-pass",
+            username="@legacy",
+            is_verified=False,
+        )
+
+        response = self.client.post("/login", {"email": "legacy@example.com", "password": "legacy-pass"})
+
+        self.assertEqual(response.status_code, 302)
+        legacy_user.refresh_from_db()
+        self.assertNotEqual(legacy_user.password, "legacy-pass")
+        self.assertTrue(legacy_user.check_password("legacy-pass"))
+        self.assertTrue(legacy_user.is_verified)
+
+    def test_reset_password_hashes_new_password(self):
+        reset_user = User.objects.create(
+            name="Reset User",
+            age=28,
+            email="reset@example.com",
+            password="old-password",
+            username="@reset",
+            is_verified=True,
+        )
+
+        session = self.client.session
+        session["user_id"] = reset_user.id
+        session["user"] = reset_user.email
+        session.save()
+
+        forgot_response = self.client.post("/forgot-password", {"email": "reset@example.com"}, follow=True)
+
+        self.assertEqual(forgot_response.status_code, 200)
+        body = forgot_response.content.decode("utf-8")
+        marker = "/reset_password/"
+        token_start = body.find(marker)
+        self.assertNotEqual(token_start, -1)
+        token = body[token_start + len(marker):].split("<", 1)[0].strip()
+
+        reset_response = self.client.post(
+            f"/reset_password/{token}",
+            {"password": "new-secure-pass", "confirm_password": "new-secure-pass"},
+        )
+
+        self.assertEqual(reset_response.status_code, 302)
+        reset_user.refresh_from_db()
+        self.assertNotEqual(reset_user.password, "new-secure-pass")
+        self.assertTrue(reset_user.check_password("new-secure-pass"))
+
     def test_learning_flow_advances_through_lessons(self):
         lessons = list(Lesson.objects.order_by("order"))
 
