@@ -28,7 +28,7 @@ SignLingo is an interactive web application designed to make learning sign langu
 
 ## How to Run This Project
 
-There are two methods to run this application: using Docker or running it locally with the existing `signlingo` conda environment.
+There are two methods to run this application: using Docker or setting it up locally in a Python virtual environment.
 
 ### Oracle Cloud MySQL Setup
 
@@ -89,21 +89,18 @@ DATABASE_URI=mysql+pymysql://admin:MYSQL_PASSWORD@host.docker.internal:3307/sign
 Use `init-app` only when intentionally resetting and seeding the database. For a non-SQLite database, the command requires `ALLOW_DB_RESET=1`:
 
 ```bash
-conda activate signlingo
 ALLOW_DB_RESET=1 flask --app app.py init-app
 ```
 
 For existing data, prefer migrations:
 
 ```bash
-conda activate signlingo
 flask --app app.py db upgrade
 ```
 
 To seed the initial lessons, admin user, and shop items without dropping existing tables:
 
 ```bash
-conda activate signlingo
 flask --app app.py seed-data
 ```
 
@@ -137,55 +134,57 @@ To stop the application, go back to your terminal and press `Ctrl+C`.
 
 ---
 
-### Method 2: Local Setup with Conda
+### Method 2: Local Setup (Without Docker)
 
-If you prefer to run the application directly on your machine, use the existing `signlingo` conda environment.
+If you prefer to run the application directly on your machine, follow these steps.
 
 **1. Prerequisites:**
-* Conda environment: `signlingo`
+* Python 3.10
 * Git
 
 **2. Setup Instructions:**
 
 * **a. Clone the Repository:**
     ```bash
-    git clone [https://github.com/AnangAyman/Software-engineering-S4.git](https://github.com/AnangAyman/Software-engineering-S4.git)
-    cd Software-engineering-S4
+    git clone https://github.com/AnangAyman/Signlingo_V2.git
+    cd Signlingo_V2
     ```
 
-* **b. Activate the Conda Environment:**
-    ```bash
-    conda activate signlingo
-    ```
+* **b. Create and Activate a Virtual Environment:**
+    * On macOS/Linux:
+        ```bash
+        python3 -m venv venv
+        source venv/bin/activate
+        ```
+    * On Windows:
+        ```bash
+        python -m venv venv
+        .\venv\Scripts\activate
+        ```
 
-* **c. Install Dependencies if Needed:**
+* **c. Install Dependencies:**
     ```bash
     pip install -r requirements.txt
     ```
     *(Note: This step may take a significant amount of time due to the size of the machine learning libraries.)*
 
 * **d. Set Up the Database:**
-    For a fresh development database, initialize and seed the tables:
-    ```bash
-    ALLOW_DB_RESET=1 flask --app app.py init-app
-    ```
-
-    For an existing database, apply migrations instead:
+    For an existing database, apply migrations:
     ```bash
     flask --app app.py db upgrade
     ```
 
-    To seed initial data without dropping tables:
+* **e. Seed Initial Data (Lessons/Admin/Shop):**
     ```bash
     flask --app app.py seed-data
     ```
 
-* **e. Run the Application:**
+* **f. Run the Application:**
     ```bash
     flask --app app.py run
     ```
 
-* **f. Access the Application:**
+* **g. Access the Application:**
     Open your web browser and navigate to: **[http://127.0.0.1:5000](http://127.0.0.1:5000)**
 
 ### Using the Application
