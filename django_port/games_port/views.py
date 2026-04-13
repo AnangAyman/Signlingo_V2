@@ -10,7 +10,6 @@ from shared_port.view_helpers import (
     UPLOAD_DIR,
     _lesson_context,
     _pick_question,
-    _predict_fallback,
     _render,
     _require_user,
     _store_session_results,
@@ -61,7 +60,7 @@ def get_summary_results(request):
 
 # ----------------------------------- GAME PAGE ------------------------------------------------
 def ml_game(request):
-    # The ML game page still renders even before the heavy inference stack is fully production-ready.
+    # Keep the ML game inside the same Django route tree as the rest of the product.
     # Lessons are expected to exist already from the bootstrap seed step.
     user, redirect_response = _require_user(request)
     if redirect_response:
@@ -151,8 +150,8 @@ def capture_page(request):
 
 @csrf_exempt
 def predict(request):
-    # Fall back gracefully so demo and QA flows remain usable during ML outages.
-    # Receive image blob from the browser and hand it to the model service layer.
+    # Receive image blob from the browser and hand it to the Django-side ML service layer.
+    # If the ML runtime fails unexpectedly, surface a real error instead of inventing a fake prediction.
     file_obj = request.FILES.get("image")
     if not file_obj:
         return JsonResponse({"error": "No image provided"}, status=400)
@@ -164,8 +163,7 @@ def predict(request):
     except ValueError as exc:
         return JsonResponse({"error": str(exc)}, status=400)
     except Exception:
-        payload = _predict_fallback()
-        return JsonResponse(payload)
+        return JsonResponse({"error": "Prediction failed due to an ML runtime error."}, status=500)
 
 
 def magic_touch(request):

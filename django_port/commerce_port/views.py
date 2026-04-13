@@ -4,7 +4,14 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from legacy_port.models import ShopItem, UserItem
-from shared_port.view_helpers import _current_user, _normalize_plan, _render, _require_user, _user_shell_context
+from shared_port.view_helpers import (
+    _build_streak_data,
+    _current_user,
+    _normalize_plan,
+    _render,
+    _require_user,
+    _user_shell_context,
+)
 
 
 # ----------------------------------- SHOP Functionality --------------------------------------------
@@ -47,6 +54,8 @@ def shop(request):
     if redirect_response:
         return redirect_response
 
+    # The Flask shop route also exposed the weekly streak widget, so keep that parity here.
+    _today, _streak_data, current_streak = _build_streak_data(user)
     # The Flask version recalculated some sidebar state inline here.
     # In Django that shared shell/progress context is centralized instead of duplicated per page.
     # Create a quick lookup of inventory quantities: {item_id: quantity}.
@@ -54,6 +63,7 @@ def shop(request):
     context = _user_shell_context(user)
     context.update(
         {
+            "current_streak": current_streak,
             "shop_items": ShopItem.objects.order_by("id"),
             "inventory": inventory,
             "user_inventory_map": inventory,
@@ -82,7 +92,7 @@ def buy_item(request):
         return JsonResponse({"success": False, "message": "Your health is already full!"}, status=400)
     # Check if the user has enough points.
     if user.points < item.price:
-        return JsonResponse({"success": False, "message": "Not enough points."}, status=400)
+        return JsonResponse({"success": False, "message": "Not enough XP."}, status=400)
 
     # Deduct points first, then apply the item effect.
     user.points -= item.price

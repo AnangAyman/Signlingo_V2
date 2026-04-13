@@ -31,3 +31,5 @@ Notes:
 
 - The original Flask runtime files have been retired from the active backend.
 - Original explanatory comments were preserved inside the Django apps and the migration audit docs.
+- `python manage.py reset_legacy_data` is available when you need the Django-side equivalent of the old Flask init/reset seed flow.
+- `../requirements-lock.txt` keeps the full installed dependency snapshot for teammates who want a closer environment match.

@@ -1,5 +1,6 @@
 import json
 import random
+import os
 from pathlib import Path
 
 from .models import Course, Lesson, Module, ShopItem, Unit, User
@@ -58,6 +59,9 @@ def _load_ml_runtime():
         return _ML_RUNTIME
 
     # Load bisindo static (MediaPipe keypoint) model dependencies lazily so local setup stays lighter.
+    matplotlib_dir = PROJECT_ROOT / "django_instance" / ".matplotlib"
+    matplotlib_dir.mkdir(parents=True, exist_ok=True)
+    os.environ.setdefault("MPLCONFIGDIR", str(matplotlib_dir))
     import cv2
     import h5py
     import mediapipe as mp

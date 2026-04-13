@@ -31,6 +31,7 @@ def video_learning(request):
 @csrf_exempt
 def mark_lesson_status(request):
     # Accept either lesson ID or lesson key so the front end can integrate flexibly.
+    # Preserve the old Flask default: if the client omits status, treat it as completed.
     user, redirect_response = _require_user(request)
     if redirect_response:
         return JsonResponse({"error": "unauthorized"}, status=401)
@@ -48,7 +49,7 @@ def mark_lesson_status(request):
     item, _ = UserLessonStatus.objects.update_or_create(
         user=user,
         lesson=lesson,
-        defaults={"status": payload.get("status", "not_started"), "score": payload.get("score")},
+        defaults={"status": payload.get("status", "completed"), "score": payload.get("score")},
     )
     return JsonResponse({"success": True, "id": item.id, "status": item.status, "message": f"Lesson {lesson.title} marked as {item.status}"})
 

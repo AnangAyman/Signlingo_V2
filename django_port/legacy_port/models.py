@@ -156,3 +156,6 @@ class UserItem(models.Model):
     # Relationships
     class Meta:
         db_table = "user_item"
+        constraints = [
+            models.UniqueConstraint(fields=["user", "item"], name="unique_user_item_pair"),
+        ]

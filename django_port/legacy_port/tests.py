@@ -1,11 +1,16 @@
 import json
+from datetime import datetime, timezone as datetime_timezone
 from unittest.mock import patch
 
+from django.core.management import call_command
+from django.db import IntegrityError
+from django.test import override_settings
 from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from .models import Lesson, ShopItem, User, UserLessonStatus
+from .models import Lesson, ShopItem, User, UserItem, UserLessonStatus
 from .services import seed_initial_data
+from shared_port.view_helpers import _build_streak_data
 
 
 class LegacyPortFlowTests(TestCase):
@@ -50,6 +55,20 @@ class LegacyPortFlowTests(TestCase):
         self.assertEqual(payload["friend"]["name"], self.friend.name)
         self.assertTrue(self.user.is_friends_with(self.friend))
 
+    def test_search_users_returns_matching_results(self):
+        response = self.client.get("/search-users", {"q": "Friend"})
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(len(payload), 1)
+        self.assertEqual(payload[0]["name"], self.friend.name)
+
+    def test_search_users_returns_empty_list_for_short_query(self):
+        response = self.client.get("/search-users", {"q": "F"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [])
+
     def test_save_session_results_and_summary(self):
         game_response = self.client.post(
             "/save-session-results",
@@ -84,6 +103,19 @@ class LegacyPortFlowTests(TestCase):
         self.assertTrue(payload["success"])
         self.assertEqual(payload["status"], "completed")
 
+    def test_mark_lesson_status_defaults_to_completed_when_status_is_missing(self):
+        lesson = Lesson.objects.get(url="/video_learning")
+        response = self.client.post(
+            "/mark-lesson-status",
+            data=json.dumps({"lesson_key": lesson.lesson_key}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload["success"])
+        self.assertEqual(payload["status"], "completed")
+
     def test_buy_refill_hearts_updates_balance_and_lives(self):
         item = ShopItem.objects.get(item_key="refill_hearts")
         response = self.client.post(
@@ -100,6 +132,28 @@ class LegacyPortFlowTests(TestCase):
         self.assertEqual(self.user.points, 1500 - item.price)
         self.assertEqual(payload["new_lives"], 5)
 
+    def test_buy_inventory_item_updates_quantity(self):
+        item = ShopItem.objects.get(item_key="xp_boost")
+        response = self.client.post(
+            "/buy-item",
+            data=json.dumps({"item_id": item.id}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload["success"])
+        self.assertEqual(payload["quantity"], 1)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.points, 1500 - item.price)
+
+    def test_user_item_pair_is_unique(self):
+        item = ShopItem.objects.get(item_key="xp_boost")
+        UserItem.objects.create(user=self.user, item=item, quantity=1)
+
+        with self.assertRaises(IntegrityError):
+            UserItem.objects.create(user=self.user, item=item, quantity=1)
+
     def test_leaderboard_renders_friends_and_league(self):
         self.user.add_friend(self.friend)
         response = self.client.get("/leaderboard")
@@ -110,22 +164,41 @@ class LegacyPortFlowTests(TestCase):
         self.assertIn(self.user.league, body)
         self.assertIn(self.friend.name, body)
 
-    @patch("games_port.views.predict_bisindo_image", side_effect=RuntimeError("ml runtime unavailable"))
-    def test_predict_returns_usable_fallback_payload(self, _mock_predict):
-        upload = SimpleUploadedFile("snapshot.jpg", b"placeholder", content_type="image/jpeg")
-        response = self.client.post("/predict", data={"image": upload})
+    def test_remove_friend_json_response(self):
+        self.user.add_friend(self.friend)
+        response = self.client.post(
+            f"/remove_friend/{self.friend.id}",
+            content_type="application/json",
+            HTTP_ACCEPT="application/json",
+        )
 
         self.assertEqual(response.status_code, 200)
         payload = response.json()
-        self.assertIn("result", payload)
-        self.assertTrue(payload["fallback"])
-        self.assertGreaterEqual(payload["confidence"], 0.7)
+        self.assertTrue(payload["success"])
+        self.assertFalse(self.user.is_friends_with(self.friend))
+
+    @patch("games_port.views.predict_bisindo_image", side_effect=RuntimeError("ml runtime unavailable"))
+    def test_predict_returns_runtime_error_when_ml_fails(self, _mock_predict):
+        upload = SimpleUploadedFile("snapshot.jpg", b"placeholder", content_type="image/jpeg")
+        response = self.client.post("/predict", data={"image": upload})
+
+        self.assertEqual(response.status_code, 500)
+        payload = response.json()
+        self.assertEqual(payload["error"], "Prediction failed due to an ML runtime error.")
 
     def test_predict_requires_image(self):
         response = self.client.post("/predict")
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()["error"], "No image provided")
+
+    @patch("games_port.views.predict_bisindo_image", side_effect=ValueError("No hand detected"))
+    def test_predict_returns_validation_error_for_invalid_ml_input(self, _mock_predict):
+        upload = SimpleUploadedFile("snapshot.jpg", b"placeholder", content_type="image/jpeg")
+        response = self.client.post("/predict", data={"image": upload})
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"], "No hand detected")
 
     def test_core_pages_and_json_endpoints_render(self):
         page_urls = [
@@ -159,6 +232,26 @@ class LegacyPortFlowTests(TestCase):
         self.assertIn("choices", question_response.json())
         self.assertIn("answer", ml_question_response.json())
         self.assertTrue(lives_response.json()["success"])
+
+    def test_capture_route_stays_available(self):
+        response = self.client.get("/capture")
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response["Location"].endswith("/ml_game"))
+
+    def test_streak_helper_preserves_original_jakarta_timezone_logic(self):
+        lesson = Lesson.objects.get(url="/video_learning")
+        status = UserLessonStatus.objects.create(user=self.user, lesson=lesson, status="completed")
+        fixed_now = datetime(2026, 4, 13, 16, 30, tzinfo=datetime_timezone.utc)
+        UserLessonStatus.objects.filter(id=status.id).update(last_updated=fixed_now)
+
+        with patch("shared_port.view_helpers.timezone.now", return_value=fixed_now):
+            today, streak_data, current_streak = _build_streak_data(self.user)
+
+        self.assertEqual(today.isoformat(), "2026-04-13")
+        monday_entry = next(entry for entry in streak_data if entry["date"].isoformat() == "2026-04-13")
+        self.assertTrue(monday_entry["is_active"])
+        self.assertEqual(current_streak, 1)
 
     def test_dashboard_and_roadmap_show_real_progress(self):
         lesson = Lesson.objects.get(url="/video_learning")
@@ -288,6 +381,90 @@ class LegacyPortFlowTests(TestCase):
         self.assertNotEqual(reset_user.password, "new-secure-pass")
         self.assertTrue(reset_user.check_password("new-secure-pass"))
 
+    @override_settings(
+        EMAIL_HOST_USER="signlingo@example.com",
+        EMAIL_HOST_PASSWORD="app-password",
+        DEFAULT_FROM_EMAIL="signlingo@example.com",
+    )
+    @patch("accounts_port.views.safe_send_email", return_value=True)
+    def test_forgot_password_uses_email_delivery_when_configured(self, _mock_send):
+        response = self.client.post("/forgot-password", {"email": "yeongjin@example.com"}, follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        body = response.content.decode("utf-8")
+        self.assertIn("password reset link has been sent", body)
+        self.assertNotIn("/reset_password/", body)
+
+    def test_edit_account_updates_profile_and_password(self):
+        response = self.client.post(
+            "/edit-account",
+            {
+                "name": "Yeongjin Updated",
+                "age": "25",
+                "email": "yeongjin.updated@example.com",
+                "current_password": "testpass",
+                "new_password": "better-pass",
+                "confirm_new_password": "better-pass",
+            },
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.name, "Yeongjin Updated")
+        self.assertEqual(self.user.email, "yeongjin.updated@example.com")
+        self.assertTrue(self.user.check_password("better-pass"))
+
+    def test_edit_account_rejects_invalid_age_instead_of_crashing(self):
+        response = self.client.post(
+            "/edit-account",
+            {
+                "name": "Yeongjin Updated",
+                "age": "not-a-number",
+                "email": "yeongjin.updated@example.com",
+            },
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Invalid age format.", response.content.decode("utf-8"))
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.age, 24)
+
+    def test_edit_account_blank_name_falls_back_to_anonymous_wanderer(self):
+        response = self.client.post(
+            "/edit-account",
+            {
+                "name": "",
+                "age": "24",
+                "email": "yeongjin@example.com",
+            },
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.name, "Anonymous Wanderer")
+
+    def test_edit_account_rejects_short_new_password(self):
+        response = self.client.post(
+            "/edit-account",
+            {
+                "name": "Yeongjin Updated",
+                "age": "25",
+                "email": "yeongjin.updated@example.com",
+                "current_password": "testpass",
+                "new_password": "123",
+                "confirm_new_password": "123",
+            },
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("New password must be at least 6 characters long.", response.content.decode("utf-8"))
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("testpass"))
+
     def test_learning_flow_advances_through_lessons(self):
         lessons = list(Lesson.objects.order_by("order"))
 
@@ -316,3 +493,21 @@ class LegacyPortFlowTests(TestCase):
         self.assertEqual(final_mark_response.status_code, 200)
         completed_dashboard = self.client.get("/dashboard").content.decode("utf-8")
         self.assertIn("Review Lessons", completed_dashboard)
+
+    def test_reset_legacy_data_command_reseeds_required_records(self):
+        self.user.add_friend(self.friend)
+        User.objects.create(
+            name="Temporary User",
+            age=20,
+            email="temporary@example.com",
+            password="temp-pass",
+            username="@temporary",
+            is_verified=True,
+        )
+
+        call_command("reset_legacy_data")
+
+        self.assertTrue(User.objects.filter(email="admin@example.com").exists())
+        self.assertTrue(ShopItem.objects.filter(item_key="refill_hearts").exists())
+        self.assertEqual(Lesson.objects.count(), 4)
+        self.assertFalse(User.objects.filter(email="temporary@example.com").exists())

@@ -1,4 +1,9 @@
+import time
+from smtplib import SMTPException
+
+from django.conf import settings
 from django.contrib import messages
+from django.core.mail import EmailMessage
 from django.shortcuts import redirect
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -14,6 +19,23 @@ from shared_port.view_helpers import (
     _require_user,
     _user_shell_context,
 )
+
+
+def safe_send_email(message: EmailMessage, retries: int = 3, delay: int = 3) -> bool:
+    # Mirror the old Flask retry behavior so intermittent mail issues do not fail immediately.
+    for attempt in range(1, retries + 1):
+        try:
+            message.send(fail_silently=False)
+            return True
+        except (OSError, SMTPException):
+            if attempt < retries:
+                time.sleep(delay)
+            else:
+                return False
+
+
+def _real_email_delivery_enabled() -> bool:
+    return bool(settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD)
 
 
 # ----------------------------------- AUTHENTICATION ------------------------------------------------
@@ -104,18 +126,33 @@ def logout(request):
 # ----------------------------------- FORGOT/RESET PASSWORD ROUTES ------------------------------------
 @csrf_exempt
 def forgot_password(request):
-    # Development mode shows the reset link in a message until real email delivery is wired up.
-    # Later on, this can move to a database-backed token table with expiry if the team wants.
+    # Keep the reset flow usable in development, but allow real email delivery when SMTP settings exist.
+    # Later on, this can still move to a database-backed token table with expiry if the team wants.
     if request.method == "POST":
         email = request.POST.get("email", "")
         user = User.objects.filter(email=email).first()
         if user:
             token = _make_signed_token({"user_id": user.id}, salt="password-reset")
             reset_url = request.build_absolute_uri(f"/reset_password/{token}")
-            messages.success(
-                request,
-                f"If an account with {email} exists, a reset link was generated for development: {reset_url}",
-            )
+            if _real_email_delivery_enabled():
+                message = EmailMessage(
+                    subject="Password Reset Link",
+                    body=f"Use this link to reset your SignLingo password: {reset_url}",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=[email],
+                )
+                if safe_send_email(message):
+                    messages.success(request, f"If an account with {email} exists, a password reset link has been sent.")
+                else:
+                    messages.success(
+                        request,
+                        f"If an account with {email} exists, a reset link was generated for development: {reset_url}",
+                    )
+            else:
+                messages.success(
+                    request,
+                    f"If an account with {email} exists, a reset link was generated for development: {reset_url}",
+                )
         else:
             # Generic message for security.
             messages.success(request, f"If an account with {email} exists, a password reset link has been sent.")
@@ -168,12 +205,21 @@ def edit_account(request):
         new_password = request.POST.get("new_password", "")
         confirm_new_password = request.POST.get("confirm_new_password", "")
 
+        # Keep the old Flask guardrails here so bad form data fails gracefully instead of crashing.
+        try:
+            normalized_age = int(age) if age else None
+        except ValueError:
+            messages.error(request, "Invalid age format.")
+            context["current_user_data"] = {"name": name, "age": age, "email": email}
+            return _render(request, "edit_account.html", context)
+
         # Email validation and update.
         if User.objects.exclude(id=user.id).filter(email=email).exists():
             messages.error(request, "That email address is already in use by another account.")
         else:
-            user.name = name
-            user.age = int(age) if age else None
+            # Match the legacy behavior: blank names fall back to Anonymous Wanderer.
+            user.name = name if name else "Anonymous Wanderer"
+            user.age = normalized_age
             user.email = email
             if new_password:
                 # Some legacy accounts may still have plain-text passwords until they log in and get upgraded.
@@ -183,6 +229,11 @@ def edit_account(request):
                     return _render(request, "edit_account.html", context)
                 if new_password != confirm_new_password:
                     messages.error(request, "New passwords do not match.")
+                    context["current_user_data"] = current_user_data
+                    return _render(request, "edit_account.html", context)
+                if len(new_password) < 6:
+                    # Preserve the minimum-length rule the Flask route enforced.
+                    messages.error(request, "New password must be at least 6 characters long.")
                     context["current_user_data"] = current_user_data
                     return _render(request, "edit_account.html", context)
                 user.set_password(new_password)

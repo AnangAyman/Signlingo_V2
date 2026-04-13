@@ -1,6 +1,7 @@
 import random
 from datetime import timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from django.core import signing
 from django.shortcuts import redirect, render
@@ -14,6 +15,7 @@ from legacy_port.services import get_initials
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 UPLOAD_DIR = PROJECT_ROOT / "static" / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+JAKARTA_TIMEZONE = ZoneInfo("Asia/Jakarta")
 
 
 def _current_user(request):
@@ -78,11 +80,15 @@ def _lesson_context(user):
 
 def _build_streak_data(user):
     # ----------------- WEEKLY STREAK (Monday -> Sunday of current week) -----------------
-    today = timezone.localdate()
+    # Preserve the original Flask routes.py behavior, which calculated streaks in Asia/Jakarta.
+    today = timezone.localtime(timezone.now(), JAKARTA_TIMEZONE).date()
     monday = today - timedelta(days=today.weekday())
     sunday = monday + timedelta(days=6)
-    statuses = user.lesson_statuses.filter(last_updated__date__gte=monday, last_updated__date__lte=sunday)
-    active_dates = {status.last_updated.date() for status in statuses}
+    active_dates = set()
+    for status in user.lesson_statuses.only("last_updated"):
+        activity_date = timezone.localtime(status.last_updated, JAKARTA_TIMEZONE).date()
+        if monday <= activity_date <= sunday:
+            active_dates.add(activity_date)
 
     # Build streak data for this week.
     streak_data = []
@@ -129,11 +135,6 @@ def _pick_question(request, question_key, questions):
     request.session[asked_key] = asked
     request.session.modified = True
     return question
-
-
-def _predict_fallback():
-    # Keep the gameplay flow alive when the heavier ML stack is unavailable.
-    return {"result": random.choice([chr(code) for code in range(ord("A"), ord("Z") + 1)]), "confidence": 0.95, "fallback": True}
 
 
 def _make_signed_token(payload, salt):

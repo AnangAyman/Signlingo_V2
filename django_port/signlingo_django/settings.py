@@ -14,8 +14,15 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-signlingo-dev-
 DEBUG = os.environ.get("DJANGO_DEBUG", "true").lower() == "true"
 
 # The Flask app.py also carried Gmail SMTP settings here.
-# Email delivery is intentionally left out of the current Django port until the team
-# decides whether to re-enable real verification/reset emails.
+# Keep email settings environment-driven so the team can re-enable real delivery
+# without changing the Django code again.
+EMAIL_BACKEND = os.environ.get("DJANGO_EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
+EMAIL_HOST = os.environ.get("DJANGO_EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.environ.get("DJANGO_EMAIL_PORT", "587"))
+EMAIL_USE_TLS = os.environ.get("DJANGO_EMAIL_USE_TLS", "true").lower() == "true"
+EMAIL_HOST_USER = os.environ.get("DJANGO_EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("DJANGO_EMAIL_HOST_PASSWORD", "")
+DEFAULT_FROM_EMAIL = os.environ.get("DJANGO_DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "signlingo@example.com")
 
 render_hostname = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
 allowed_hosts = [host.strip() for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "*").split(",") if host.strip()]

@@ -7,7 +7,7 @@ SignLingo is now maintained as a Django-based backend for the capstone project. 
 * **Backend:** Python, Django
 * **Database:** SQLite by default, with `DATABASE_URL` support for hosted databases
 * **Frontend:** HTML, CSS, JavaScript templates
-* **Machine Learning:** TensorFlow/Keras, OpenCV, MediaPipe integration points with graceful fallback support
+* **Machine Learning:** TensorFlow/Keras, OpenCV, and MediaPipe-powered sign prediction
 * **Containerization:** Docker, Docker Compose
 
 ## Project Structure
@@ -64,6 +64,17 @@ Open:
 
 **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
 
+If you want to clear local data and rebuild the default starter records:
+
+```bash
+python django_port\manage.py reset_legacy_data
+```
+
+Dependency files:
+
+- `requirements.txt`: top-level packages the project depends on directly
+- `requirements-lock.txt`: full environment snapshot from `pip freeze` for reproducible setup/debugging
+
 ## Deployment
 
 `render.yaml` is configured for Docker deployment on Render using the root `Dockerfile`.
@@ -78,4 +89,4 @@ Health check endpoint:
 
 * The old Flask runtime has been retired from the active project flow.
 * Some legacy data/model naming is still kept for migration compatibility.
-* Password handling is being upgraded inside the Django flow while preserving compatibility with existing seeded or legacy users.
+* Password handling now upgrades old plain-text rows into Django hashes after successful legacy login.
