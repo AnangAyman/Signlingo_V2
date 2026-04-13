@@ -5,6 +5,7 @@ from initialization import get_or_create_lessons_from_json, create_admin_user, s
 import os
 from flask_mail import Mail
 from dotenv import load_dotenv
+import click
 
 load_dotenv()
 
@@ -35,6 +36,14 @@ migrate = Migrate(app, db)
 def init_app_command():
     """Clears existing data and seeds the database with lessons and an admin user."""
     with app.app_context():
+        database_uri = app.config['SQLALCHEMY_DATABASE_URI']
+        is_sqlite = database_uri.startswith('sqlite:')
+        if not is_sqlite and os.environ.get('ALLOW_DB_RESET') != '1':
+            raise click.ClickException(
+                "Refusing to reset a non-SQLite database. "
+                "Set ALLOW_DB_RESET=1 when you intentionally want to run init-app."
+            )
+
         db.drop_all()
         db.create_all()
         print("Database initialized successfully!")
@@ -51,4 +60,3 @@ def init_app_command():
 
 if __name__ == '__main__':
     app.run(debug=True)
-

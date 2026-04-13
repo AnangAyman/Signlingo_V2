@@ -19,7 +19,7 @@ SignLingo is an interactive web application designed to make learning sign langu
 ## Technology Stack
 
 * **Backend:** Python, Flask, SQLAlchemy
-* **Database:** SQLite (with Flask-Migrate for schema migrations)
+* **Database:** Oracle Cloud MySQL HeatWave via SQLAlchemy (SQLite fallback for local development)
 * **Frontend:** HTML, CSS, JavaScript
 * **Machine Learning:** TensorFlow/Keras, OpenCV, MediaPipe
 * **Containerization:** Docker, Docker Compose
@@ -28,14 +28,57 @@ SignLingo is an interactive web application designed to make learning sign langu
 
 ## How to Run This Project
 
-There are two methods to run this application: using Docker (easiest and most reliable) or setting it up locally in a Python virtual environment.
+There are two methods to run this application: using Docker or running it locally with the existing `signlingo` conda environment.
+
+### Oracle Cloud MySQL Setup
+
+The shared cloud database runs on Oracle Cloud MySQL HeatWave. The DB system is private-only, so local development uses the Oracle Compute VM as an SSH tunnel.
+
+**1. Start the SSH tunnel:**
+
+```bash
+ssh -L 3307:10.0.1.50:3306 -i Oracle_DB/ssh-key-2026-04-10.key ubuntu@134.185.98.192
+```
+
+Keep this terminal open while the app is running.
+
+**2. Configure `.env`:**
+
+Use `.env.example` as the template. For local conda execution, point SQLAlchemy at the local tunnel:
+
+```env
+DATABASE_URI=mysql+pymysql://admin:MYSQL_PASSWORD@127.0.0.1:3307/signlingo
+```
+
+For Docker Compose, use the host gateway name:
+
+```env
+DATABASE_URI=mysql+pymysql://admin:MYSQL_PASSWORD@host.docker.internal:3307/signlingo
+```
+
+**3. Initialize or migrate the database:**
+
+Use `init-app` only when intentionally resetting and seeding the database. For a non-SQLite database, the command requires `ALLOW_DB_RESET=1`:
+
+```bash
+conda activate signlingo
+ALLOW_DB_RESET=1 flask --app app.py init-app
+```
+
+For existing data, prefer migrations:
+
+```bash
+conda activate signlingo
+flask --app app.py db upgrade
+```
 
 ### Method 1: Running with Docker (Recommended)
 
-This is the easiest way to run the application, as it handles all dependencies and setup within a self-contained environment.
+This runs the application in a container while reading environment variables from `.env`.
 
 **1. Prerequisite:**
 * You must have **[Docker Desktop](https://www.docker.com/products/docker-desktop/)** installed and running on your machine.
+* The Oracle MySQL SSH tunnel must already be running if `.env` points to `host.docker.internal:3307`.
 
 **2. Build and Run the Application:**
 Open your terminal or command prompt, navigate to the project's root directory (the one containing `docker-compose.yml`), and run this single command:
@@ -45,6 +88,7 @@ docker compose up --build
 ```
 * The `--build` flag will build the Docker image from the `Dockerfile` the first time you run it. This might take several minutes as it downloads the Python image and installs all dependencies, including TensorFlow.
 * Once the build is complete, the container will start, and you will see server logs in your terminal.
+* The Docker image no longer runs `flask init-app` during build, so cloud database resets must be run intentionally.
 
 **3. Access the Application:**
 Open your web browser and navigate to:
@@ -58,12 +102,12 @@ To stop the application, go back to your terminal and press `Ctrl+C`.
 
 ---
 
-### Method 2: Local Setup (Without Docker)
+### Method 2: Local Setup with Conda
 
-If you prefer to run the application directly on your machine, follow these steps.
+If you prefer to run the application directly on your machine, use the existing `signlingo` conda environment.
 
 **1. Prerequisites:**
-* Python 3.10
+* Conda environment: `signlingo`
 * Git
 
 **2. Setup Instructions:**
@@ -74,42 +118,34 @@ If you prefer to run the application directly on your machine, follow these step
     cd Software-engineering-S4
     ```
 
-* **b. Create and Activate a Virtual Environment:**
-    * On macOS/Linux:
-        ```bash
-        python3 -m venv venv
-        source venv/bin/activate
-        ```
-    * On Windows:
-        ```bash
-        python -m venv venv
-        .\venv\Scripts\activate
-        ```
+* **b. Activate the Conda Environment:**
+    ```bash
+    conda activate signlingo
+    ```
 
-* **c. Install Dependencies:**
+* **c. Install Dependencies if Needed:**
     ```bash
     pip install -r requirements.txt
     ```
     *(Note: This step may take a significant amount of time due to the size of the machine learning libraries.)*
 
 * **d. Set Up the Database:**
-    This command will apply the migration scripts to create the `users.sqlite` file and all necessary tables.
+    For a fresh development database, initialize and seed the tables:
     ```bash
-    flask db upgrade
+    ALLOW_DB_RESET=1 flask --app app.py init-app
     ```
 
-* **e. Seed the Database with Initial Data:**
-    This command populates the database with the lessons.
+    For an existing database, apply migrations instead:
     ```bash
-    flask seed_lessons
+    flask --app app.py db upgrade
     ```
 
-* **f. Run the Application:**
+* **e. Run the Application:**
     ```bash
-    flask run
+    flask --app app.py run
     ```
 
-* **g. Access the Application:**
+* **f. Access the Application:**
     Open your web browser and navigate to: **[http://127.0.0.1:5000](http://127.0.0.1:5000)**
 
 ### Using the Application
