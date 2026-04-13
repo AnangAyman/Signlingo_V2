@@ -34,15 +34,43 @@ There are two methods to run this application: using Docker or running it locall
 
 The shared cloud database runs on Oracle Cloud MySQL HeatWave. The DB system is private-only, so local development uses the Oracle Compute VM as an SSH tunnel.
 
-**1. Start the SSH tunnel:**
+**1. Set up SSH access:**
+
+Do not share the original Oracle VM private key through GitHub, chat, or email. Each developer should generate their own SSH key pair and send only the public key to the DB/infra owner.
+
+On each developer machine:
 
 ```bash
-ssh -L 3307:10.0.1.50:3306 -i Oracle_DB/ssh-key-2026-04-10.key ubuntu@134.185.98.192
+ssh-keygen -t ed25519 -C "your-name-signlingo"
+```
+
+Send this file's contents to the DB/infra owner:
+
+```text
+~/.ssh/id_ed25519.pub
+```
+
+Keep this file private and never share it:
+
+```text
+~/.ssh/id_ed25519
+```
+
+The DB/infra owner adds each developer's public key to the VM:
+
+```bash
+~/.ssh/authorized_keys
+```
+
+**2. Start the SSH tunnel:**
+
+```bash
+ssh -L 3307:10.0.1.50:3306 -i ~/.ssh/id_ed25519 ubuntu@134.185.98.192
 ```
 
 Keep this terminal open while the app is running.
 
-**2. Configure `.env`:**
+**3. Configure `.env`:**
 
 Use `.env.example` as the template. For local conda execution, point SQLAlchemy at the local tunnel:
 
@@ -56,7 +84,7 @@ For Docker Compose, use the host gateway name:
 DATABASE_URI=mysql+pymysql://admin:MYSQL_PASSWORD@host.docker.internal:3307/signlingo
 ```
 
-**3. Initialize or migrate the database:**
+**4. Initialize or migrate the database:**
 
 Use `init-app` only when intentionally resetting and seeding the database. For a non-SQLite database, the command requires `ALLOW_DB_RESET=1`:
 
