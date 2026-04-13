@@ -21,5 +21,6 @@ Oracle_DB/
 *.pem
 
 # local documentation
+document/
 document.md
 excute.md
