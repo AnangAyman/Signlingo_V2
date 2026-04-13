@@ -12,13 +12,20 @@ load_dotenv()
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI', 'sqlite:///users.sqlite')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'supersecretkey')  # Required for session management
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'dev-unsafe-change-me'  # Required for session management
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', 'signlingolanguage@gmail.com')
-app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', 'frpk wyzu xdlf tyyj')
+mail_username = os.environ.get('MAIL_USERNAME')
+mail_password = os.environ.get('MAIL_PASSWORD')
+if mail_username and mail_password:
+    app.config['MAIL_USERNAME'] = mail_username
+    app.config['MAIL_PASSWORD'] = mail_password
+else:
+    # Dev-friendly default: keep the app running even if mail is not configured.
+    # Password reset / verify flows that require email will not send messages.
+    app.config['MAIL_SUPPRESS_SEND'] = True
 mail = Mail(app)
 
 
