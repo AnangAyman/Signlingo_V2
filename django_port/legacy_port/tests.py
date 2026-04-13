@@ -110,7 +110,7 @@ class LegacyPortFlowTests(TestCase):
         self.assertIn(self.user.league, body)
         self.assertIn(self.friend.name, body)
 
-    @patch("legacy_port.views.predict_bisindo_image", side_effect=RuntimeError("ml runtime unavailable"))
+    @patch("games_port.views.predict_bisindo_image", side_effect=RuntimeError("ml runtime unavailable"))
     def test_predict_returns_usable_fallback_payload(self, _mock_predict):
         upload = SimpleUploadedFile("snapshot.jpg", b"placeholder", content_type="image/jpeg")
         response = self.client.post("/predict", data={"image": upload})

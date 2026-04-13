@@ -9,8 +9,13 @@ PROJECT_ROOT = BASE_DIR.parent
 DJANGO_INSTANCE_DIR = PROJECT_ROOT / "django_instance"
 DJANGO_INSTANCE_DIR.mkdir(exist_ok=True)
 
+# Required for session management, mirroring the role Flask's SECRET_KEY had in app.py.
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-signlingo-dev-key")
 DEBUG = os.environ.get("DJANGO_DEBUG", "true").lower() == "true"
+
+# The Flask app.py also carried Gmail SMTP settings here.
+# Email delivery is intentionally left out of the current Django port until the team
+# decides whether to re-enable real verification/reset emails.
 
 render_hostname = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
 allowed_hosts = [host.strip() for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "*").split(",") if host.strip()]
@@ -25,6 +30,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # Feature apps split the former monolithic Flask routes.py into ownership-based modules.
+    "core_port",
+    "accounts_port",
+    "social_port",
+    "learning_port",
+    "games_port",
+    "commerce_port",
     "legacy_port",
 ]
 

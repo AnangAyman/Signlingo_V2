@@ -3,6 +3,8 @@ from datetime import date
 from django.db import models
 
 
+# Association table for friendships.
+# In Django we model it explicitly instead of using Flask SQLAlchemy's db.Table helper.
 class User(models.Model):
     name = models.CharField(max_length=80)
     age = models.IntegerField(blank=True, null=True)
@@ -12,6 +14,7 @@ class User(models.Model):
     is_verified = models.BooleanField(default=False)
     lives = models.IntegerField(default=5)
     username = models.CharField(max_length=80, unique=True, blank=True, null=True)
+    # Streaks
     streak = models.IntegerField(default=0)
     last_login_date = models.DateField(default=date.today)
 
@@ -31,6 +34,7 @@ class User(models.Model):
         return "Diamond"
 
     def add_friend(self, other_user: "User") -> None:
+        # Add Friends
         if self.id == other_user.id:
             return
         Friendship.objects.get_or_create(user=self, friend=other_user)
@@ -110,9 +114,9 @@ class ShopItem(models.Model):
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=255)
     price = models.IntegerField()
-    icon_class = models.CharField(max_length=50)
+    icon_class = models.CharField(max_length=50)  # e.g., 'fas fa-heart'
     icon_background_class = models.CharField(max_length=50, default="item-icon")
-    item_key = models.CharField(max_length=50, unique=True)
+    item_key = models.CharField(max_length=50, unique=True)  # unique key for logic (e.g., 'refill_hearts')
 
     class Meta:
         db_table = "shop_item"
@@ -123,5 +127,6 @@ class UserItem(models.Model):
     item = models.ForeignKey(ShopItem, on_delete=models.CASCADE, related_name="owned_by")
     quantity = models.IntegerField(default=0)
 
+    # Relationships
     class Meta:
         db_table = "user_item"

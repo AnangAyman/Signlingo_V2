@@ -21,6 +21,7 @@ def get_initials(full_name: str):
         return "User", "U"
 
     first_name = name_parts[0]
+    # If there's no last name, use an empty string for the initial.
     last_initial = name_parts[1][0] if len(name_parts) > 1 else ""
     initials = (first_name[0] + last_initial).upper()
     return first_name, initials
@@ -56,6 +57,7 @@ def _load_ml_runtime():
     if _ML_RUNTIME is not None:
         return _ML_RUNTIME
 
+    # Load bisindo static (MediaPipe keypoint) model dependencies lazily so local setup stays lighter.
     import cv2
     import h5py
     import mediapipe as mp
@@ -78,6 +80,8 @@ def _load_ml_runtime():
 
 
 def _normalize_landmarks(landmarks, np_module):
+    # Normalize landmarks relative to wrist (index 0) and hand scale.
+    # This matches the normalization applied during bisindo_static_model training.
     wrist = landmarks[0].copy()
     landmarks = landmarks - wrist
     scale = np_module.linalg.norm(landmarks[9])
@@ -87,6 +91,8 @@ def _normalize_landmarks(landmarks, np_module):
 
 
 def _extract_keypoints(hand_landmarks_list, np_module):
+    # Flatten up to 2 hands x 21 landmarks x 3 coords into a (1, 126) tensor.
+    # Missing second hand is zero-padded.
     keypoints = []
     for index in range(2):
         if index < len(hand_landmarks_list):
@@ -95,11 +101,13 @@ def _extract_keypoints(hand_landmarks_list, np_module):
             array = _normalize_landmarks(array, np_module)
             keypoints.extend(array.flatten().tolist())
         else:
-            keypoints.extend([0.0] * (21 * 3))
+            keypoints.extend([0.0] * (21 * 3))  # zero-pad missing hand
     return np_module.array(keypoints, dtype=np_module.float32).reshape(1, 126)
 
 
 def _build_bisindo_model(runtime, model_path):
+    # The original Flask route rebuilt the model manually because the saved Keras config
+    # was not compatible with the container runtime. Preserve that workaround here.
     model = runtime["Sequential"](
         [
             runtime["Input"](shape=(126,)),
@@ -116,6 +124,7 @@ def _build_bisindo_model(runtime, model_path):
     )
     model.compile(optimizer="adam", loss="categorical_crossentropy")
 
+    # Load weights layer-by-layer from the h5 model_weights group.
     with runtime["h5py"].File(model_path, "r") as file_handle:
         weight_group = file_handle["model_weights"]
         layer_names = [name.decode("utf-8") if isinstance(name, bytes) else name for name in weight_group.attrs.get("layer_names", [])]
@@ -152,10 +161,12 @@ def predict_bisindo_image(file_bytes, upload_dir=None, model_path=MODEL_PATH):
     mp = runtime["mp"]
     np_module = runtime["np"]
 
+    # Read image bytes into an OpenCV frame.
     frame = cv2.imdecode(np_module.frombuffer(file_bytes, np_module.uint8), cv2.IMREAD_COLOR)
     if frame is None:
         raise ValueError("Invalid image payload")
 
+    # Detect hands from the uploaded frame.
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     with mp.solutions.hands.Hands(static_image_mode=True, max_num_hands=2, min_detection_confidence=0.3) as hands_detector:
         results = hands_detector.process(rgb_frame)
@@ -163,6 +174,7 @@ def predict_bisindo_image(file_bytes, upload_dir=None, model_path=MODEL_PATH):
     if not results.multi_hand_landmarks:
         raise ValueError("No hand detected")
 
+    # Preprocess and predict.
     input_tensor = _extract_keypoints(results.multi_hand_landmarks, np_module)
     prediction = model.predict(input_tensor, verbose=0)
     classes = [chr(code) for code in range(ord("A"), ord("Z") + 1)]
@@ -181,6 +193,7 @@ def predict_bisindo_image(file_bytes, upload_dir=None, model_path=MODEL_PATH):
         h, w, _ = frame.shape
         all_xs, all_ys = [], []
         debug_frame = frame.copy()
+        # Combine landmarks of both hands into one bounding box for debug output.
         for hand_landmarks in results.multi_hand_landmarks:
             all_xs.extend([landmark.x for landmark in hand_landmarks.landmark])
             all_ys.extend([landmark.y for landmark in hand_landmarks.landmark])
@@ -190,6 +203,7 @@ def predict_bisindo_image(file_bytes, upload_dir=None, model_path=MODEL_PATH):
         ymin = max(0, int(min(all_ys) * h) - 20)
         xmax = min(w, int(max(all_xs) * w) + 20)
         ymax = min(h, int(max(all_ys) * h) + 20)
+        # Save debug images so QA can inspect the model input and hand overlay.
         crop = frame[ymin:ymax, xmin:xmax]
         if crop.size > 0:
             cv2.imwrite(str(debug_crop_path), crop)
@@ -201,11 +215,18 @@ def predict_bisindo_image(file_bytes, upload_dir=None, model_path=MODEL_PATH):
 
 
 def seed_initial_data():
+    """
+    Reads lessons from lessons.json and populates the database with a default
+    course structure.
+    """
+    # Create a default course if it doesn't exist.
     course, _ = Course.objects.get_or_create(
         title="BISINDO Language",
         defaults={"description": "Learn the basics of BISINDO sign language."},
     )
+    # Create a default module for this course.
     module, _ = Module.objects.get_or_create(title="Introduction", course=course, defaults={"order": 0})
+    # Create a default unit for this module.
     unit, _ = Unit.objects.get_or_create(title="Getting Started", module=module, defaults={"order": 0})
 
     for index, lesson_data in enumerate(load_lessons()):
@@ -216,7 +237,7 @@ def seed_initial_data():
                 "title": lesson_data["title"],
                 "url": lesson_data.get("url"),
                 "unit": unit,
-                "order": index,
+                "order": index,  # Associate the lesson with our default unit ordering.
             },
         )
 
@@ -258,12 +279,13 @@ def seed_initial_data():
     for item in shop_items:
         ShopItem.objects.update_or_create(item_key=item["item_key"], defaults=item)
 
+    # Checks for an existing admin user and creates one if not found.
     User.objects.get_or_create(
         email="admin@example.com",
         defaults={
             "name": "Admin",
             "age": 99,
-            "password": "admin",
+            "password": "admin",  # IMPORTANT: In a real application, you must hash this password!
             "is_verified": True,
             "username": "@admin",
             "lives": 100000,

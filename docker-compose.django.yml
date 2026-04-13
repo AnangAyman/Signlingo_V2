@@ -6,5 +6,7 @@ services:
     ports:
       - "8001:8000"
     volumes:
+      # This line syncs all project files into the Django container during local development.
       - .:/app
+      # This line persists the Django SQLite/state directory outside the container.
       - ./django_instance:/app/django_instance

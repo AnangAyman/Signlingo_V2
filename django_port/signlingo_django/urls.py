@@ -4,5 +4,5 @@ from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", include(("legacy_port.urls", "auth"), namespace="auth")),
+    path("", include(("signlingo_django.app_urls", "auth"), namespace="auth")),
 ]
