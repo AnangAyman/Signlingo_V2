@@ -90,41 +90,41 @@
             <div class="roadmap-container">
                 <div class="roadmap-header">
                     <h1>Module 1</h1>
-                    <p>Master Bisindo one step at a time</p>
+                    <p>
+                        {% if module_complete %}
+                        Module complete. Revisit any lesson or claim your trophy milestone.
+                        {% elif current_lesson %}
+                        Next lesson: {{ current_lesson.title }}
+                        {% else %}
+                        Master Bisindo one step at a time
+                        {% endif %}
+                    </p>
                 </div>
 
                 <div class="unit-section">
                     <div class="unit-header">
                         <h2 class="unit-title">Unit 1: Basics</h2>
+                        <p class="caption mt-2">{{ completed_lessons_count }}/{{ total_lessons_count }} lessons completed · {{ module_progress_percent|round|int }}% progress</p>
                     </div>
 
                     <div class="roadmap-path">
-                        <div class="lesson-node current">
-                            <button class="lesson-button" onclick="window.location.href='/video_learning'">
+                        {% for lesson in lessons %}
+                        {% set node_class = 'completed' if lesson.status == 'completed' else 'current' if current_lesson and lesson.id == current_lesson.id else 'locked' %}
+                        <div class="lesson-node {{ node_class }}">
+                            <button class="lesson-button" {% if node_class != 'locked' and lesson.url %}onclick="window.location.href='{{ lesson.url }}'"{% endif %}>
+                                {% if node_class == 'completed' %}
+                                <i class="fas fa-check"></i>
+                                {% elif node_class == 'current' %}
                                 <i class="fas fa-star"></i>
-                            </button>
-                        </div>
-
-                        <div class="lesson-node locked">
-                            <button class="lesson-button">
+                                {% else %}
                                 <i class="fas fa-lock"></i>
+                                {% endif %}
                             </button>
                         </div>
+                        {% endfor %}
 
-                        <div class="lesson-node locked">
-                            <button class="lesson-button">
-                                <i class="fas fa-lock"></i>
-                            </button>
-                        </div>
-
-                        <div class="lesson-node locked">
-                            <button class="lesson-button">
-                                <i class="fas fa-lock"></i>
-                            </button>
-                        </div>
-
-                        <div class="lesson-node treasure">
-                            <button class="lesson-button">
+                        <div class="lesson-node {{ 'treasure' if module_complete else 'locked' }}">
+                            <button class="lesson-button" {% if module_complete %}onclick="window.location.href='/dashboard'"{% endif %}>
                                 <i class="fas fa-trophy"></i>
                             </button>
                         </div>

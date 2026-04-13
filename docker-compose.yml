@@ -1,11 +1,12 @@
-version: '3.8'
 services:
-  web:
-    build: .
+  django_web:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "5001:5000"
+      - "8001:8000"
     volumes:
-      # This new line syncs all your project files
-      - .:/app 
-      # This line already persists your SQLite database
-      - ./instance:/app/instance
+      # This line syncs all project files into the Django container during local development.
+      - .:/app
+      # This line persists the Django SQLite/state directory outside the container.
+      - ./django_instance:/app/django_instance
