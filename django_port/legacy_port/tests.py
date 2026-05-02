@@ -510,6 +510,36 @@ class LegacyPortFlowTests(TestCase):
         self.assertTrue(created_user.is_verified)
         self.assertEqual(self.client.session["user_id"], created_user.id)
 
+    @override_settings(
+        GOOGLE_CLIENT_ID="client-id",
+        GOOGLE_CLIENT_SECRET="client-secret",
+        GOOGLE_REDIRECT_URI="http://127.0.0.1:8000/login/google/callback",
+    )
+    @patch("accounts_port.views.requests.post")
+    @patch("accounts_port.views.requests.get")
+    def test_google_callback_flash_message_is_consumed_on_dashboard(self, mock_get, mock_post):
+        session = self.client.session
+        session["google_oauth_state"] = "state-token"
+        session.save()
+
+        mock_post.return_value.ok = True
+        mock_post.return_value.json.return_value = {"access_token": "token"}
+        mock_get.return_value.ok = True
+        mock_get.return_value.json.return_value = {
+            "sub": "google-sub-789",
+            "email": "flash-google@example.com",
+            "name": "Flash Google",
+        }
+
+        response = self.client.get("/login/google/callback", {"state": "state-token", "code": "auth-code"}, follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Signed in with Google successfully.", response.content.decode("utf-8"))
+
+        login_response = self.client.get("/login")
+        self.assertEqual(login_response.status_code, 200)
+        self.assertNotIn("Signed in with Google successfully.", login_response.content.decode("utf-8"))
+
     def test_edit_account_updates_profile_and_password(self):
         response = self.client.post(
             "/edit-account",
