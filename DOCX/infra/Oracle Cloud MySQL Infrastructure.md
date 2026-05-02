@@ -22,6 +22,8 @@ Oracle MySQL DB System (Private IP)
 
 ## Resource Summary
 
+> Shared snapshot note: concrete IP addresses, SSH targets, and administrator credentials are intentionally redacted in this copy. The team should keep the live values in private handover notes or `.env`-style secrets, not in the shared repository.
+
 ### MySQL DB System
 
 | Field      | Value                    |
@@ -29,9 +31,9 @@ Oracle MySQL DB System (Private IP)
 | Name       | Signlingo-DB             |
 | Type       | MySQL HeatWave DB System |
 | Shape      | Always Free              |
-| Private IP | 10.0.1.50                |
+| Private IP | `<db-private-ip>`        |
 | Port       | 3306                     |
-| Admin User | admin                    |
+| Admin User | `<db-admin-user>`        |
 
 ---
 
@@ -42,8 +44,8 @@ Oracle MySQL DB System (Private IP)
 | Name       | signlingo-vm           |
 | OS         | Ubuntu 22.04           |
 | Shape      | VM.Standard.E2.1.Micro |
-| Public IP  | 134.185.98.192         |
-| Private IP | 10.0.1.93              |
+| Public IP  | `<vm-public-ip>`       |
+| Private IP | `<vm-private-ip>`      |
 
 ---
 
@@ -81,7 +83,7 @@ Use Compute VM as intermediate access node:
 ### 1. SSH into VM
 
 ```bash
-ssh -i <private-key>.key ubuntu@134.185.98.192
+ssh -i <ssh-private-key> ubuntu@<vm-public-ip>
 ```
 
 ---
@@ -89,7 +91,7 @@ ssh -i <private-key>.key ubuntu@134.185.98.192
 ### 2. Connect to MySQL from VM
 
 ```bash
-mysql -h 10.0.1.50 -u admin -p
+mysql -h <db-private-ip> -u <db-admin-user> -p
 ```
 
 ---
@@ -99,13 +101,13 @@ mysql -h 10.0.1.50 -u admin -p
 If developer wants to use local DB GUI / IDE:
 
 ```bash
-ssh -L 3307:10.0.1.50:3306 -i <private-key>.key ubuntu@134.185.98.192
+ssh -L 3307:<db-private-ip>:3306 -i <ssh-private-key> ubuntu@<vm-public-ip>
 ```
 
 Then connect locally with:
 
 ```bash
-mysql -h 127.0.0.1 -P 3307 -u admin -p
+mysql -h 127.0.0.1 -P 3307 -u <db-admin-user> -p
 ```
 
 Useful for:

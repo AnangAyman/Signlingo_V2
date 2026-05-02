@@ -27,8 +27,8 @@ Developers must connect through the Oracle Compute VM using SSH local port forwa
 
 | Item | Value |
 |------|-------|
-| VM Public IP | `134.185.98.192` |
-| DB Private IP | `10.0.1.50` |
+| VM Public IP | `<vm-public-ip>` |
+| DB Private IP | `<db-private-ip>` |
 | DB Port | `3306` |
 | Local Tunnel Host | `127.0.0.1` |
 | Local Tunnel Port | `3307` |
@@ -84,7 +84,7 @@ The DB/infra owner adds the public key to the VM:
 Run this command in a terminal and keep it open:
 
 ```bash
-ssh -L 3307:10.0.1.50:3306 -i ~/.ssh/id_ed25519 ubuntu@134.185.98.192
+ssh -L 3307:<db-private-ip>:3306 -i ~/.ssh/id_ed25519 ubuntu@<vm-public-ip>
 ```
 
 Expected behavior:
@@ -102,7 +102,7 @@ Do not close this terminal while using the DB.
 In another terminal:
 
 ```bash
-mysql -h 127.0.0.1 -P 3307 -u admin -p signlingo
+mysql -h 127.0.0.1 -P 3307 -u <db-user> -p signlingo
 ```
 
 Useful commands:
@@ -182,7 +182,7 @@ DATABASE_URI=mysql+pymysql://DB_USER:DB_PASSWORD@host.docker.internal:3307/signl
 Start the SSH tunnel on the host first:
 
 ```bash
-ssh -L 3307:10.0.1.50:3306 -i ~/.ssh/id_ed25519 ubuntu@134.185.98.192
+ssh -L 3307:<db-private-ip>:3306 -i ~/.ssh/id_ed25519 ubuntu@<vm-public-ip>
 ```
 
 Then run:
@@ -291,7 +291,7 @@ all Django migrations applied
 Verified on 2026-05-03:
 
 - [x] VM SSH access works
-- [x] VM can reach DB private IP `10.0.1.50:3306`
+- [x] VM can reach DB private IP `<db-private-ip>:3306`
 - [x] Local tunnel `127.0.0.1:3307` works
 - [x] `signlingo` database exists
 - [x] Django `manage.py check` passes
