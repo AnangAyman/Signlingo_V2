@@ -13,3 +13,13 @@ env/
 /static/uploads
 
 .DS_Store
+.env
+ca.pem
+Oracle_DB/
+*.key
+*.pem
+
+#local files
+document/
+document.md
+excute.md
