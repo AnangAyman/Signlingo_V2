@@ -20,6 +20,16 @@
         <h1>Log in</h1>
         
         <form method="POST">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="error-message">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <p class="{{ category }}">{{ message }}</p>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
             
             {% if error %}
             <div class="error-message">
