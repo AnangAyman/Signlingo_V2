@@ -78,12 +78,10 @@ class User(models.Model):
 class Friendship(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="friendships")
     friend = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reverse_friendships")
+    pk = models.CompositePrimaryKey("user", "friend")
 
     class Meta:
         db_table = "friendship"
-        constraints = [
-            models.UniqueConstraint(fields=["user", "friend"], name="unique_friendship_pair"),
-        ]
 
 
 class Course(models.Model):

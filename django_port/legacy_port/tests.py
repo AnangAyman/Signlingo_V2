@@ -164,6 +164,51 @@ class LegacyPortFlowTests(TestCase):
         self.assertIn(self.user.league, body)
         self.assertIn(self.friend.name, body)
 
+    def test_leaderboard_renders_without_friends(self):
+        self.user.friendships.all().delete()
+        self.friend.friendships.all().delete()
+
+        response = self.client.get("/leaderboard")
+
+        self.assertEqual(response.status_code, 200)
+        body = response.content.decode("utf-8")
+        self.assertIn("Friends", body)
+        self.assertIn(self.user.league, body)
+        self.assertNotIn(self.friend.name, body)
+
+    def test_leaderboard_redirects_when_not_logged_in(self):
+        self.client.logout()
+
+        response = self.client.get("/leaderboard")
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/login", response["Location"])
+
+    def test_add_friend_creates_bidirectional_links(self):
+        self.user.add_friend(self.friend)
+
+        self.assertTrue(self.user.is_friends_with(self.friend))
+        self.assertTrue(self.friend.is_friends_with(self.user))
+        self.assertEqual(User.objects.get(id=self.user.id).friendships.count(), 1)
+        self.assertEqual(User.objects.get(id=self.friend.id).friendships.count(), 1)
+
+    def test_remove_friend_deletes_bidirectional_links(self):
+        self.user.add_friend(self.friend)
+
+        self.user.remove_friend(self.friend)
+
+        self.assertFalse(self.user.is_friends_with(self.friend))
+        self.assertFalse(self.friend.is_friends_with(self.user))
+        self.assertEqual(User.objects.get(id=self.user.id).friendships.count(), 0)
+        self.assertEqual(User.objects.get(id=self.friend.id).friendships.count(), 0)
+
+    def test_add_friend_is_idempotent(self):
+        self.user.add_friend(self.friend)
+        self.user.add_friend(self.friend)
+
+        self.assertEqual(User.objects.get(id=self.user.id).friendships.count(), 1)
+        self.assertEqual(User.objects.get(id=self.friend.id).friendships.count(), 1)
+
     def test_remove_friend_json_response(self):
         self.user.add_friend(self.friend)
         response = self.client.post(
