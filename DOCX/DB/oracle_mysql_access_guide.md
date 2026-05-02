@@ -1,10 +1,10 @@
 # Oracle MySQL Access Guide
 
 ## Goal
-This document explains how to access the SignLingo Oracle Cloud MySQL HeatWave database from local development tools, VSCode, Docker, Flask, and Django.
+This document explains how to access the SignLingo Oracle Cloud MySQL HeatWave database from local development tools, VSCode, Docker, and Django.
 
 Related schema snapshot:
-- [`document/DB/oracle_mysql_schema.md`](/home/kotaiho/26-1/Signlingo_V2/document/DB/oracle_mysql_schema.md)
+- [`DOCX/DB/oracle_mysql_schema.md`](/home/kotaiho/26-1/Signlingo_V2/DOCX/DB/oracle_mysql_schema.md)
 
 ---
 
@@ -49,7 +49,6 @@ Never share these files:
 private key
 .env
 DB password
-Oracle_DB/ssh-key-2026-04-10.key
 ```
 
 ### Recommended Team Flow
@@ -86,12 +85,6 @@ Run this command in a terminal and keep it open:
 
 ```bash
 ssh -L 3307:10.0.1.50:3306 -i ~/.ssh/id_ed25519 ubuntu@134.185.98.192
-```
-
-If using the original local key before moving it out of the repo:
-
-```bash
-ssh -L 3307:10.0.1.50:3306 -i Oracle_DB/ssh-key-2026-04-10.key ubuntu@134.185.98.192
 ```
 
 Expected behavior:
@@ -134,7 +127,7 @@ shop_item: 4
 
 ---
 
-## 3. Flask and Django Local Access
+## 3. Django Local Access
 
 Use the `signlingo` conda environment.
 
@@ -142,41 +135,7 @@ Use the `signlingo` conda environment.
 conda activate signlingo
 ```
 
-### Flask local access
-
-Set `.env`:
-
-```env
-DATABASE_URI=mysql+pymysql://DB_USER:DB_PASSWORD@127.0.0.1:3307/signlingo
-```
-
-Apply migrations:
-
-```bash
-flask --app app.py db upgrade
-```
-
-Seed initial data without dropping tables:
-
-```bash
-flask --app app.py seed-data
-```
-
-Run Flask:
-
-```bash
-flask --app app.py run
-```
-
-Open:
-
-```text
-http://127.0.0.1:5000
-```
-
-### Django local access
-
-The Django development branch uses the same tunnel, but reads `DATABASE_URI` through `django_port/manage.py`.
+The Django development branch uses the same tunnel and reads `DATABASE_URI` through `django_port/manage.py`.
 
 Set the database URI:
 
@@ -187,7 +146,7 @@ DATABASE_URI=mysql+pymysql://DB_USER:DB_PASSWORD@127.0.0.1:3307/signlingo
 Run migrations:
 
 ```bash
-python django_port/manage.py migrate --fake-initial
+python django_port/manage.py migrate
 ```
 
 Seed legacy starter data:
@@ -281,61 +240,7 @@ SELECT * FROM user_lesson_status;
 
 ---
 
-## 6. ERD View in VSCode
-
-Open:
-
-```text
-document/week6/signlingo_erd_preview.md
-```
-
-Then use:
-
-```text
-Ctrl+Shift+V
-```
-
-If Mermaid does not render, install:
-
-```text
-Markdown Preview Mermaid Support
-```
-
----
-
-## 7. Important Commands
-
-### Safe migration
-
-```bash
-flask --app app.py db upgrade
-```
-
-### Safe seed
-
-```bash
-flask --app app.py seed-data
-```
-
-### Dangerous reset
-
-Use only when intentionally resetting the database:
-
-```bash
-ALLOW_DB_RESET=1 flask --app app.py init-app
-```
-
-Warning:
-
-```text
-init-app runs db.drop_all().
-It can delete cloud DB tables and data.
-Do not run it casually.
-```
-
----
-
-## Troubleshooting
+## 6. Troubleshooting
 
 ### SSH tunnel does not connect
 
@@ -359,43 +264,38 @@ Check:
 
 - SSH tunnel terminal is still open
 - `.env` host is correct
-  - Local Flask: `127.0.0.1`
+  - Local Django: `127.0.0.1`
   - Docker Compose: `host.docker.internal`
 - Port is `3307`
 - DB user/password is correct
 - Database name is `signlingo`
 
-### Flask says missing column
+### Django says missing column
 
 Run migrations:
 
 ```bash
-flask --app app.py db upgrade
+python django_port/manage.py migrate
 ```
 
-Current expected Alembic version:
+Current expected migration state:
 
 ```text
-91b8f2d4c6a1
+all Django migrations applied
 ```
 
 ---
 
 ## Current Verified State
 
-Verified on 2026-04-28:
+Verified on 2026-05-03:
 
 - [x] VM SSH access works
 - [x] VM can reach DB private IP `10.0.1.50:3306`
 - [x] Local tunnel `127.0.0.1:3307` works
 - [x] `signlingo` database exists
-- [x] Alembic version is `91b8f2d4c6a1`
-- [x] `user.is_verified` exists in Oracle MySQL
-- [x] Seed data exists
-- [x] Flask responds on `/`, `/login`, `/start`
-- [x] Admin login redirects to `/dashboard`
 - [x] Django `manage.py check` passes
-- [x] Django `migrate --fake-initial` succeeds against Oracle MySQL
+- [x] Django `migrate` succeeds against Oracle MySQL
 - [x] Django `bootstrap_legacy_data` succeeds against Oracle MySQL
 - [x] Django reads `DATABASE_URI=mysql+pymysql://...@127.0.0.1:3307/signlingo`
 
