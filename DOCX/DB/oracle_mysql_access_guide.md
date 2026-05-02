@@ -122,6 +122,8 @@ If the tunnel does not open, check:
 - your private key path is correct
 - your private key permission is `600`
 
+If you are on Windows or inside Docker, replace `~/.ssh/id_ed25519` with the private key path for that environment.
+
 ---
 
 ## 2. Test DB Connection with MySQL CLI
