@@ -13,6 +13,7 @@ class User(models.Model):
     age = models.IntegerField(blank=True, null=True)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=128)
+    google_id = models.CharField(max_length=128, blank=True, null=True, unique=True)
     points = models.IntegerField(default=0)
     is_verified = models.BooleanField(default=False)
     lives = models.IntegerField(default=5)

@@ -395,6 +395,76 @@ class LegacyPortFlowTests(TestCase):
         self.assertIn("password reset link has been sent", body)
         self.assertNotIn("/reset_password/", body)
 
+    @override_settings(
+        GOOGLE_CLIENT_ID="client-id",
+        GOOGLE_CLIENT_SECRET="client-secret",
+        GOOGLE_REDIRECT_URI="http://127.0.0.1:8000/login/google/callback",
+    )
+    def test_google_login_redirects_to_authorization_endpoint(self):
+        response = self.client.get("/login/google")
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("accounts.google.com/o/oauth2/v2/auth", response["Location"])
+        session = self.client.session
+        self.assertIn("google_oauth_state", session)
+
+    @override_settings(
+        GOOGLE_CLIENT_ID="client-id",
+        GOOGLE_CLIENT_SECRET="client-secret",
+        GOOGLE_REDIRECT_URI="http://127.0.0.1:8000/login/google/callback",
+    )
+    @patch("accounts_port.views.requests.post")
+    @patch("accounts_port.views.requests.get")
+    def test_google_callback_links_existing_account(self, mock_get, mock_post):
+        session = self.client.session
+        session["google_oauth_state"] = "state-token"
+        session.save()
+
+        mock_post.return_value.ok = True
+        mock_post.return_value.json.return_value = {"access_token": "token"}
+        mock_get.return_value.ok = True
+        mock_get.return_value.json.return_value = {
+            "sub": "google-sub-123",
+            "email": self.user.email,
+            "name": self.user.name,
+        }
+
+        response = self.client.get("/login/google/callback", {"state": "state-token", "code": "auth-code"})
+
+        self.assertEqual(response.status_code, 302)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.google_id, "google-sub-123")
+        self.assertEqual(self.client.session["user_id"], self.user.id)
+
+    @override_settings(
+        GOOGLE_CLIENT_ID="client-id",
+        GOOGLE_CLIENT_SECRET="client-secret",
+        GOOGLE_REDIRECT_URI="http://127.0.0.1:8000/login/google/callback",
+    )
+    @patch("accounts_port.views.requests.post")
+    @patch("accounts_port.views.requests.get")
+    def test_google_callback_creates_new_account(self, mock_get, mock_post):
+        session = self.client.session
+        session["google_oauth_state"] = "state-token"
+        session.save()
+
+        mock_post.return_value.ok = True
+        mock_post.return_value.json.return_value = {"access_token": "token"}
+        mock_get.return_value.ok = True
+        mock_get.return_value.json.return_value = {
+            "sub": "google-sub-456",
+            "email": "new-google@example.com",
+            "name": "Google Example",
+        }
+
+        response = self.client.get("/login/google/callback", {"state": "state-token", "code": "auth-code"})
+
+        self.assertEqual(response.status_code, 302)
+        created_user = User.objects.get(email="new-google@example.com")
+        self.assertEqual(created_user.google_id, "google-sub-456")
+        self.assertTrue(created_user.is_verified)
+        self.assertEqual(self.client.session["user_id"], created_user.id)
+
     def test_edit_account_updates_profile_and_password(self):
         response = self.client.post(
             "/edit-account",
