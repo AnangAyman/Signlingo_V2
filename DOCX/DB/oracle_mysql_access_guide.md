@@ -77,6 +77,25 @@ The DB/infra owner adds the public key to the VM:
 ~/.ssh/authorized_keys
 ```
 
+### Team Setup Checklist
+
+1. On your own PC, create a fresh SSH key pair if you do not already have one for this project.
+2. Send only the public key to the DB/infra owner.
+3. Wait until the owner confirms that your key was added to `authorized_keys`.
+4. Keep the private key file on your PC only.
+5. Use that private key when opening the tunnel.
+
+Example flow:
+
+```bash
+ssh-keygen -t ed25519 -C "your-name-signlingo"
+```
+
+```text
+Public key to share: ~/.ssh/id_ed25519.pub
+Private key to keep: ~/.ssh/id_ed25519
+```
+
 ---
 
 ## 1. Open SSH Tunnel
@@ -94,6 +113,14 @@ No output is normal.
 The terminal stays connected.
 Do not close this terminal while using the DB.
 ```
+
+If the tunnel does not open, check:
+
+- your public key was added to the VM
+- the VM public IP is correct
+- port `22` is open
+- your private key path is correct
+- your private key permission is `600`
 
 ---
 
@@ -220,6 +247,14 @@ Create a new SQLTools connection:
 | Username | DB username |
 | Password | DB password |
 | SSL | Disabled |
+
+If you are connecting from VSCode on your own PC:
+
+1. Keep the SSH tunnel terminal open.
+2. Open SQLTools or another MySQL client.
+3. Connect to `127.0.0.1:3307`.
+4. Use the same DB username and password that are stored in the private handover notes.
+5. Refresh the table list after connecting.
 
 After connecting:
 
