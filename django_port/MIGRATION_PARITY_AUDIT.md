@@ -34,7 +34,7 @@ That Django-side setup now seeds:
 
 The original Flask ML prediction flow has been moved into:
 
-- `legacy_port/services.py` for model loading and image prediction
+- `games_port/services.py` for game question loading, model loading, landmark extraction, and image prediction
 - `games_port/views.py` for the request/response layer
 
 The Django port now restores the required ML runtime dependencies in `requirements.txt` and loads the BISINDO model from `models/bisindo_static_model.h5`.

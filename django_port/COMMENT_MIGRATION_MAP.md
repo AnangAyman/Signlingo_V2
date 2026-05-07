@@ -61,12 +61,12 @@ losing the original implementation notes.
   Preserved in `commerce_port/views.py`.
 
 - `# ----------------------------------- CNN-LSTM MODEL ------------------------------------------------`
-  Preserved conceptually in `legacy_port/services.py`, which now owns the model-loading
+  Preserved conceptually in `games_port/services.py`, which now owns the game-side model-loading
   and prediction logic that used to live at the bottom of `routes.py`.
 
 - Comments about model compatibility, landmark normalization, keypoint extraction,
   debug image generation, and prediction flow
-  Preserved in `legacy_port/services.py`.
+  Preserved in `games_port/services.py`.
 
 ## Additional source files now covered
 

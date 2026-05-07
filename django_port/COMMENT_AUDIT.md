@@ -51,7 +51,7 @@ and where their comments now live in the Django port.
   Preserved in `commerce_port/views.py`.
 
 - CNN-LSTM / MediaPipe / debug image comments
-  Preserved in `legacy_port/services.py`.
+  Preserved in `games_port/services.py`.
 
 - Blueprint-specific comment (`Define the Blueprint`)
   Preserved conceptually by Django app routing in `signlingo_django/app_urls.py`.

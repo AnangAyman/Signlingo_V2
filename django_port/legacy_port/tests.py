@@ -184,7 +184,7 @@ class LegacyPortFlowTests(TestCase):
         self.assertTrue(payload["success"])
         self.assertFalse(self.user.is_friends_with(self.friend))
 
-    @patch("games_port.views.predict_bisindo_image", side_effect=RuntimeError("ml runtime unavailable"))
+    @patch("games_port.services.predict_bisindo_image", side_effect=RuntimeError("ml runtime unavailable"))
     def test_predict_returns_runtime_error_when_ml_fails(self, _mock_predict):
         upload = SimpleUploadedFile("snapshot.jpg", b"placeholder", content_type="image/jpeg")
         response = self.client.post("/predict", data={"image": upload})
@@ -199,7 +199,7 @@ class LegacyPortFlowTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()["error"], "No image provided")
 
-    @patch("games_port.views.predict_bisindo_image", side_effect=ValueError("No hand detected"))
+    @patch("games_port.services.predict_bisindo_image", side_effect=ValueError("No hand detected"))
     def test_predict_returns_validation_error_for_invalid_ml_input(self, _mock_predict):
         upload = SimpleUploadedFile("snapshot.jpg", b"placeholder", content_type="image/jpeg")
         response = self.client.post("/predict", data={"image": upload})

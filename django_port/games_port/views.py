@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
 
-from legacy_port.services import load_ml_questions, load_questions, predict_bisindo_image
+from games_port import services as game_services
 from shared_port.view_helpers import (
     UPLOAD_DIR,
     _lesson_context,
@@ -113,7 +113,7 @@ def gamepage(request):
 
 def get_question(request):
     # Shuffle answer choices client-side consumers receive to avoid fixed ordering.
-    question = dict(_pick_question(request, "quiz", load_questions()))
+    question = dict(_pick_question(request, "quiz", game_services.load_questions()))
     if question.get("choices"):
         question["choices"] = random.sample(question["choices"], len(question["choices"]))  # Shuffle choices.
     return JsonResponse(question)
@@ -121,7 +121,7 @@ def get_question(request):
 
 def get_question_ml(request):
     # Keep the correct answer in the payload so the existing client logic can score responses.
-    return JsonResponse(_pick_question(request, "ml", load_ml_questions()))
+    return JsonResponse(_pick_question(request, "ml", game_services.load_ml_questions()))
 
 
 @csrf_exempt
@@ -157,7 +157,7 @@ def predict(request):
         return JsonResponse({"error": "No image provided"}, status=400)
 
     try:
-        payload = predict_bisindo_image(file_obj.read(), upload_dir=UPLOAD_DIR)
+        payload = game_services.predict_bisindo_image(file_obj.read(), upload_dir=UPLOAD_DIR)
         request.session["today_login"] = True
         return JsonResponse(payload)
     except ValueError as exc:
