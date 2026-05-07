@@ -42,6 +42,13 @@ class LegacyPortFlowTests(TestCase):
         session["user"] = self.user.email
         session.save()
 
+    def test_health_endpoint_reports_django_runtime(self):
+        # Keep the public deployment probe covered because Render and teammates use it for smoke checks.
+        response = self.client.get("/health/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"status": "ok", "framework": "django"})
+
     def test_add_friend_json_response(self):
         response = self.client.post(
             f"/add_friend/{self.friend.id}",
