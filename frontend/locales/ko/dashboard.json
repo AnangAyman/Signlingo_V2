@@ -1,0 +1,19 @@
+{
+  "level": "레벨 {{level}}",
+  "xpProgress": "{{current}} / 500 XP",
+  "totalXp": "총 XP",
+  "levelLabel": "레벨",
+  "leagueLabel": "리그",
+  "dailyGoals": "일일 목표",
+  "goals": {
+    "completeLessons": "레슨 3개 완료",
+    "practice": "15분 연습",
+    "earnXp": "XP 50 획득"
+  },
+  "quickActions": "빠른 작업",
+  "actions": {
+    "continueLearning": "학습 계속하기",
+    "practiceCamera": "AI 카메라 연습",
+    "viewAchievements": "업적 보기"
+  }
+}

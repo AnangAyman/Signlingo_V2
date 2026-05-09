@@ -38,11 +38,16 @@ INSTALLED_APPS = [
     "games_port",
     "commerce_port",
     "legacy_port",
+    # JSON API for the Next.js frontend.
+    "api_port",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    # CorsMiddleware must come before SessionMiddleware so OPTIONS pre-flights
+    # are handled before Django touches the session or CSRF token.
+    "shared_port.cors_middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -97,3 +102,19 @@ STATIC_ROOT = DJANGO_INSTANCE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ---------------------------------------------------------------------------
+# Session / Cookie settings for the Next.js frontend
+# ---------------------------------------------------------------------------
+# Allow the frontend on localhost:3000 to send the session cookie when calling
+# the Django API on localhost:8000.  In production, set SESSION_COOKIE_SAMESITE
+# to "None" and SESSION_COOKIE_SECURE to True (requires HTTPS).
+SESSION_COOKIE_SAMESITE = os.environ.get("SESSION_COOKIE_SAMESITE", "Lax")
+SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "false").lower() == "true"
+CSRF_COOKIE_SAMESITE = os.environ.get("CSRF_COOKIE_SAMESITE", "Lax")
+CSRF_COOKIE_SECURE = os.environ.get("CSRF_COOKIE_SECURE", "false").lower() == "true"
+# Exempt the JSON API prefix from CSRF checks; the API uses session auth only.
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]

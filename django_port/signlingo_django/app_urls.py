@@ -12,4 +12,6 @@ urlpatterns = [
     path("", include("learning_port.urls")),
     path("", include("games_port.urls")),
     path("", include("commerce_port.urls")),
+    # JSON API endpoints consumed by the Next.js frontend.
+    path("", include("api_port.urls")),
 ]
