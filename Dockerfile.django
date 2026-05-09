@@ -1,0 +1,30 @@
+# Use the specific Python 3.10.4 runtime as the base image. Keep parity with the Flask container.
+FROM python:3.10.4-slim
+
+# Set environment variables.
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Set the working directory inside the container.
+WORKDIR /app
+
+# Install system dependencies.
+RUN apt-get update && apt-get install -y \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy the Django requirements file.
+COPY django_requirements.txt ./
+
+# Install Python dependencies.
+RUN pip install --no-cache-dir -r django_requirements.txt
+
+# Copy the rest of the application's code.
+COPY . .
+
+# Expose the port that the Django app runs on.
+EXPOSE 8000
+
+# Run migrations, seed starter data, collect static files, and launch Gunicorn.
+CMD ["sh", "-c", "python django_port/manage.py migrate && python django_port/manage.py bootstrap_legacy_data && python django_port/manage.py collectstatic --noinput && gunicorn signlingo_django.wsgi:application --chdir django_port --bind 0.0.0.0:${PORT:-8000}"]
