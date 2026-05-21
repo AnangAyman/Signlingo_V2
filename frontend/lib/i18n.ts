@@ -7,6 +7,7 @@ import enGamification from "@/locales/en/gamification.json";
 import enPlaceholder from "@/locales/en/placeholder.json";
 import enLeagues from "@/locales/en/leagues.json";
 import enDashboard from "@/locales/en/dashboard.json";
+import enAuth from "@/locales/en/auth.json";
 
 import koCommon from "@/locales/ko/common.json";
 import koLeaderboard from "@/locales/ko/leaderboard.json";
@@ -14,6 +15,7 @@ import koGamification from "@/locales/ko/gamification.json";
 import koPlaceholder from "@/locales/ko/placeholder.json";
 import koLeagues from "@/locales/ko/leagues.json";
 import koDashboard from "@/locales/ko/dashboard.json";
+import koAuth from "@/locales/ko/auth.json";
 
 const resources = {
   en: {
@@ -23,6 +25,7 @@ const resources = {
     placeholder: enPlaceholder,
     leagues: enLeagues,
     dashboard: enDashboard,
+    auth: enAuth,
   },
   ko: {
     common: koCommon,
@@ -31,6 +34,7 @@ const resources = {
     placeholder: koPlaceholder,
     leagues: koLeagues,
     dashboard: koDashboard,
+    auth: koAuth,
   },
 };
 
@@ -39,7 +43,7 @@ if (!i18n.isInitialized) {
     resources,
     lng: "en",
     fallbackLng: "en",
-    ns: ["common", "leaderboard", "gamification", "placeholder", "leagues", "dashboard"],
+    ns: ["common", "leaderboard", "gamification", "placeholder", "leagues", "dashboard", "auth"],
     defaultNS: "common",
     interpolation: {
       escapeValue: false,

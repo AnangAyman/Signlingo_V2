@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,7 @@ import { Eye, EyeOff, Mail, Lock, Hand, ArrowLeft } from "lucide-react";
 export default function LoginPage() {
   const router = useRouter();
   const { login, isLoading } = useAuthStore();
+  const { t } = useTranslation("auth");
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,7 +30,7 @@ export default function LoginPage() {
     setError("");
     
     if (!email || !password) {
-      setError("Please fill in all fields");
+      setError(t("login.errors.missingFields"));
       return;
     }
 
@@ -36,7 +38,7 @@ export default function LoginPage() {
       await login(email, password);
       router.push("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Invalid email or password");
+      setError(err instanceof Error ? err.message : t("login.errors.invalidCredentials"));
     }
   };
 
@@ -56,7 +58,7 @@ export default function LoginPage() {
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8 group"
           >
             <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-            Back to home
+            {t("login.backHome")}
           </Link>
 
           {/* Logo & Header */}
@@ -65,13 +67,13 @@ export default function LoginPage() {
               <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
                 <Hand className="w-6 h-6 text-primary-foreground" />
               </div>
-              <span className="text-2xl font-bold text-foreground">SignLingo</span>
+              <span className="text-2xl font-bold text-foreground">{t("brand")}</span>
             </div>
             <h1 className="text-3xl font-bold text-foreground mb-2">
-              Welcome back
+              {t("login.title")}
             </h1>
             <p className="text-muted-foreground">
-              Continue your sign language journey
+              {t("login.subtitle")}
             </p>
           </div>
 
@@ -80,7 +82,7 @@ export default function LoginPage() {
             {/* Email Field */}
             <div className="space-y-2">
               <Label htmlFor="email" className="text-foreground font-medium">
-                Email address
+                {t("login.emailLabel")}
               </Label>
               <div className="relative">
                 <Mail className={`absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${
@@ -93,7 +95,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   onFocus={() => setFocusedField("email")}
                   onBlur={() => setFocusedField(null)}
-                  placeholder="you@example.com"
+                  placeholder={t("login.emailPlaceholder")}
                   className="pl-10 h-12 bg-card border-border focus:border-primary focus:ring-primary"
                   autoComplete="email"
                 />
@@ -104,13 +106,13 @@ export default function LoginPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password" className="text-foreground font-medium">
-                  Password
+                  {t("login.passwordLabel")}
                 </Label>
                 <Link 
                   href="/forgot-password" 
                   className="text-sm text-secondary hover:text-secondary/80 transition-colors"
                 >
-                  Forgot password?
+                  {t("login.forgotPassword")}
                 </Link>
               </div>
               <div className="relative">
@@ -124,7 +126,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   onFocus={() => setFocusedField("password")}
                   onBlur={() => setFocusedField(null)}
-                  placeholder="Enter your password"
+                  placeholder={t("login.passwordPlaceholder")}
                   className="pl-10 pr-10 h-12 bg-card border-border focus:border-primary focus:ring-primary"
                   autoComplete="current-password"
                 />
@@ -132,7 +134,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={showPassword ? t("login.hidePassword") : t("login.showPassword")}
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -148,7 +150,7 @@ export default function LoginPage() {
                 className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
               />
               <Label htmlFor="remember" className="text-sm text-muted-foreground cursor-pointer">
-                Remember me for 30 days
+                {t("login.rememberMe")}
               </Label>
             </div>
 
@@ -172,10 +174,10 @@ export default function LoginPage() {
               {isLoading ? (
                 <span className="flex items-center gap-2">
                   <Spinner className="w-5 h-5" />
-                  Signing in...
+                  {t("login.submitting")}
                 </span>
               ) : (
-                "Sign in"
+                t("login.submit")
               )}
             </Button>
 
@@ -186,7 +188,7 @@ export default function LoginPage() {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-4 bg-background text-muted-foreground">
-                  Or continue with
+                  {t("login.divider")}
                 </span>
               </div>
             </div>
@@ -216,7 +218,7 @@ export default function LoginPage() {
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                   />
                 </svg>
-                Google
+                {t("providers.google")}
               </Button>
               <Button
                 type="button"
@@ -226,18 +228,18 @@ export default function LoginPage() {
                 <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.341-3.369-1.341-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
                 </svg>
-                GitHub
+                {t("providers.github")}
               </Button>
             </div>
 
             {/* Sign Up Link */}
             <p className="text-center text-muted-foreground">
-              {"Don't have an account?"}{" "}
+              {t("login.signupPrompt")}{" "}
               <Link 
                 href="/signup" 
                 className="text-secondary hover:text-secondary/80 font-medium transition-colors"
               >
-                Sign up for free
+                {t("login.signupLink")}
               </Link>
             </p>
           </form>
