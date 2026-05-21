@@ -17,6 +17,12 @@ const BASE_URL =
   (typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_URL) ||
   DEFAULT_API_URL;
 
+export const API_BASE_URL = BASE_URL.replace(/\/$/, "");
+
+export function backendPath(path: string): string {
+  return `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
 // ---------------------------------------------------------------------------
 // Shared types
 // ---------------------------------------------------------------------------
@@ -70,7 +76,7 @@ export interface ApiDashboard {
 // ---------------------------------------------------------------------------
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
     credentials: "include",
     headers: {
       "Content-Type": "application/json",

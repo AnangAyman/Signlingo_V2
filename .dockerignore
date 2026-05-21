@@ -6,3 +6,6 @@ __pycache__
 django_instance
 instance
 node_modules
+frontend/.next
+frontend/.vercel
+frontend/node_modules

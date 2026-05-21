@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { Medal, Award, Trophy, Crown, Star } from "lucide-react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { dashboardApi, leaderboardApi, type ApiLeaderboardEntry } from "@/lib/api";
 
 // ============================================================
 // TYPES
@@ -180,19 +181,52 @@ const generateMockParticipants = (
 // MOCK API FUNCTIONS
 // ============================================================
 
-const fetchLeagueStatus = async (userId: string): Promise<UserLeagueStatus> => {
-  await new Promise((resolve) => setTimeout(resolve, 800));
-  
+function normalizeTier(tier: string | undefined): LeagueTier {
+  const normalized = (tier || "bronze").toLowerCase();
+  return TIER_ORDER.includes(normalized as LeagueTier)
+    ? (normalized as LeagueTier)
+    : "bronze";
+}
+
+function mapLeaderboardEntry(entry: ApiLeaderboardEntry): LeagueParticipant {
   return {
-    userId,
-    currentTier: "silver",
-    currentRank: 8,
-    weeklyXp: 750,
-    xpToNext: 250,
-    xpToAvoidDemotion: 150,
-    lastUpdated: new Date(),
-    promotionDemotionState: "stable",
-    streakDays: 5,
+    userId: entry.id,
+    username: entry.username,
+    xp: entry.weeklyXp ?? entry.xp,
+    rank: entry.rank,
+    isCurrentUser: entry.isCurrentUser,
+  };
+}
+
+const fetchLeagueSnapshot = async (
+  userId: string
+): Promise<{ status: UserLeagueStatus; participants: LeagueParticipant[] }> => {
+  // Use the Django API as the source of truth when the integrated backend is available.
+  const [dashboard, leaderboard] = await Promise.all([
+    dashboardApi.get(),
+    leaderboardApi.get("global"),
+  ]);
+
+  const tier = normalizeTier(dashboard.user.league);
+  const leagueInfo = LEAGUES[tier];
+  const currentEntry =
+    leaderboard.entries.find((entry) => entry.isCurrentUser) ||
+    leaderboard.entries.find((entry) => entry.id === userId);
+
+  const userXp = currentEntry?.weeklyXp ?? dashboard.user.xp;
+  return {
+    status: {
+      userId,
+      currentTier: tier,
+      currentRank: currentEntry?.rank ?? dashboard.rank ?? 1,
+      weeklyXp: userXp,
+      xpToNext: Math.max(0, leagueInfo.maxXp - dashboard.user.xp),
+      xpToAvoidDemotion: 0,
+      lastUpdated: new Date(),
+      promotionDemotionState: "stable",
+      streakDays: dashboard.currentStreak,
+    },
+    participants: leaderboard.entries.map(mapLeaderboardEntry),
   };
 };
 
@@ -228,20 +262,22 @@ export function useLeagueData({ userId, onPromotion, onDemotion }: UseLeagueData
     setError(null);
     
     try {
-      const data = await fetchLeagueStatus(userId);
-      setStatus(data);
+      const data = await fetchLeagueSnapshot(userId);
+      setStatus(data.status);
       
-      const leagueInfo = LEAGUES[data.currentTier];
-      const mockParticipants = generateMockParticipants(
-        userId,
-        leagueInfo.leagueSize,
-        data.currentRank,
-        data.weeklyXp
-      );
-      setParticipants(mockParticipants);
+      const leagueInfo = LEAGUES[data.status.currentTier];
+      const apiParticipants = data.participants.length
+        ? data.participants
+        : generateMockParticipants(
+            userId,
+            leagueInfo.leagueSize,
+            data.status.currentRank,
+            data.status.weeklyXp
+          );
+      setParticipants(apiParticipants);
       
       // Check for demotion risk
-      if (data.currentRank >= leagueInfo.demotionRank) {
+      if (data.status.currentRank >= leagueInfo.demotionRank) {
         setShowDemotionTooltip(true);
       }
     } catch (err) {

@@ -5,19 +5,7 @@ import { Camera, ExternalLink, Gamepad2 } from "lucide-react";
 import { AppHeader } from "@/components/app-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-const DEFAULT_BACKEND_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://signlingo-django.onrender.com"
-    : "http://localhost:8000";
-
-const BACKEND_URL =
-  (typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_URL) ||
-  DEFAULT_BACKEND_URL;
-
-function backendPath(path: string) {
-  return `${BACKEND_URL.replace(/\/$/, "")}${path}`;
-}
+import { backendPath } from "@/lib/api";
 
 export default function AIGamePage() {
   const magicTouchUrl = backendPath("/magic_touch");
@@ -55,7 +43,7 @@ export default function AIGamePage() {
                 MediaPipe/static letter prediction backend.
               </p>
               <Button asChild className="w-full">
-                <Link href={magicTouchUrl} target="_blank" rel="noreferrer">
+                <Link href={magicTouchUrl}>
                   Open Magic Touch
                   <ExternalLink className="w-4 h-4 ml-2" />
                 </Link>
@@ -76,7 +64,7 @@ export default function AIGamePage() {
                 recognition before the final frontend game screen is finished.
               </p>
               <Button asChild variant="outline" className="w-full">
-                <Link href={cameraPracticeUrl} target="_blank" rel="noreferrer">
+                <Link href={cameraPracticeUrl}>
                   Open Camera Practice
                   <ExternalLink className="w-4 h-4 ml-2" />
                 </Link>

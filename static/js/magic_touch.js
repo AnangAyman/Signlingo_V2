@@ -30,6 +30,7 @@ let cooldownActive = false;
 const DEBOUNCE_THRESHOLD = 2; // Must hold for 5 consecutive frames
 const CONFIDENCE_THRESHOLD = 0.70;
 const COOLDOWN_MS = 0;
+const PREDICTION_DELAY_MS = 120; // Keep webcam inference responsive without hammering the backend.
 
 // Webcam setup
 if (startBtn) startBtn.disabled = true;
@@ -258,7 +259,7 @@ async function predictLoop() {
     }
 
     // Add a tiny delay between requests to avoid overloading but keep it "real-time"
-    setTimeout(predictLoop, 50);
+    setTimeout(predictLoop, PREDICTION_DELAY_MS);
 }
 
 function handlePrediction(letter, confidence) {

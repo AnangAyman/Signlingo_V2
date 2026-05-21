@@ -24,7 +24,6 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useAuthStore } from "@/lib/store";
-import { useGamificationStore } from "@/components/gamification/useGamificationStore";
 import { useTranslation } from "react-i18next";
 import { LanguageToggle } from "@/components/common/LanguageToggle";
 
@@ -40,7 +39,6 @@ export function AppHeader() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuthStore();
-  const { userProgress } = useGamificationStore();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { t } = useTranslation();
@@ -108,16 +106,16 @@ export function AppHeader() {
             <div className="hidden md:flex items-center gap-3 px-3 py-1.5 rounded-full bg-muted/60 border border-border/50">
               <span className="flex items-center gap-1 text-sm font-semibold text-foreground">
                 <Flame className="w-4 h-4 text-orange-500" aria-hidden />
-                {userProgress.dailyStreak}d
+                {user.dailyStreak}d
               </span>
               <span className="w-px h-4 bg-border" aria-hidden />
               <span className="flex items-center gap-1 text-sm font-semibold text-foreground">
                 <Zap className="w-4 h-4 text-primary" aria-hidden />
-                {userProgress.totalXp} XP
+                {user.xp} XP
               </span>
               <span className="w-px h-4 bg-border" aria-hidden />
               <Badge variant="secondary" className="text-xs px-1.5 py-0">
-                Lv {userProgress.level}
+                Lv {user.level}
               </Badge>
             </div>
 
@@ -197,14 +195,14 @@ export function AppHeader() {
               <div className="flex items-center gap-4 px-3 py-2 mb-2 rounded-lg bg-muted/60">
                 <span className="flex items-center gap-1 text-sm font-semibold">
                   <Flame className="w-4 h-4 text-orange-500" aria-hidden />
-                  {t("appNav.dayStreak", { count: userProgress.dailyStreak })}
+                  {t("appNav.dayStreak", { count: user.dailyStreak })}
                 </span>
                 <span className="flex items-center gap-1 text-sm font-semibold">
                   <Zap className="w-4 h-4 text-primary" aria-hidden />
-                  {userProgress.totalXp} XP
+                  {user.xp} XP
                 </span>
                 <Badge variant="secondary" className="text-xs">
-                  Level {userProgress.level}
+                  Level {user.level}
                 </Badge>
               </div>
 

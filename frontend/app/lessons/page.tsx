@@ -3,10 +3,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, Circle, PlayCircle, ChevronRight, RefreshCcw } from "lucide-react";
+import { CheckCircle, Circle, PlayCircle, ChevronRight, RefreshCcw, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/lib/store";
-import { lessonsApi, type ApiLesson } from "@/lib/api";
+import { backendPath, lessonsApi, type ApiLesson } from "@/lib/api";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -25,6 +25,10 @@ function toEmbedUrl(url: string): string {
     // Not a valid URL — return as-is.
   }
   return url;
+}
+
+function isBackendRoute(url: string): boolean {
+  return url.startsWith("/");
 }
 
 function StatusIcon({ status }: { status: ApiLesson["status"] }) {
@@ -200,7 +204,7 @@ export default function LessonsPage() {
                 className="flex flex-col gap-4"
               >
                 {/* Video embed */}
-                {selected.url ? (
+                {selected.url && !isBackendRoute(selected.url) ? (
                   <div
                     className="relative w-full rounded-xl overflow-hidden bg-black"
                     style={{ paddingTop: "56.25%" }}
@@ -212,6 +216,26 @@ export default function LessonsPage() {
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                     />
+                  </div>
+                ) : selected.url ? (
+                  <div className="relative w-full rounded-xl border bg-muted/40 p-8 min-h-[320px] flex flex-col items-center justify-center text-center gap-4">
+                    <PlayCircle className="w-16 h-16 text-primary/70" />
+                    <div>
+                      <h3 className="text-lg font-semibold text-foreground">
+                        This lesson is served by the Django backend.
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-2 max-w-md">
+                        The current lesson flow still uses the migrated Django page,
+                        so open it from the connected backend instead of embedding a
+                        Vercel-local route.
+                      </p>
+                    </div>
+                    <Button asChild className="gap-2">
+                      <a href={backendPath(selected.url)}>
+                        Open Lesson Flow
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
+                    </Button>
                   </div>
                 ) : (
                   <div

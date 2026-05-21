@@ -11,6 +11,7 @@ MODEL_PATH = PROJECT_ROOT / "models" / "bisindo_static_model.h5"
 
 _ML_RUNTIME = None
 _MODEL_CACHE = None
+_HANDS_DETECTOR_CACHE = None
 
 
 def load_json(path: Path):
@@ -119,6 +120,19 @@ def _build_bisindo_model(runtime, model_path):
     return model
 
 
+def _get_hands_detector(runtime):
+    global _HANDS_DETECTOR_CACHE
+    if _HANDS_DETECTOR_CACHE is None:
+        # MediaPipe Hands is expensive to construct. Keep one process-local
+        # detector for the Cloud Run worker instead of rebuilding it per frame.
+        _HANDS_DETECTOR_CACHE = runtime["mp"].solutions.hands.Hands(
+            static_image_mode=True,
+            max_num_hands=2,
+            min_detection_confidence=0.3,
+        )
+    return _HANDS_DETECTOR_CACHE
+
+
 def get_bisindo_model(model_path=MODEL_PATH):
     global _MODEL_CACHE
     if _MODEL_CACHE is not None:
@@ -128,6 +142,15 @@ def get_bisindo_model(model_path=MODEL_PATH):
         raise FileNotFoundError(f"Missing model file: {model_path}")
     _MODEL_CACHE = _build_bisindo_model(runtime, model_path)
     return _MODEL_CACHE
+
+
+def warmup_bisindo_runtime(model_path=MODEL_PATH):
+    # Load TensorFlow/Keras, model weights, and MediaPipe once during worker
+    # startup when deployment opts in. This moves the heavy cost away from the
+    # first webcam prediction request.
+    runtime = _load_ml_runtime()
+    get_bisindo_model(model_path=model_path)
+    _get_hands_detector(runtime)
 
 
 def predict_bisindo_image(file_bytes, upload_dir=None, model_path=MODEL_PATH):
@@ -145,8 +168,8 @@ def predict_bisindo_image(file_bytes, upload_dir=None, model_path=MODEL_PATH):
 
     # Detect hands from the uploaded frame.
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    with mp.solutions.hands.Hands(static_image_mode=True, max_num_hands=2, min_detection_confidence=0.3) as hands_detector:
-        results = hands_detector.process(rgb_frame)
+    hands_detector = _get_hands_detector(runtime)
+    results = hands_detector.process(rgb_frame)
 
     if not results.multi_hand_landmarks:
         raise ValueError("No hand detected")

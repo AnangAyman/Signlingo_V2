@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     "accounts_port",
     "social_port",
     "learning_port",
-    "games_port",
+    "games_port.apps.GamesPortConfig",
     "commerce_port",
     "legacy_port",
     # JSON API endpoints consumed by the Next.js frontend.
