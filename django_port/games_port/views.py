@@ -1,4 +1,5 @@
 import json
+import os
 import random
 
 from django.http import JsonResponse
@@ -163,7 +164,8 @@ def predict(request):
         return JsonResponse({"error": "No image provided"}, status=400)
 
     try:
-        payload = game_services.predict_bisindo_image(file_obj.read(), upload_dir=UPLOAD_DIR)
+        debug_upload_dir = UPLOAD_DIR if os.environ.get("SIGNLINGO_SAVE_PREDICTION_DEBUG", "").lower() == "true" else None
+        payload = game_services.predict_bisindo_image(file_obj.read(), upload_dir=debug_upload_dir)
         request.session["today_login"] = True
         return JsonResponse(payload)
     except ValueError as exc:
@@ -176,4 +178,6 @@ def magic_touch(request):
     user, redirect_response = _require_user(request)
     if redirect_response:
         return redirect_response
-    return _render(request, "magic_touch_game.html", _user_shell_context(user))
+    context = _user_shell_context(user)
+    context["frontend_dashboard_url"] = os.environ.get("FRONTEND_APP_URL", "").rstrip("/")
+    return _render(request, "magic_touch_game.html", context)

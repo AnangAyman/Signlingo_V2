@@ -117,6 +117,14 @@ if render_hostname and render_hostname not in allowed_hosts and "*" not in allow
     allowed_hosts.append(render_hostname)
 ALLOWED_HOSTS = allowed_hosts or ["*"]
 
+# When the Next.js frontend is hosted on a separate domain, Django session
+# cookies must be allowed in cross-site fetch requests.
+_default_cookie_samesite = "None" if not DEBUG else "Lax"
+SESSION_COOKIE_SAMESITE = os.environ.get("DJANGO_SESSION_COOKIE_SAMESITE", _default_cookie_samesite)
+CSRF_COOKIE_SAMESITE = os.environ.get("DJANGO_CSRF_COOKIE_SAMESITE", SESSION_COOKIE_SAMESITE)
+SESSION_COOKIE_SECURE = os.environ.get("DJANGO_SESSION_COOKIE_SECURE", str(not DEBUG)).lower() == "true"
+CSRF_COOKIE_SECURE = os.environ.get("DJANGO_CSRF_COOKIE_SECURE", str(not DEBUG)).lower() == "true"
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -129,14 +137,18 @@ INSTALLED_APPS = [
     "accounts_port",
     "social_port",
     "learning_port",
-    "games_port",
+    "games_port.apps.GamesPortConfig",
     "commerce_port",
     "legacy_port",
+    # JSON API endpoints consumed by the Next.js frontend.
+    "api_port",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    # Keep CORS before SessionMiddleware so browser preflight requests from Next.js work.
+    "shared_port.cors_middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",

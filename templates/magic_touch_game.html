@@ -22,7 +22,7 @@
         <a class="page-language-chip{% if current_language() == 'ko' %} active{% endif %}" href="{{ url_for('auth.set_language', code='ko') }}?next={{ request.path }}">{{ t('language.ko') }}</a>
     </div>
 
-    <a class="back-button" href="{{ url_for('auth.dashboard') }}">
+    <a class="back-button" href="{% if frontend_dashboard_url %}{{ frontend_dashboard_url }}/dashboard{% else %}{{ url_for('auth.dashboard') }}{% endif %}" aria-label="Back to SignLingo dashboard">
         <svg width="24" height="24" viewBox="0 0 24" fill="none">
             <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                 stroke-linejoin="round" />
@@ -60,7 +60,7 @@
                     <p>{{ t('game.magic.final_score') }} <span id="final-score">0</span></p>
                     <button class="primary-button" id="restart-game-btn">{{ t('game.magic.play_again') }}</button>
                     <button class="secondary-button mt-3"
-                        onclick="window.location.href='{{ url_for('auth.dashboard') }}'">{{ t('game.magic.return_dashboard') }}</button>
+                        onclick="window.location.href='{% if frontend_dashboard_url %}{{ frontend_dashboard_url }}/dashboard{% else %}{{ url_for('auth.dashboard') }}{% endif %}'">{{ t('game.magic.return_dashboard') }}</button>
                 </div>
             </div>
 

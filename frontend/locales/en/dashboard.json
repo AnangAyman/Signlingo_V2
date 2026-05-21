@@ -1,0 +1,19 @@
+{
+  "level": "Level {{level}}",
+  "xpProgress": "{{current}} / 500 XP",
+  "totalXp": "Total XP",
+  "levelLabel": "Level",
+  "leagueLabel": "League",
+  "dailyGoals": "Daily Goals",
+  "goals": {
+    "completeLessons": "Complete 3 lessons",
+    "practice": "Practice for 15 min",
+    "earnXp": "Earn 50 XP"
+  },
+  "quickActions": "Quick Actions",
+  "actions": {
+    "continueLearning": "Continue Learning",
+    "practiceCamera": "Practice AI Camera",
+    "viewAchievements": "View Achievements"
+  }
+}
