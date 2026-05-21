@@ -1,0 +1,21 @@
+{
+  "loading": "레슨을 불러오는 중...",
+  "loadFailed": "레슨을 불러오지 못했습니다",
+  "retry": "다시 시도",
+  "title": "영상 레슨",
+  "progressSummary": "{{completed}} / {{total}} 레슨 완료",
+  "progressPercent": "{{progress}}% 완료",
+  "allLessons": "전체 레슨",
+  "backendLessonTitle": "이 레슨은 Django 백엔드에서 제공됩니다.",
+  "backendLessonBody": "현재 레슨 흐름은 아직 마이그레이션된 Django 페이지를 사용하므로, Vercel 로컬 라우트에 임베드하지 말고 연결된 백엔드에서 여세요.",
+  "openLessonFlow": "레슨 흐름 열기",
+  "noVideo": "이 레슨에는 사용할 수 있는 영상이 없습니다.",
+  "status": {
+    "not_started": "시작 전",
+    "in_progress": "진행 중",
+    "completed": "완료됨"
+  },
+  "markComplete": "완료로 표시",
+  "completed": "완료됨",
+  "empty": "시청을 시작할 레슨을 선택하세요"
+}

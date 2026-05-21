@@ -1,0 +1,21 @@
+{
+  "loading": "Loading lessons…",
+  "loadFailed": "Failed to load lessons",
+  "retry": "Retry",
+  "title": "Video Lessons",
+  "progressSummary": "{{completed}} of {{total}} lessons completed",
+  "progressPercent": "{{progress}}% complete",
+  "allLessons": "All Lessons",
+  "backendLessonTitle": "This lesson is served by the Django backend.",
+  "backendLessonBody": "The current lesson flow still uses the migrated Django page, so open it from the connected backend instead of embedding a Vercel-local route.",
+  "openLessonFlow": "Open Lesson Flow",
+  "noVideo": "No video available for this lesson.",
+  "status": {
+    "not_started": "Not started",
+    "in_progress": "In progress",
+    "completed": "Completed"
+  },
+  "markComplete": "Mark as Complete",
+  "completed": "Completed",
+  "empty": "Select a lesson to start watching"
+}

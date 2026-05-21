@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { CheckCircle, Circle, PlayCircle, ChevronRight, RefreshCcw, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/lib/store";
@@ -31,6 +32,10 @@ function isBackendRoute(url: string): boolean {
   return url.startsWith("/");
 }
 
+function statusLabel(t: (key: string) => string, status: ApiLesson["status"]): string {
+  return t(`status.${status}`);
+}
+
 function StatusIcon({ status }: { status: ApiLesson["status"] }) {
   if (status === "completed")
     return <CheckCircle className="w-5 h-5 text-green-500 shrink-0" />;
@@ -46,6 +51,7 @@ function StatusIcon({ status }: { status: ApiLesson["status"] }) {
 export default function LessonsPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
+  const { t } = useTranslation("lessons");
 
   const [lessons, setLessons] = useState<ApiLesson[]>([]);
   const [completed, setCompleted] = useState(0);
@@ -78,11 +84,11 @@ export default function LessonsPage() {
         null;
       setSelected(current);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load lessons");
+      setError(err instanceof Error ? err.message : t("loadFailed"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (isAuthenticated) load();
@@ -121,7 +127,7 @@ export default function LessonsPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4 text-muted-foreground">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <span>Loading lessons…</span>
+          <span>{t("loading")}</span>
         </div>
       </div>
     );
@@ -133,7 +139,7 @@ export default function LessonsPage() {
         <div className="flex flex-col items-center gap-4 text-center max-w-sm">
           <p className="text-destructive">{error}</p>
           <Button variant="outline" onClick={load} className="gap-2">
-            <RefreshCcw className="w-4 h-4" /> Retry
+            <RefreshCcw className="w-4 h-4" /> {t("retry")}
           </Button>
         </div>
       </div>
@@ -145,9 +151,9 @@ export default function LessonsPage() {
       {/* Header */}
       <div className="border-b bg-card px-6 py-5">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-2xl font-bold text-foreground mb-1">Video Lessons</h1>
+          <h1 className="text-2xl font-bold text-foreground mb-1">{t("title")}</h1>
           <p className="text-sm text-muted-foreground mb-3">
-            {completed} of {total} lessons completed
+            {t("progressSummary", { completed, total })}
           </p>
           {/* Progress bar */}
           <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
@@ -158,7 +164,9 @@ export default function LessonsPage() {
               transition={{ duration: 0.6, ease: "easeOut" }}
             />
           </div>
-          <p className="text-xs text-muted-foreground mt-1">{progress.toFixed(0)}% complete</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {t("progressPercent", { progress: progress.toFixed(0) })}
+          </p>
         </div>
       </div>
 
@@ -167,7 +175,7 @@ export default function LessonsPage() {
         {/* Lesson list */}
         <aside className="w-full lg:w-72 shrink-0">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 px-1">
-            All Lessons
+            {t("allLessons")}
           </h2>
           <ul className="space-y-1">
             {lessons.map((lesson) => (
@@ -222,17 +230,15 @@ export default function LessonsPage() {
                     <PlayCircle className="w-16 h-16 text-primary/70" />
                     <div>
                       <h3 className="text-lg font-semibold text-foreground">
-                        This lesson is served by the Django backend.
+                        {t("backendLessonTitle")}
                       </h3>
                       <p className="text-sm text-muted-foreground mt-2 max-w-md">
-                        The current lesson flow still uses the migrated Django page,
-                        so open it from the connected backend instead of embedding a
-                        Vercel-local route.
+                        {t("backendLessonBody")}
                       </p>
                     </div>
                     <Button asChild className="gap-2">
                       <a href={backendPath(selected.url)}>
-                        Open Lesson Flow
+                        {t("openLessonFlow")}
                         <ExternalLink className="w-4 h-4" />
                       </a>
                     </Button>
@@ -243,7 +249,7 @@ export default function LessonsPage() {
                     style={{ paddingTop: "56.25%" }}
                   >
                     <span className="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm">
-                      No video available for this lesson.
+                      {t("noVideo")}
                     </span>
                   </div>
                 )}
@@ -253,7 +259,7 @@ export default function LessonsPage() {
                   <div>
                     <h2 className="text-xl font-semibold text-foreground">{selected.title}</h2>
                     <p className="text-sm text-muted-foreground mt-0.5 capitalize">
-                      {selected.status.replace(/_/g, " ")}
+                      {statusLabel(t, selected.status)}
                     </p>
                   </div>
                   {selected.status !== "completed" ? (
@@ -267,12 +273,12 @@ export default function LessonsPage() {
                       ) : (
                         <CheckCircle className="w-4 h-4" />
                       )}
-                      Mark as Complete
+                      {t("markComplete")}
                     </Button>
                   ) : (
                     <div className="flex items-center gap-2 text-green-600 font-medium text-sm">
                       <CheckCircle className="w-4 h-4" />
-                      Completed
+                      {t("completed")}
                     </div>
                   )}
                 </div>
@@ -281,10 +287,10 @@ export default function LessonsPage() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="flex flex-col items-center justify-center py-24 text-muted-foreground"
-              >
-                <PlayCircle className="w-16 h-16 mb-4 opacity-30" />
-                <p>Select a lesson to start watching</p>
+              className="flex flex-col items-center justify-center py-24 text-muted-foreground"
+            >
+              <PlayCircle className="w-16 h-16 mb-4 opacity-30" />
+                <p>{t("empty")}</p>
               </motion.div>
             )}
           </AnimatePresence>
@@ -293,4 +299,3 @@ export default function LessonsPage() {
     </div>
   );
 }
-
