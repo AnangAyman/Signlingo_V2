@@ -1,0 +1,451 @@
+"use client";
+
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+
+// ============================================================
+// TYPES
+// ============================================================
+
+export interface Badge {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  requirement: string;
+  requiredValue: number;
+  currentProgress: number;
+  isLocked: boolean;
+  earnedAt?: Date;
+  category: "streak" | "lessons" | "quizzes" | "league";
+  rarity: "common" | "rare" | "epic";
+}
+
+export interface Reward {
+  id: string;
+  name: string;
+  description: string;
+  cost: number;
+  icon: string;
+  isRedeemed: boolean;
+  redeemedAt?: Date;
+}
+
+export interface DailyQuest {
+  id: string;
+  description: string;
+  xpReward: number;
+  progress: number;
+  total: number;
+  completed: boolean;
+  actionType: "complete_lesson" | "score_quiz" | "practice_ai" | "daily_streak";
+  actionCount?: number;
+}
+
+export interface UserProgress {
+  level: number;
+  totalXp: number;
+  xpToNextLevel: number;
+  levelProgressPercent: number;
+  dailyStreak: number;
+  lastActiveDate: string;
+}
+
+// ============================================================
+// MOCK DATA
+// ============================================================
+
+const INITIAL_BADGES: Badge[] = [
+  {
+    id: "first-sign",
+    name: "First Sign",
+    description: "Complete your first lesson",
+    icon: "🤟",
+    requirement: "Complete 1 lesson",
+    requiredValue: 1,
+    currentProgress: 1,
+    isLocked: false,
+    earnedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+    category: "lessons",
+    rarity: "common",
+  },
+  {
+    id: "streak-starter",
+    name: "Streak Starter",
+    description: "Maintain a 3-day streak",
+    icon: "🔥",
+    requirement: "3-day streak",
+    requiredValue: 3,
+    currentProgress: 3,
+    isLocked: false,
+    earnedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+    category: "streak",
+    rarity: "common",
+  },
+  {
+    id: "week-warrior",
+    name: "Week Warrior",
+    description: "Maintain a 7-day streak",
+    icon: "⚡",
+    requirement: "7-day streak",
+    requiredValue: 7,
+    currentProgress: 5,
+    isLocked: true,
+    category: "streak",
+    rarity: "rare",
+  },
+  {
+    id: "lesson-master",
+    name: "Lesson Master",
+    description: "Complete 10 lessons",
+    icon: "📚",
+    requirement: "Complete 10 lessons",
+    requiredValue: 10,
+    currentProgress: 7,
+    isLocked: true,
+    category: "lessons",
+    rarity: "common",
+  },
+  {
+    id: "quiz-ace",
+    name: "Quiz Ace",
+    description: "Score 100% on 5 quizzes",
+    icon: "🎯",
+    requirement: "Perfect score on 5 quizzes",
+    requiredValue: 5,
+    currentProgress: 2,
+    isLocked: true,
+    category: "quizzes",
+    rarity: "rare",
+  },
+  {
+    id: "bronze-champion",
+    name: "Bronze Champion",
+    description: "Reach the Silver league",
+    icon: "🥉",
+    requirement: "Promote from Bronze",
+    requiredValue: 1,
+    currentProgress: 1,
+    isLocked: false,
+    earnedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    category: "league",
+    rarity: "common",
+  },
+  {
+    id: "silver-star",
+    name: "Silver Star",
+    description: "Reach the Gold league",
+    icon: "🥈",
+    requirement: "Promote from Silver",
+    requiredValue: 1,
+    currentProgress: 0,
+    isLocked: true,
+    category: "league",
+    rarity: "rare",
+  },
+  {
+    id: "gold-legend",
+    name: "Gold Legend",
+    description: "Reach the Platinum league",
+    icon: "🥇",
+    requirement: "Promote from Gold",
+    requiredValue: 1,
+    currentProgress: 0,
+    isLocked: true,
+    category: "league",
+    rarity: "epic",
+  },
+  {
+    id: "ai-explorer",
+    name: "AI Explorer",
+    description: "Practice with AI camera 20 times",
+    icon: "🤖",
+    requirement: "Use AI camera 20 times",
+    requiredValue: 20,
+    currentProgress: 12,
+    isLocked: true,
+    category: "lessons",
+    rarity: "rare",
+  },
+  {
+    id: "month-master",
+    name: "Month Master",
+    description: "Maintain a 30-day streak",
+    icon: "🏆",
+    requirement: "30-day streak",
+    requiredValue: 30,
+    currentProgress: 5,
+    isLocked: true,
+    category: "streak",
+    rarity: "epic",
+  },
+];
+
+const INITIAL_REWARDS: Reward[] = [
+  {
+    id: "streak-freeze",
+    name: "Streak Freeze",
+    description: "Protect your streak for one day",
+    cost: 200,
+    icon: "🧊",
+    isRedeemed: false,
+  },
+  {
+    id: "double-xp",
+    name: "Double XP (1hr)",
+    description: "Earn double XP for one hour",
+    cost: 350,
+    icon: "⚡",
+    isRedeemed: false,
+  },
+  {
+    id: "custom-avatar",
+    name: "Custom Avatar",
+    description: "Unlock a special avatar frame",
+    cost: 500,
+    icon: "🎨",
+    isRedeemed: false,
+  },
+  {
+    id: "bonus-lesson",
+    name: "Bonus Lesson",
+    description: "Access an exclusive bonus lesson",
+    cost: 300,
+    icon: "🎁",
+    isRedeemed: true,
+    redeemedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+  },
+  {
+    id: "hint-pack",
+    name: "Hint Pack (5)",
+    description: "Get 5 hints for difficult signs",
+    cost: 150,
+    icon: "💡",
+    isRedeemed: false,
+  },
+];
+
+const INITIAL_QUESTS: DailyQuest[] = [
+  {
+    id: "quest-lesson",
+    description: "Complete 3 lessons",
+    xpReward: 50,
+    progress: 2,
+    total: 3,
+    completed: false,
+    actionType: "complete_lesson",
+    actionCount: 3,
+  },
+  {
+    id: "quest-quiz",
+    description: "Score 80%+ on a quiz",
+    xpReward: 30,
+    progress: 1,
+    total: 1,
+    completed: true,
+    actionType: "score_quiz",
+  },
+  {
+    id: "quest-practice",
+    description: "Practice with AI camera",
+    xpReward: 25,
+    progress: 0,
+    total: 1,
+    completed: false,
+    actionType: "practice_ai",
+  },
+];
+
+const INITIAL_PROGRESS: UserProgress = {
+  level: 7,
+  totalXp: 1750,
+  xpToNextLevel: 250,
+  levelProgressPercent: 75,
+  dailyStreak: 5,
+  lastActiveDate: new Date().toISOString().split("T")[0],
+};
+
+// ============================================================
+// STORE
+// ============================================================
+
+interface GamificationStore {
+  userProgress: UserProgress;
+  badges: Badge[];
+  rewards: Reward[];
+  dailyQuests: DailyQuest[];
+  showLevelUpModal: boolean;
+  newLevel: number | null;
+  newlyEarnedBadge: Badge | null;
+
+  addXp: (amount: number, source: string) => void;
+  redeemReward: (rewardId: string) => boolean;
+  completeQuest: (questId: string) => void;
+  checkBadges: () => Badge | null;
+  resetDemo: () => void;
+  closeLevelUpModal: () => void;
+  clearNewBadge: () => void;
+  simulateNewDay: () => void;
+}
+
+export const useGamificationStore = create<GamificationStore>()(
+  persist(
+    (set, get) => ({
+      userProgress: INITIAL_PROGRESS,
+      badges: INITIAL_BADGES,
+      rewards: INITIAL_REWARDS,
+      dailyQuests: INITIAL_QUESTS,
+      showLevelUpModal: false,
+      newLevel: null,
+      newlyEarnedBadge: null,
+
+      addXp: (amount: number, source: string) => {
+        const { userProgress, checkBadges } = get();
+        let newTotalXp = userProgress.totalXp + amount;
+        let newLevel = userProgress.level;
+        let newXpToNext = userProgress.xpToNextLevel - amount;
+        let showLevelUp = false;
+
+        // Level up check
+        while (newXpToNext <= 0) {
+          newLevel += 1;
+          newXpToNext += 500; // 500 XP per level
+          showLevelUp = true;
+        }
+
+        const levelProgressPercent = ((500 - newXpToNext) / 500) * 100;
+
+        set({
+          userProgress: {
+            ...userProgress,
+            totalXp: newTotalXp,
+            level: newLevel,
+            xpToNextLevel: newXpToNext,
+            levelProgressPercent,
+            lastActiveDate: new Date().toISOString().split("T")[0],
+          },
+          showLevelUpModal: showLevelUp,
+          newLevel: showLevelUp ? newLevel : null,
+        });
+
+        // Check for new badges
+        const newBadge = checkBadges();
+        if (newBadge) {
+          set({ newlyEarnedBadge: newBadge });
+        }
+      },
+
+      redeemReward: (rewardId: string) => {
+        const { rewards, userProgress } = get();
+        const reward = rewards.find((r) => r.id === rewardId);
+
+        if (!reward || reward.isRedeemed || userProgress.totalXp < reward.cost) {
+          return false;
+        }
+
+        set({
+          rewards: rewards.map((r) =>
+            r.id === rewardId
+              ? { ...r, isRedeemed: true, redeemedAt: new Date() }
+              : r
+          ),
+          userProgress: {
+            ...userProgress,
+            totalXp: userProgress.totalXp - reward.cost,
+          },
+        });
+
+        return true;
+      },
+
+      completeQuest: (questId: string) => {
+        const { dailyQuests, addXp } = get();
+        const quest = dailyQuests.find((q) => q.id === questId);
+
+        if (!quest || quest.completed || quest.progress < quest.total) {
+          return;
+        }
+
+        set({
+          dailyQuests: dailyQuests.map((q) =>
+            q.id === questId ? { ...q, completed: true } : q
+          ),
+        });
+
+        addXp(quest.xpReward, `quest:${questId}`);
+      },
+
+      checkBadges: () => {
+        const { badges, userProgress } = get();
+        let earnedBadge: Badge | null = null;
+
+        const updatedBadges = badges.map((badge) => {
+          if (badge.isLocked && badge.currentProgress >= badge.requiredValue) {
+            earnedBadge = { ...badge, isLocked: false, earnedAt: new Date() };
+            return earnedBadge;
+          }
+          return badge;
+        });
+
+        if (earnedBadge) {
+          set({ badges: updatedBadges });
+        }
+
+        return earnedBadge;
+      },
+
+      resetDemo: () => {
+        set({
+          userProgress: INITIAL_PROGRESS,
+          badges: INITIAL_BADGES,
+          rewards: INITIAL_REWARDS.map((r) => ({ ...r, isRedeemed: false, redeemedAt: undefined })),
+          dailyQuests: INITIAL_QUESTS.map((q) => ({ ...q, progress: 0, completed: false })),
+          showLevelUpModal: false,
+          newLevel: null,
+          newlyEarnedBadge: null,
+        });
+      },
+
+      closeLevelUpModal: () => {
+        set({ showLevelUpModal: false, newLevel: null });
+      },
+
+      clearNewBadge: () => {
+        set({ newlyEarnedBadge: null });
+      },
+
+      simulateNewDay: () => {
+        const { userProgress, dailyQuests } = get();
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+        // Check if user was active yesterday
+        const wasActiveYesterday = userProgress.lastActiveDate === yesterdayStr;
+        const newStreak = wasActiveYesterday ? userProgress.dailyStreak + 1 : 1;
+
+        set({
+          userProgress: {
+            ...userProgress,
+            dailyStreak: newStreak,
+            lastActiveDate: new Date().toISOString().split("T")[0],
+          },
+          dailyQuests: dailyQuests.map((q) => ({
+            ...q,
+            progress: 0,
+            completed: false,
+          })),
+        });
+      },
+    }),
+    {
+      name: "signlingo-gamification",
+      partialize: (state) => ({
+        userProgress: state.userProgress,
+        badges: state.badges,
+        rewards: state.rewards,
+        dailyQuests: state.dailyQuests,
+      }),
+    }
+  )
+);
