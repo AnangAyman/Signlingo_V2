@@ -109,7 +109,7 @@ function LeaderboardRowComponent({
       transition={{ delay: Math.min(index * 0.03, 0.5), duration: 0.28 }}
       onClick={() => onUserClick?.(entry.id)}
       role="row"
-      aria-label={`Rank ${entry.rank}: ${entry.username}, ${formatNumber(entry.xp)} XP`}
+      aria-label={t("rankLabel", { rank: entry.rank, username: entry.username, xp: formatNumber(entry.xp) })}
       tabIndex={0}
       onKeyDown={(e) => e.key === "Enter" && onUserClick?.(entry.id)}
       className={`
@@ -204,7 +204,7 @@ function LeaderboardRowComponent({
                   : { scale: [1, 1.65, 1], opacity: [1, 0.35, 1] }
               }
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              title="Online now – challenge them!"
+              title={t("onlineTitle")}
               className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-background rounded-full"
             />
           )}
@@ -308,7 +308,7 @@ function LeaderboardRowComponent({
               size="sm"
               variant="ghost"
               className="h-8 px-2 opacity-0 group-hover:opacity-100 transition-opacity"
-              aria-label={`Add ${entry.username} as friend`}
+              aria-label={t("addFriend", { username: entry.username })}
               onClick={(e) => e.stopPropagation()}
             >
               <UserPlus className="w-3.5 h-3.5" />

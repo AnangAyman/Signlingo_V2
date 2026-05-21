@@ -31,19 +31,40 @@
   "challengeUserLabel": "Challenge {{username}}",
   "sent": "Sent",
   "addFriend": "Add {{username}} as friend",
+  "onlineTitle": "Online now – challenge them!",
+  "loading": "Loading leaderboard",
   "xpLabel": "XP",
   "rankLabel": "Rank {{rank}}: {{username}}, {{xp}} XP",
+  "errors": {
+    "fetch": "Failed to fetch leaderboard",
+    "load": "Failed to load leaderboard. Tap Retry to try again.",
+    "loadMore": "Failed to load more entries.",
+    "switchView": "Failed to switch view.",
+    "refresh": "Failed to refresh leaderboard."
+  },
   "modal": {
     "closeLabel": "Close profile",
-    "you": "(You)",
+    "you": "You",
+    "profileLabel": "{{username}}'s profile",
     "online": "Online now",
     "offline": "Offline",
     "globally": "{{rank}} globally",
     "totalXp": "Total XP",
     "weeklyXp": "Weekly XP",
     "rank": "Rank",
+    "badges": "Badges",
+    "practiceHelp": "Earn XP to climb the ranks!",
+    "practiceAmountLabel": "Add {{amount}} practice XP",
+    "addFriendBtn": "Add Friend",
+    "viewProfileBtn": "View Profile",
     "challengeBtn": "Challenge",
     "practiceSession": "Practice Session",
-    "challengeSentBtn": "Challenge Sent"
+    "challengeSentBtn": "Challenge Sent",
+    "leagues": {
+      "diamond": "Diamond",
+      "gold": "Gold",
+      "silver": "Silver",
+      "bronze": "Bronze"
+    }
   }
 }

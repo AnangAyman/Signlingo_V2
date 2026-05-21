@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 interface LeaderboardSkeletonProps {
   count?: number;
@@ -11,8 +12,9 @@ export function LeaderboardSkeleton({
   count = 5,
   reducedMotion = false,
 }: LeaderboardSkeletonProps) {
+  const { t } = useTranslation("leaderboard");
   return (
-    <div className="space-y-2" aria-label="Loading leaderboard" aria-busy="true">
+    <div className="space-y-2" aria-label={t("loading")} aria-busy="true">
       {Array.from({ length: count }).map((_, i) => (
         <motion.div
           key={i}

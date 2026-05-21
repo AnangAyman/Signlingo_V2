@@ -101,7 +101,7 @@ export default function Leaderboard({
         origin: { x: 0.5, y: 0.5 },
         colors: ["#6366f1", "#f59e0b", "#14b8a6", "#ec4899"],
       });
-      toast.success("🎉 " + t("top10Toast"), { duration: 4500 });
+      toast.success(t("top10Toast"), { duration: 4500 });
     }
     prevUserRankRef.current = newRank;
   }, [currentUserEntry, reducedMotion]);
@@ -206,7 +206,7 @@ export default function Leaderboard({
               transition={{ duration: 0.15 }}
               onClick={() => setSearchQuery("")}
               className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground"
-              aria-label="Clear search"
+              aria-label={t("clearSearch")}
             >
               <X className="w-4 h-4" />
             </motion.button>
@@ -226,7 +226,7 @@ export default function Leaderboard({
           variant="outline"
           className="gap-1.5 text-xs border-dashed"
           onClick={() => handlePractice(currentUserId, 50)}
-          aria-label="Add 50 practice XP"
+          aria-label={t("addXpLabel")}
         >
           <Zap className="w-3.5 h-3.5 text-amber-500" />
           {t("addXpBtn")}
@@ -359,4 +359,3 @@ export default function Leaderboard({
     </div>
   );
 }
-

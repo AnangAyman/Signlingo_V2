@@ -35,21 +35,22 @@ export function UserProfileModal({
   if (!user) return null;
   const { t } = useTranslation("leaderboard");
 
-  const league =
+  const leagueTier =
     user.xp >= 8_000
-      ? "Diamond"
+      ? "diamond"
       : user.xp >= 5_000
-      ? "Gold"
+      ? "gold"
       : user.xp >= 2_500
-      ? "Silver"
-      : "Bronze";
+      ? "silver"
+      : "bronze";
+  const league = t(`modal.leagues.${leagueTier}`);
 
   const leagueColor =
-    league === "Diamond"
+    leagueTier === "diamond"
       ? "text-cyan-500"
-      : league === "Gold"
+      : leagueTier === "gold"
       ? "text-yellow-500"
-      : league === "Silver"
+      : leagueTier === "silver"
       ? "text-slate-400"
       : "text-amber-600";
 
@@ -64,7 +65,7 @@ export function UserProfileModal({
           onClick={onClose}
           role="dialog"
           aria-modal="true"
-          aria-label={`${user.username}'s profile`}
+          aria-label={t("modal.profileLabel", { username: user.username })}
         >
           <motion.div
             initial={
@@ -88,7 +89,7 @@ export function UserProfileModal({
             <button
               onClick={onClose}
               className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-muted transition-colors"
-              aria-label="Close profile"
+              aria-label={t("modal.closeLabel")}
             >
               <X className="w-4 h-4 text-muted-foreground" />
             </button>
@@ -167,7 +168,7 @@ export function UserProfileModal({
             {user.badges && user.badges.length > 0 && (
               <div className="mb-5">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-                  Badges
+                  {t("modal.badges")}
                 </p>
                 <div className="flex gap-2 flex-wrap">
                   {user.badges.slice(0, 5).map((b, i) => (
@@ -196,6 +197,7 @@ export function UserProfileModal({
                       variant="outline"
                       className="flex-1 gap-1.5 text-xs border-dashed"
                       onClick={() => onPractice(user.id, amt)}
+                      aria-label={t("modal.practiceAmountLabel", { amount: amt })}
                     >
                       <Zap className="w-3 h-3 text-amber-500" />
                       +{amt} XP
@@ -203,7 +205,7 @@ export function UserProfileModal({
                   ))}
                 </div>
                 <p className="text-xs text-muted-foreground mt-2 text-center">
-                  Earn XP to climb the ranks!
+                  {t("modal.practiceHelp")}
                 </p>
               </div>
             )}
@@ -223,11 +225,11 @@ export function UserProfileModal({
                 ) : (
                   <Button className="flex-1 gap-2">
                     <UserPlus className="w-4 h-4" />
-                    Add Friend
+                    {t("modal.addFriendBtn")}
                   </Button>
                 )}
                 <Button variant="outline" className="flex-1">
-                  View Profile
+                  {t("modal.viewProfileBtn")}
                 </Button>
               </div>
             )}

@@ -31,19 +31,40 @@
   "challengeUserLabel": "{{username}} 도전",
   "sent": "전송됨",
   "addFriend": "{{username}}을(를) 친구로 추가",
+  "onlineTitle": "지금 온라인 상태입니다 – 도전해 보세요!",
+  "loading": "리더보드 불러오는 중",
   "xpLabel": "XP",
   "rankLabel": "순위 {{rank}}: {{username}}, {{xp}} XP",
+  "errors": {
+    "fetch": "리더보드를 불러오지 못했습니다",
+    "load": "리더보드를 불러오지 못했습니다. 재시도를 눌러 다시 시도하세요.",
+    "loadMore": "항목을 더 불러오지 못했습니다.",
+    "switchView": "보기 전환에 실패했습니다.",
+    "refresh": "리더보드를 새로고침하지 못했습니다."
+  },
   "modal": {
     "closeLabel": "프로필 닫기",
-    "you": "(나)",
+    "you": "나",
+    "profileLabel": "{{username}}님의 프로필",
     "online": "온라인",
     "offline": "오프라인",
     "globally": "전체 {{rank}}위",
     "totalXp": "전체 XP",
     "weeklyXp": "이번 주 XP",
     "rank": "순위",
+    "badges": "배지",
+    "practiceHelp": "XP를 획득해 순위를 올려 보세요!",
+    "practiceAmountLabel": "연습 XP {{amount}} 추가",
+    "addFriendBtn": "친구 추가",
+    "viewProfileBtn": "프로필 보기",
     "challengeBtn": "도전",
     "practiceSession": "연습 세션",
-    "challengeSentBtn": "도전장 전송됨"
+    "challengeSentBtn": "도전장 전송됨",
+    "leagues": {
+      "diamond": "다이아몬드",
+      "gold": "골드",
+      "silver": "실버",
+      "bronze": "브론즈"
+    }
   }
 }

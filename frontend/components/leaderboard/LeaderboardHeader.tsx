@@ -21,8 +21,8 @@ export function LeaderboardHeader({
   onRefresh,
   reducedMotion = false,
 }: LeaderboardHeaderProps) {
-  const { t } = useTranslation("leaderboard");
-  const weekLabel = getWeekLabel();
+  const { t, i18n } = useTranslation("leaderboard");
+  const weekLabel = getWeekLabel(i18n.language);
 
   return (
     <motion.div
@@ -98,13 +98,14 @@ export function LeaderboardHeader({
   );
 }
 
-function getWeekLabel(): string {
+function getWeekLabel(language: string): string {
   const now = new Date();
   const monday = new Date(now);
   monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
   const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
+  const locale = language === "ko" ? "ko-KR" : "en-US";
   const fmt = (d: Date) =>
-    d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    d.toLocaleDateString(locale, { month: "short", day: "numeric" });
   return `${fmt(monday)} – ${fmt(sunday)}`;
 }
