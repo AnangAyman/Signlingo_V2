@@ -122,7 +122,7 @@ export function DailyQuests({ reducedMotion = false }: DailyQuestsProps) {
             simulateNewDay();
             toast.info(t("quests.simulateNewDayToast"));
           }}
-          aria-label="Simulate a new day to reset daily quests"
+          aria-label={t("quests.simulateNewDayLabel")}
         >
           <RefreshCw className="w-3 h-3 mr-2" aria-hidden />
           {t("quests.simulateNewDay")}

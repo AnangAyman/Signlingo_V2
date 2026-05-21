@@ -84,16 +84,16 @@ export function GamificationPage({
               variant="outline"
               size="sm"
               onClick={() => handleAddXp(50)}
-              aria-label="Add 50 XP (demo)"
+              aria-label={t("addXpSmallLabel")}
             >
               <Zap className="w-4 h-4 mr-1 text-primary" aria-hidden />
-              +50 XP
+              {t("addXpBtn")}
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => handleAddXp(200)}
-              aria-label="Add 200 XP (demo)"
+              aria-label={t("addXpLargeLabel")}
             >
               <Zap className="w-4 h-4 mr-1 text-amber-500" aria-hidden />
               {t("addXpLargeBtn")}
@@ -105,8 +105,8 @@ export function GamificationPage({
                 resetDemo();
                 toast.info(t("resetToast"));
               }}
-              aria-label="Reset demo state"
-              title="Reset demo"
+              aria-label={t("resetLabel")}
+              title={t("resetLabel")}
             >
               <RotateCcw className="w-4 h-4" />
             </Button>

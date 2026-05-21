@@ -76,7 +76,7 @@ export function LevelUpModal({ reducedMotion = false }: LevelUpModalProps) {
             <motion.div
               role="dialog"
               aria-modal="true"
-              aria-label={`Level up – you reached level ${newLevel}`}
+              aria-label={t("levelUp.ariaLabel", { level: newLevel })}
               initial={
                 reducedMotion ? { opacity: 0 } : { scale: 0.5, opacity: 0, y: 40 }
               }
@@ -128,7 +128,7 @@ export function LevelUpModal({ reducedMotion = false }: LevelUpModalProps) {
                 animate={reducedMotion ? {} : { scale: 1 }}
                 transition={{ type: "spring", damping: 10, delay: 0.3 }}
                 className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/15 border-4 border-primary mb-4"
-                aria-label={`Level ${newLevel}`}
+                aria-label={t("levelUp.levelBadgeLabel", { level: newLevel })}
               >
                 <span className="text-3xl font-black text-primary">
                   {newLevel}

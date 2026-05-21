@@ -9,6 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Lock, Award, Check } from "lucide-react";
 import type { Badge } from "./useGamificationStore";
+import { useTranslation } from "react-i18next";
 
 interface BadgesGridProps {
   badges: Badge[];
@@ -17,6 +18,7 @@ interface BadgesGridProps {
 
 export function BadgesGrid({ badges, reducedMotion = false }: BadgesGridProps) {
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
+  const { t } = useTranslation("gamification");
 
   // Sort badges: earned first (newest first), then locked by progress
   const sortedBadges = [...badges].sort((a, b) => {
@@ -45,11 +47,11 @@ export function BadgesGrid({ badges, reducedMotion = false }: BadgesGridProps) {
   const getRarityLabel = (rarity: Badge["rarity"]) => {
     switch (rarity) {
       case "common":
-        return { text: "Common", className: "bg-gray-500/20 text-gray-400" };
+        return { text: t("badges.rarity.common"), className: "bg-gray-500/20 text-gray-400" };
       case "rare":
-        return { text: "Rare", className: "bg-blue-500/20 text-blue-400" };
+        return { text: t("badges.rarity.rare"), className: "bg-blue-500/20 text-blue-400" };
       case "epic":
-        return { text: "Epic", className: "bg-purple-500/20 text-purple-400" };
+        return { text: t("badges.rarity.epic"), className: "bg-purple-500/20 text-purple-400" };
     }
   };
 
@@ -60,7 +62,7 @@ export function BadgesGrid({ badges, reducedMotion = false }: BadgesGridProps) {
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg flex items-center gap-2">
               <Award className="w-5 h-5 text-primary" />
-              Badges
+              {t("badges.title")}
             </CardTitle>
             <BadgeUI variant="secondary">
               {badges.filter((b) => !b.isLocked).length}/{badges.length}
@@ -131,7 +133,7 @@ export function BadgesGrid({ badges, reducedMotion = false }: BadgesGridProps) {
                   <p className="text-sm text-muted-foreground">{badge.description}</p>
                   {badge.isLocked && (
                     <p className="text-xs text-primary mt-1">
-                      {badge.requirement} to unlock
+                      {t("badges.unlockRequirement", { requirement: badge.requirement })}
                     </p>
                   )}
                 </TooltipContent>
@@ -182,7 +184,7 @@ export function BadgesGrid({ badges, reducedMotion = false }: BadgesGridProps) {
                 ) : (
                   <div className="bg-green-500/10 rounded-xl p-4 border border-green-500/30">
                     <Check className="w-6 h-6 text-green-500 mx-auto mb-2" />
-                    <p className="text-sm text-green-500">Earned on</p>
+                    <p className="text-sm text-green-500">{t("badges.earnedOn")}</p>
                     <p className="text-foreground font-medium">
                       {selectedBadge.earnedAt?.toLocaleDateString()}
                     </p>

@@ -70,7 +70,7 @@ export function RewardCard({
 
           {/* Cost badge */}
           <Badge variant="secondary" className="text-xs font-semibold">
-            ⚡ {reward.cost} XP
+            ⚡ {t("rewards.cost", { cost: reward.cost })}
           </Badge>
 
           {/* CTA */}
@@ -80,7 +80,7 @@ export function RewardCard({
               animate={reducedMotion ? {} : { scale: 1 }}
               transition={{ type: "spring", damping: 10 }}
               className="flex items-center gap-1 text-green-500 text-sm font-semibold"
-              aria-label={`Redeemed on ${safeDate(reward.redeemedAt)}`}
+              aria-label={t("rewards.redeemedOnLabel", { date: safeDate(reward.redeemedAt) })}
             >
               <Check className="w-4 h-4" aria-hidden />
               {t("rewards.redeemed")}
@@ -91,7 +91,7 @@ export function RewardCard({
               onClick={() => onRedeem(reward.id)}
               disabled={!canAfford}
               className="w-full"
-              aria-label={`Redeem ${reward.name} for ${reward.cost} XP`}
+              aria-label={t("rewards.redeemLabel", { name: reward.name, cost: reward.cost })}
             >
               <ShoppingBag className="w-3 h-3 mr-1.5" aria-hidden />
               {t("rewards.redeem")}

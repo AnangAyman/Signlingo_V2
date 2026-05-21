@@ -30,11 +30,25 @@
     "celebrateBtn": "Celebrate"
   },
   "badges": {
+    "title": "Badges",
     "newBadgeToast": "New badge unlocked: {{name}}! {{icon}}",
     "lockedLabel": "locked",
     "unlockedLabel": "unlocked",
     "unlockedOn": "Unlocked on {{date}}",
-    "moreToUnlock": "{{remaining}} more to unlock"
+    "moreToUnlock": "{{remaining}} more to unlock",
+    "unlockRequirement": "{{requirement}} to unlock",
+    "earnedOn": "Earned on",
+    "earnedInline": "Earned {{date}}",
+    "progressLabel": "{{name}} progress",
+    "cardStateLabel": {
+      "locked": "{{name}} badge – locked",
+      "unlocked": "{{name}} badge – unlocked"
+    },
+    "rarity": {
+      "common": "Common",
+      "rare": "Rare",
+      "epic": "Epic"
+    }
   },
   "quests": {
     "title": "Daily Quests",
@@ -47,12 +61,24 @@
     "questNotReady": "Quest not ready: {{description}}",
     "markComplete": "Mark complete: {{description}}",
     "completed": "{{description}} – completed",
-    "progress": "{{current}}/{{total}}"
+    "progress": "{{current}}/{{total}}",
+    "progressLabel": "{{description}} progress",
+    "simulateProgressLabel": "Simulate one step of progress for: {{description}}"
   },
   "rewards": {
+    "title": "Rewards Shop",
+    "balance": "Your balance:",
+    "availableLabel": "Available rewards",
+    "scrollLeft": "Scroll rewards left",
+    "scrollRight": "Scroll rewards right",
+    "alreadyRedeemedToast": "{{name}} is already redeemed.",
+    "notEnoughXpToast": "Not enough XP! Need {{xp}} more XP.",
+    "redeemedToast": "You redeemed {{name}} for {{cost}} XP!",
     "redeemed": "Redeemed",
     "redeem": "Redeem",
-    "cost": "{{cost}} XP"
+    "cost": "{{cost}} XP",
+    "redeemedOnLabel": "Redeemed on {{date}}",
+    "redeemLabel": "Redeem {{name}} for {{cost}} XP"
   },
   "levelUp": {
     "title": "Level Up!",
@@ -61,6 +87,7 @@
     "closeLabel": "Close level up modal",
     "dismissLabel": "Dismiss level up modal and continue",
     "ariaLabel": "Level up – you reached level {{level}}",
+    "levelBadgeLabel": "Level {{level}}",
     "toast": "Congratulations! You reached level {{level}}!"
   }
 }
