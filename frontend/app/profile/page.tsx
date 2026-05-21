@@ -1,12 +1,14 @@
 import { PlaceholderPage } from "@/components/placeholder-page";
+import { useTranslation } from "react-i18next";
 
 export default function ProfilePage() {
+  const { t } = useTranslation("placeholder");
   return (
     <PlaceholderPage
       icon="👤"
-      title="Profile Coming Soon"
-      message="Profile customization is on its way. Soon you can upload an avatar, edit your details, and showcase your badges."
-      hint="Bio, social links, and achievement showcase are all planned."
+      title={t("profile.title")}
+      message={t("profile.message")}
+      hint={t("profile.hint")}
     />
   );
 }

@@ -1,11 +1,13 @@
 import { PlaceholderPage } from "@/components/placeholder-page";
+import { useTranslation } from "react-i18next";
 
 export default function SettingsPage() {
+  const { t } = useTranslation("placeholder");
   return (
     <PlaceholderPage
       icon="⚙️"
-      title="Settings Coming Soon"
-      message="Settings will be available in the next update — theme, language, notification preferences, and accessibility options."
+      title={t("settings.title")}
+      message={t("settings.message")}
     />
   );
 }

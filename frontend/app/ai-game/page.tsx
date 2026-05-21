@@ -6,8 +6,10 @@ import { AppHeader } from "@/components/app-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { backendPath } from "@/lib/api";
+import { useTranslation } from "react-i18next";
 
 export default function AIGamePage() {
+  const { t } = useTranslation("ai-game");
   const magicTouchUrl = backendPath("/magic_touch");
   const cameraPracticeUrl = backendPath("/capture");
 
@@ -18,14 +20,13 @@ export default function AIGamePage() {
       <main className="container mx-auto px-4 py-12 max-w-4xl">
         <div className="mb-8">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-3">
-            Django AI backend connected
+            {t("badge")}
           </p>
           <h1 className="text-4xl font-black text-foreground mb-3">
-            AI Practice Game
+            {t("title")}
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl">
-            The new Next.js frontend now links to the existing Django camera
-            and prediction flow while the full React game UI is being integrated.
+            {t("subtitle")}
           </p>
         </div>
 
@@ -35,16 +36,15 @@ export default function AIGamePage() {
               <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center mb-3">
                 <Gamepad2 className="w-6 h-6 text-primary" />
               </div>
-              <CardTitle>Magic Touch Game</CardTitle>
+              <CardTitle>{t("magicTouch.title")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
-                Open the Django-powered game page that uses the current
-                MediaPipe/static letter prediction backend.
+                {t("magicTouch.description")}
               </p>
               <Button asChild className="w-full">
                 <Link href={magicTouchUrl}>
-                  Open Magic Touch
+                  {t("magicTouch.button")}
                   <ExternalLink className="w-4 h-4 ml-2" />
                 </Link>
               </Button>
@@ -56,16 +56,15 @@ export default function AIGamePage() {
               <div className="w-12 h-12 rounded-xl bg-secondary/15 flex items-center justify-center mb-3">
                 <Camera className="w-6 h-6 text-secondary" />
               </div>
-              <CardTitle>Camera Practice</CardTitle>
+              <CardTitle>{t("cameraPractice.title")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
-                Use the existing Django camera capture page to test live
-                recognition before the final frontend game screen is finished.
+                {t("cameraPractice.description")}
               </p>
               <Button asChild variant="outline" className="w-full">
                 <Link href={cameraPracticeUrl}>
-                  Open Camera Practice
+                  {t("cameraPractice.button")}
                   <ExternalLink className="w-4 h-4 ml-2" />
                 </Link>
               </Button>
