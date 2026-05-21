@@ -1,0 +1,22 @@
+{
+  "package.page_title": "요금제 선택 - SignLingo",
+  "package.nav.dashboard": "대시보드",
+  "package.nav.courses": "코스",
+  "package.nav.leaderboard": "리더보드",
+  "package.nav.shop": "상점",
+  "package.nav.premium": "프리미엄",
+  "package.nav.logout": "로그아웃",
+  "package.header.badge": "프리미엄",
+  "package.header.title": "7일 무료 체험 이후 이용할 요금제를 선택하세요",
+  "package.card.family_badge": "4-6명",
+  "package.card.family_title": "가족 요금제",
+  "package.card.family_duration": "12개월",
+  "package.card.yearly_badge": "가장 인기",
+  "package.card.yearly_duration": "12개월",
+  "package.card.monthly_duration": "1개월",
+  "package.pricing.prefix": "7일 무료 체험 후 Rp",
+  "package.pricing.per_year": "연간 결제",
+  "package.pricing.billed_prefix": "(월 Rp",
+  "package.pricing.billed_suffix": ", 연간 청구) 및 관련 세금 적용",
+  "package.cta": "7일 무료 체험 시작"
+}

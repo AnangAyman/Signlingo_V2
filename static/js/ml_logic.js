@@ -8,6 +8,25 @@ const questionEl = document.getElementById('question');
 const progressBarFill = document.getElementById('progress-bar');
 const visualArea = document.querySelector('.quiz-visual-area');
 const controlsContainer = document.getElementById('ml-controls');
+const gameCard = document.querySelector('.quiz-card');
+
+const uiText = {
+    startCapture: gameCard?.dataset.startCaptureLabel || 'Start Pose Capture',
+    tryAgain: gameCard?.dataset.tryAgainLabel || 'Try Again',
+    webcamError: gameCard?.dataset.webcamError || 'Could not access webcam. Please allow camera access and refresh.',
+    fetchError: gameCard?.dataset.fetchError || 'Could not load ML challenge.',
+    practiceComplete: gameCard?.dataset.practiceComplete || 'Practice Complete!',
+    feedbackCorrect: gameCard?.dataset.feedbackCorrect || 'Great job!',
+    feedbackIncorrect: gameCard?.dataset.feedbackIncorrect || 'Incorrect!',
+};
+
+const endpoints = {
+    saveResults: gameCard?.dataset.saveResultsUrl || '/save-session-results',
+    markStatus: gameCard?.dataset.markStatusUrl || '/mark-lesson-status',
+    resultSummary: gameCard?.dataset.resultSummaryUrl || '/result-summary',
+    getQuestion: gameCard?.dataset.questionUrl || '/get-question-ml',
+    predict: gameCard?.dataset.predictUrl || '/predict',
+};
 
 let questionsAsked = 0;
 let correctAnswersCount = 0;
@@ -26,7 +45,7 @@ if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         })
         .catch(err => {
             console.error('Webcam error:', err);
-            questionEl.innerText = 'Could not access webcam. Please allow camera access and refresh.';
+            questionEl.innerText = uiText.webcamError;
             if (startBtn) startBtn.disabled = true;
         });
 }
@@ -47,10 +66,10 @@ function showFeedbackBanner(isCorrect, correctAns) {
     banner.classList.remove('correct', 'incorrect');
     if (isCorrect) {
         banner.classList.add('correct');
-        feedbackText.innerText = 'Great job!';
+        feedbackText.innerText = uiText.feedbackCorrect;
     } else {
         banner.classList.add('incorrect');
-        feedbackText.innerText = `Incorrect!`;
+        feedbackText.innerText = uiText.feedbackIncorrect;
     }
     banner.classList.add('show');
 }
@@ -66,7 +85,7 @@ async function mlGameSessionCompleted(lessonKey) {
     const disclaimer = document.querySelector('.webcam-disclaimer');
     if (disclaimer) disclaimer.style.display = 'none';
 
-    questionEl.innerText = 'Practice Complete!';
+    questionEl.innerText = uiText.practiceComplete;
     questionEl.classList.add('quiz-complete-title');
 
     const accuracy = (correctAnswersCount / TOTAL_QUESTIONS) * 100;
@@ -74,7 +93,7 @@ async function mlGameSessionCompleted(lessonKey) {
 
     // --- Save ML results for summary ---
     try {
-        await fetch('/save-session-results', {
+        await fetch(endpoints.saveResults, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -91,7 +110,7 @@ async function mlGameSessionCompleted(lessonKey) {
     // --- Mark lesson as complete for tracking ---
     if (lessonKey) {
         try {
-            await fetch('/mark-lesson-status', {
+            await fetch(endpoints.markStatus, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ lesson_key: lessonKey, status: 'completed' })
@@ -102,14 +121,13 @@ async function mlGameSessionCompleted(lessonKey) {
     }
 
     // --- Redirect immediately to unified result summary ---
-    window.location.href = '/result-summary';
+    window.location.href = endpoints.resultSummary;
 }
 
 // --- Load Question ---
 async function loadQuestion() {
     if (questionsAsked >= TOTAL_QUESTIONS) {
-        const gameContainer = document.querySelector('.quiz-card');
-        const lessonKey = gameContainer ? gameContainer.dataset.lessonKey : null;
+        const lessonKey = gameCard ? gameCard.dataset.lessonKey : null;
         mlGameSessionCompleted(lessonKey);
         return;
     }
@@ -117,7 +135,7 @@ async function loadQuestion() {
     hideFeedbackBanner();
 
     try {
-        const res = await fetch('/get-question-ml');
+        const res = await fetch(endpoints.getQuestion);
         if (!res.ok) throw new Error('Failed to fetch ML question.');
 
         const data = await res.json();
@@ -130,11 +148,11 @@ async function loadQuestion() {
 
         startBtn.disabled = false;
         startBtn.style.display = 'block';
-        startBtn.textContent = 'Start Pose Capture';
+        startBtn.textContent = uiText.startCapture;
         startBtn.onclick = startCountdown;
     } catch (error) {
         console.error("ML Logic: Error loading question:", error);
-        questionEl.innerText = 'Could not load ML challenge.';
+        questionEl.innerText = uiText.fetchError;
         startBtn.disabled = true;
     }
 }
@@ -171,7 +189,7 @@ async function captureAndSend() {
         formData.append('image', blob, 'snapshot.jpg');
 
         try {
-            const res = await fetch('/predict', { method: 'POST', body: formData });
+            const res = await fetch(endpoints.predict, { method: 'POST', body: formData });
             if (!res.ok) throw new Error('Prediction request failed.');
 
             const data = await res.json();
@@ -180,7 +198,7 @@ async function captureAndSend() {
             console.error("ML Logic: Error during prediction:", err);
             showFeedbackBanner(false, correctAnswer);
             startBtn.disabled = false;
-            startBtn.textContent = 'Try Again';
+            startBtn.textContent = uiText.tryAgain;
         } finally {
             setTimeout(() => { countdownEl.textContent = ''; }, 1000);
         }
@@ -221,7 +239,7 @@ cancelSkip.addEventListener('click', () => {
 
 confirmSkip.addEventListener('click', async () => {
     try {
-        await fetch('/save-session-results', {
+        await fetch(endpoints.saveResults, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -235,7 +253,7 @@ confirmSkip.addEventListener('click', async () => {
         console.error('Failed to mark ML as skipped:', error);
     }
 
-    window.location.href = '/result-summary';
+    window.location.href = endpoints.resultSummary;
 });
 
 // --- Close modal when clicking outside ---

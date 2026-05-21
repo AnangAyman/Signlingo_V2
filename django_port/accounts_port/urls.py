@@ -4,6 +4,7 @@ from . import views
 
 
 urlpatterns = [
+    path("language/<str:code>", views.set_language, name="set_language"),
     path("register", views.register, name="register"),
     path("verify/<str:token>", views.verify_email, name="verify_email"),
     path("login", views.login, name="login"),

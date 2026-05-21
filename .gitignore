@@ -21,6 +21,11 @@ Oracle_DB/
 
 #local files
 document/
+!document/
+document/*
+!document/auth/
+document/auth/*
+!document/auth/authentication_flow.md
 !DOCX/
 document.md
 excute.md

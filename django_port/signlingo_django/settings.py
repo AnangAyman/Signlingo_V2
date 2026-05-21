@@ -1,4 +1,6 @@
 import os
+import socket
+import sys
 from pathlib import Path
 from urllib.parse import urlparse, urlunparse
 
@@ -46,6 +48,24 @@ def _normalize_database_url(value: str) -> str:
     return value
 
 
+def _is_local_tunnel_database(value: str) -> bool:
+    """Detect the documented SSH tunnel database URL."""
+    parsed = urlparse(value)
+    return parsed.scheme == "mysql" and parsed.hostname in {
+        "127.0.0.1",
+        "localhost",
+        "host.docker.internal",
+    } and parsed.port == 3307
+
+
+def _is_tcp_port_open(host: str, port: int, timeout: float = 0.8) -> bool:
+    try:
+        with socket.create_connection((host, port), timeout=timeout):
+            return True
+    except OSError:
+        return False
+
+
 # Keep local development aligned with the repo's .env file.
 _load_local_env(PROJECT_ROOT / ".env")
 
@@ -54,6 +74,23 @@ if "DATABASE_URL" not in os.environ and "DATABASE_URI" in os.environ:
     os.environ["DATABASE_URL"] = _normalize_database_url(os.environ["DATABASE_URI"])
 if "DATABASE_URI" not in os.environ and "DATABASE_URL" in os.environ:
     os.environ["DATABASE_URI"] = os.environ["DATABASE_URL"]
+
+sqlite_database_url = f"sqlite:///{(DJANGO_INSTANCE_DIR / 'db.sqlite3').as_posix()}"
+configured_database_url = os.environ.get("DATABASE_URL") or os.environ.get("DATABASE_URI")
+if configured_database_url:
+    normalized_database_url = _normalize_database_url(configured_database_url)
+    if _is_local_tunnel_database(normalized_database_url):
+        parsed_database_url = urlparse(normalized_database_url)
+        tunnel_host = parsed_database_url.hostname or "127.0.0.1"
+        tunnel_port = parsed_database_url.port or 3307
+        if not _is_tcp_port_open(tunnel_host, tunnel_port):
+            print(
+                f"[signlingo] Warning: SSH tunnel {tunnel_host}:{tunnel_port} is unavailable; "
+                f"falling back to SQLite at {DJANGO_INSTANCE_DIR / 'db.sqlite3'}",
+                file=sys.stderr,
+            )
+            os.environ["DATABASE_URL"] = sqlite_database_url
+            os.environ["DATABASE_URI"] = sqlite_database_url
 
 # Required for session management, mirroring the role Flask's SECRET_KEY had in app.py.
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-signlingo-dev-key")
@@ -138,7 +175,7 @@ ASGI_APPLICATION = "signlingo_django.asgi.application"
 
 DATABASES = {
     "default": dj_database_url.config(
-        default=f"sqlite:///{(DJANGO_INSTANCE_DIR / 'db.sqlite3').as_posix()}",
+        default=sqlite_database_url,
         conn_max_age=600,
     )
 }

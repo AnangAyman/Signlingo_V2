@@ -42,6 +42,36 @@ h1, h2, h3 {
     margin: 0 auto;
 }
 
+.page-language-switcher {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    display: flex;
+    gap: var(--space-s);
+    z-index: 10;
+}
+
+.page-language-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: var(--white);
+    color: var(--neutral-dark);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.page-language-chip.active {
+    background: linear-gradient(135deg, var(--primary) 0%, #008B94 100%);
+    color: var(--white);
+}
+
 /* Back Button */
 .back-button {
     position: absolute;
@@ -478,6 +508,11 @@ h1, h2, h3 {
 
     .form-row {
         grid-template-columns: 1fr;
+    }
+
+    .page-language-switcher {
+        top: 16px;
+        right: 16px;
     }
 }
 

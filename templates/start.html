@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ current_language() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Choose Your Course - SignLingo</title>
+    <title>{{ t('start.page_title') }}</title>
     <!-- External Fonts and Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,12 +13,16 @@
     <link rel="stylesheet" href="/static/css/start_style.css">
 </head>
 <body>
+    <div class="page-language-switcher" aria-label="{{ t('language.switcher_label') }}">
+        <a class="page-language-chip{% if current_language() == 'en' %} active{% endif %}" href="{{ url_for('auth.set_language', code='en') }}?next={{ request.path }}">{{ t('language.en') }}</a>
+        <a class="page-language-chip{% if current_language() == 'ko' %} active{% endif %}" href="{{ url_for('auth.set_language', code='ko') }}?next={{ request.path }}">{{ t('language.ko') }}</a>
+    </div>
 
     <div class="start-container">
         <!-- Page Header -->
         <header class="page-header">
-            <h1 class="page-title">Welcome! Choose Your <span class="highlight">First Course</span></h1>
-            <p class="page-subtitle">Select a sign language to begin your learning journey. You can always explore other courses later.</p>
+            <h1 class="page-title">{{ t('start.header.title_prefix') }} <span class="highlight">{{ t('start.header.title_highlight') }}</span></h1>
+            <p class="page-subtitle">{{ t('start.header.subtitle') }}</p>
         </header>
 
         <!-- Course Selection Grid -->
@@ -27,13 +31,13 @@
             <!-- Available Course -->
             <a href="/dashboard" class="course-card">
                 <div class="flag-container">
-                    <img src="../static/Assets/Indonesia.png" alt="Indonesia Flag" class="flag-image">
+                    <img src="/static/Assets/Indonesia.png" alt="Indonesia Flag" class="flag-image">
                 </div>
                 <div class="course-info">
                     <h3 class="course-title">Bisindo</h3>
                     <p class="learners-count">
                         <i class="fas fa-users"></i>
-                        <span>1,247 learners</span>
+                        <span>1,247 {{ t('start.available.learners') }}</span>
                     </p>
                 </div>
             </a>
@@ -42,12 +46,12 @@
             <div class="course-card locked">
                 <div class="flag-container">
                     <div class="lock-overlay"><i class="fas fa-lock"></i></div>
-                    <img src="../static/Assets/America.png" alt="USA Flag" class="flag-image">
+                    <img src="/static/Assets/America.png" alt="USA Flag" class="flag-image">
                 </div>
                 <div class="course-info">
                     <h3 class="course-title">ASL</h3>
                     <p class="learners-count">
-                        <span>Coming Soon</span>
+                        <span>{{ t('start.coming_soon') }}</span>
                     </p>
                 </div>
             </div>
@@ -56,12 +60,12 @@
             <div class="course-card locked">
                 <div class="flag-container">
                     <div class="lock-overlay"><i class="fas fa-lock"></i></div>
-                    <img src="../static/Assets/British.png" alt="UK Flag" class="flag-image">
+                    <img src="/static/Assets/British.png" alt="UK Flag" class="flag-image">
                 </div>
                 <div class="course-info">
                     <h3 class="course-title">BSL</h3>
                     <p class="learners-count">
-                        <span>Coming Soon</span>
+                        <span>{{ t('start.coming_soon') }}</span>
                     </p>
                 </div>
             </div>
@@ -70,12 +74,12 @@
             <div class="course-card locked">
                 <div class="flag-container">
                     <div class="lock-overlay"><i class="fas fa-lock"></i></div>
-                    <img src="../static/Assets/France.png" alt="France Flag" class="flag-image">
+                    <img src="/static/Assets/France.png" alt="France Flag" class="flag-image">
                 </div>
                 <div class="course-info">
                     <h3 class="course-title">LSF</h3>
                     <p class="learners-count">
-                        <span>Coming Soon</span>
+                        <span>{{ t('start.coming_soon') }}</span>
                     </p>
                 </div>
             </div>
@@ -84,12 +88,12 @@
             <div class="course-card locked">
                 <div class="flag-container">
                     <div class="lock-overlay"><i class="fas fa-lock"></i></div>
-                    <img src="../static/Assets/China.png" alt="China Flag" class="flag-image">
+                    <img src="/static/Assets/China.png" alt="China Flag" class="flag-image">
                 </div>
                 <div class="course-info">
                     <h3 class="course-title">CSL</h3>
                     <p class="learners-count">
-                        <span>Coming Soon</span>
+                        <span>{{ t('start.coming_soon') }}</span>
                     </p>
                 </div>
             </div>

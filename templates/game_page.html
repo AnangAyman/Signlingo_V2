@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ current_language() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SignLingo</title>
+    <title>{{ t('game.quiz.page_title') }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,6 +13,10 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/game_style.css') }}">
 </head>
 <body>
+    <div class="page-language-switcher" aria-label="{{ t('language.switcher_label') }}">
+        <a class="page-language-chip{% if current_language() == 'en' %} active{% endif %}" href="{{ url_for('auth.set_language', code='en') }}?next={{ request.path }}">{{ t('language.en') }}</a>
+        <a class="page-language-chip{% if current_language() == 'ko' %} active{% endif %}" href="{{ url_for('auth.set_language', code='ko') }}?next={{ request.path }}">{{ t('language.ko') }}</a>
+    </div>
     <button class="back-button" onclick="window.location.href='/dashboard'">
         <svg width="24" height="24" viewBox="0 0 24" fill="none">
             <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -30,11 +34,11 @@
             
             <div class="game-header">
                 <div class="header-text">
-                    <span class="module-badge">Practice</span>
-                    <h1>{{ current_lesson.title if current_lesson else "Practice" }}</h1>
+                    <span class="module-badge">{{ t('game.quiz.badge') }}</span>
+                    <h1>{{ current_lesson.title if current_lesson else t('game.quiz.fallback_title') }}</h1>
                 </div>
                 <div class="progress-info">
-                    <span class="progress-label">Module Progress</span>
+                    <span class="progress-label">{{ t('game.quiz.progress') }}</span>
                     <div class="module-progress-container">
                         <div class="module-progress-bar" style="width: {{ module_progress_percent }}%;"></div>
                     </div>
@@ -50,7 +54,7 @@
                 <img id="sign-image" src="{{ url_for('static', filename='Assets/great_job.png') }}" alt="Sign Language Image" class="sign-image-style">
             </div>
 
-            <div id="question" class="question-text">Loading question...</div>
+            <div id="question" class="question-text">{{ t('game.quiz.loading_question') }}</div>
             
             <div id="choices" class="choices-grid"></div>
 
@@ -72,7 +76,7 @@
 
     <button class="skip-button" id="skip-button">
         <i class="fa-solid fa-forward"></i>
-        Skip Practice
+        {{ t('game.quiz.skip_button') }}
     </button>
 
     <!-- Skip Confirmation Modal -->
@@ -81,11 +85,11 @@
             <div class="modal-icon">
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
-            <h3 class="modal-title">Skip this practice?</h3>
-            <p class="modal-text">You won't earn any XP if you skip. Are you sure you want to continue?</p>
+            <h3 class="modal-title">{{ t('game.quiz.skip_title') }}</h3>
+            <p class="modal-text">{{ t('game.quiz.skip_body') }}</p>
             <div class="modal-actions">
-                <button class="modal-button cancel-button" id="cancel-skip">Cancel</button>
-                <button class="modal-button confirm-button" id="confirm-skip">Skip Practice</button>
+                <button class="modal-button cancel-button" id="cancel-skip">{{ t('game.quiz.cancel') }}</button>
+                <button class="modal-button confirm-button" id="confirm-skip">{{ t('game.quiz.confirm_skip') }}</button>
             </div>
         </div>
     </div>
@@ -96,23 +100,23 @@
             <div class="modal-icon modal-icon-heart">
                 <i class="fa-solid fa-heart-crack"></i>
             </div>
-            <h3 class="modal-title">You're out of lives!</h3>
-            <p class="modal-text">Choose an option to continue learning:</p>
+            <h3 class="modal-title">{{ t('game.quiz.out_of_lives_title') }}</h3>
+            <p class="modal-text">{{ t('game.quiz.out_of_lives_body') }}</p>
             
             <div class="lives-options">
                 <button class="modal-button premium-button" onclick="window.location.href='/premium'">
                     <i class="fa-solid fa-crown"></i>
-                    Get Premium
+                    {{ t('game.quiz.get_premium') }}
                 </button>
                 
                 <button class="modal-button ad-button" id="watch-ad-button">
                     <i class="fa-solid fa-video"></i>
-                    Watch an Ad
+                    {{ t('game.quiz.watch_ad') }}
                 </button>
                 
                 <button class="modal-button secondary-full-button" onclick="window.location.href='/dashboard'">
                     <i class="fa-solid fa-arrow-left"></i>
-                    Back to Dashboard
+                    {{ t('game.quiz.back_dashboard') }}
                 </button>
             </div>
         </div>

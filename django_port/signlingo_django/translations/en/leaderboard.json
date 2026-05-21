@@ -1,0 +1,20 @@
+{
+  "leaderboard.page_title": "Leaderboard - SignLingo",
+  "leaderboard.nav.dashboard": "Dashboard",
+  "leaderboard.nav.courses": "Courses",
+  "leaderboard.nav.leaderboard": "Leaderboard",
+  "leaderboard.nav.shop": "Shop",
+  "leaderboard.nav.premium": "Premium",
+  "leaderboard.nav.logout": "Logout",
+  "leaderboard.dropup.profile": "Profile",
+  "leaderboard.header.title": "Leaderboards",
+  "leaderboard.header.subtitle": "Compete with others and climb the ranks!",
+  "leaderboard.league.suffix": "League",
+  "leaderboard.league.subtitle": "Your competitive tier",
+  "leaderboard.friends.title": "Friends",
+  "leaderboard.friends.subtitle": "Challenge your friends",
+  "leaderboard.modal.title": "Add a Friend",
+  "leaderboard.modal.search_placeholder": "Search by name...",
+  "leaderboard.modal.helper": "Enter a name to find and add friends.",
+  "leaderboard.points_label": "XP"
+}

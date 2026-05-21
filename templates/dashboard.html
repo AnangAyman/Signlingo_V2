@@ -1,30 +1,34 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ current_language() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Learning Dashboard</title>
+    <title>{{ t('dashboard.page_title') }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="static/css/global_style.css">
-    <link rel="stylesheet" href="static/css/home_style.css">
+    <link rel="stylesheet" href="/static/css/global_style.css">
+    <link rel="stylesheet" href="/static/css/home_style.css">
 </head>
 <body>
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <a class="sidebar-brand" href="/dashboard">SignLingo</a>
+            <div class="sidebar-language-switcher" aria-label="{{ t('language.switcher_label') }}">
+                <a class="sidebar-language-chip{% if current_language() == 'en' %} active{% endif %}" href="{{ url_for('auth.set_language', code='en') }}?next={{ request.path }}">{{ t('language.en') }}</a>
+                <a class="sidebar-language-chip{% if current_language() == 'ko' %} active{% endif %}" href="{{ url_for('auth.set_language', code='ko') }}?next={{ request.path }}">{{ t('language.ko') }}</a>
+            </div>
         </div>
         <div class="sidebar-menu">
             <a class="sidebar-link active" href="/dashboard">
                 <i class="fas fa-house"></i>
-                <span>Dashboard</span>
+                <span>{{ t('dashboard.nav.dashboard') }}</span>
             </a>
             <a class="sidebar-link" href="/course">
                 <i class="fas fa-book"></i>
-                <span>Courses</span>
+                <span>{{ t('dashboard.nav.courses') }}</span>
             </a>
             <!-- <a class="sidebar-link" href="/daily-quiz">
                 <i class="fas fa-clipboard-list"></i>
@@ -32,15 +36,15 @@
             </a> -->
             <a class="sidebar-link" href="/leaderboard">
                 <i class="fas fa-trophy"></i>
-                <span>Leaderboard</span>
+                <span>{{ t('dashboard.nav.leaderboard') }}</span>
             </a>
             <a class="sidebar-link" href="/shop">
                 <i class="fas fa-shopping-bag"></i>
-                <span>Shop</span>
+                <span>{{ t('dashboard.nav.shop') }}</span>
             </a>
             <a class="sidebar-link" href="/premium">
                 <i class="fas fa-crown"></i>
-                <span>Premium</span>
+                <span>{{ t('dashboard.nav.premium') }}</span>
             </a>
             <button class="more-options-button" id="moreOptionsButton">
                 <i class="fas fa-ellipsis-h"></i>
@@ -56,19 +60,23 @@
             </a>
             <a class="logout-link" href="/logout">
                 <i class="fas fa-sign-out-alt"></i>
-                <span>Logout</span>
+                <span>{{ t('dashboard.nav.logout') }}</span>
             </a>
         </div>
     </nav>
 
     <div class="dropup-menu" id="dropupMenu">
+        <div class="dropup-language-switcher" aria-label="{{ t('language.switcher_label') }}">
+            <a class="dropup-language-chip{% if current_language() == 'en' %} active{% endif %}" href="{{ url_for('auth.set_language', code='en') }}?next={{ request.path }}">{{ t('language.en') }}</a>
+            <a class="dropup-language-chip{% if current_language() == 'ko' %} active{% endif %}" href="{{ url_for('auth.set_language', code='ko') }}?next={{ request.path }}">{{ t('language.ko') }}</a>
+        </div>
         <a href="/edit-account">
             <i class="fas fa-user-circle"></i>
             <span id="profileName">{{ full_name }}</span>
         </a>
         <a href="/logout" class="logout-link-mobile">
             <i class="fas fa-sign-out-alt"></i>
-            <span>Logout</span>
+            <span>{{ t('dashboard.nav.logout') }}</span>
         </a>
     </div>
 
@@ -104,26 +112,26 @@
             {% endwith %}
 
             <div class="welcome-section mb-4">
-                <h1 class="hero-title">Welcome, {{ full_name.split()[0] }}!</h1>
+                <h1 class="hero-title">{{ t('dashboard.welcome').format(name=full_name.split()[0]) }}</h1>
             </div>
 
             <div class="row g-4">
                 <div class="col-lg-8">
                     <div class="hero-card mb-4">
                         <div class="hero-content">
-                            <span class="hero-label">Let's start</span>
-                            <h2 class="section-title">Bisindo Letters</h2>
+                            <span class="hero-label">{{ t('dashboard.hero.label') }}</span>
+                            <h2 class="section-title">{{ t('dashboard.hero.title') }}</h2>
                             <p class="body-large">
                                 {% if module_complete %}
-                                You've completed the Bisindo path. Review any lesson or jump back in for more practice.
+                                {{ t('dashboard.hero.complete') }}
                                 {% elif current_lesson %}
-                                Next step: <strong>{{ current_lesson.title }}</strong>. Keep moving through the Bisindo path one lesson at a time.
+                                {{ t('dashboard.hero.next_prefix') }} <strong>{{ current_lesson.title }}</strong>{{ t('dashboard.hero.next_suffix') }}
                                 {% else %}
-                                Test your skills in Bisindo Letters, where you'll learn to express written communication effectively using Bahasa Isyarat Indonesia (Indonesian Sign Language).
+                                {{ t('dashboard.hero.default') }}
                                 {% endif %}
                             </p>
                             <button class="btn-primary" onclick="window.location.href='{{ current_lesson.url if current_lesson else '/video_learning' }}'">
-                                {% if module_complete %}Review Lessons{% else %}Resume {{ current_lesson.title if current_lesson else 'Learning' }}{% endif %}
+                                {% if module_complete %}{{ t('dashboard.hero.review') }}{% else %}{{ t('dashboard.hero.resume_button') }}{% endif %}
                                 <i class="fas fa-arrow-right"></i>
                             </button>
                         </div>
@@ -141,13 +149,13 @@
                     </div> -->
 
                     <div class="section-header">
-                        <h3 class="subheading">All modules</h3>
+                        <h3 class="subheading">{{ t('dashboard.modules.heading') }}</h3>
                     </div>
 
                     <div class="module-card">
                         <div class="module-header">
                             <div>
-                                <span class="module-badge">MODULE</span>
+                                <span class="module-badge">{{ t('dashboard.modules.badge') }}</span>
                                 <h3 class="subheading mt-2">Module 1</h3>
                             </div>
                             <button class="icon-button icon-button-primary" onclick="window.location.href='/roadmap'">
@@ -158,14 +166,14 @@
                             <div class="progress-bar" style="width: {{ module_progress_percent }}%"></div>
                         </div>
                         <div class="module-footer">
-                            <span class="caption">{{ module_progress_percent|round|int }}% practiced · {{ completed_lessons_count }}/{{ total_lessons_count }} lessons</span>
+                            <span class="caption">{{ t('dashboard.modules.practiced_lessons').format(percent=module_progress_percent|round|int, completed=completed_lessons_count, total=total_lessons_count) }}</span>
                         </div>
                     </div>
 
                     <div class="module-card locked">
                         <div class="module-header">
                             <div>
-                                <span class="module-badge">MODULE</span>
+                                <span class="module-badge">{{ t('dashboard.modules.badge') }}</span>
                                 <h3 class="subheading mt-2">Module 2</h3>
                             </div>
                             <button class="icon-button icon-button-primary">
@@ -176,14 +184,14 @@
                             <div class="progress-bar" style="width: 0%"></div>
                         </div>
                         <div class="module-footer">
-                            <span class="caption">0% practiced</span>
+                            <span class="caption">{{ t('dashboard.modules.practiced_only').format(percent=0) }}</span>
                         </div>
                     </div>
 
                     <div class="module-card locked">
                         <div class="module-header">
                             <div>
-                                <span class="module-badge">MODULE</span>
+                                <span class="module-badge">{{ t('dashboard.modules.badge') }}</span>
                                 <h3 class="subheading mt-2">Module 3</h3>
                             </div>
                             <button class="icon-button icon-button-primary" onclick="window.location.href='/roadmap'">
@@ -194,7 +202,7 @@
                             <div class="progress-bar" style="width: 0%"></div>
                         </div>
                         <div class="module-footer">
-                            <span class="caption">0% practiced</span>
+                            <span class="caption">{{ t('dashboard.modules.practiced_only').format(percent=0) }}</span>
                         </div>
                     </div>
                 </div>
@@ -204,21 +212,21 @@
                         <div class="summary-item">
                             <i class="fas fa-book-open summary-icon"></i>
                             <div>
-                                <div class="summary-label">Current Course</div>
-                                <div class="summary-value">Bisindo</div>
+                                <div class="summary-label">{{ t('dashboard.summary.current_course') }}</div>
+                                <div class="summary-value">{{ t('dashboard.summary.course_value') }}</div>
                             </div>
                         </div>
                         <div class="summary-item">
                             <i class="fas fa-star summary-icon"></i>
                             <div>
-                                <div class="summary-label">Total XP</div>
+                                <div class="summary-label">{{ t('dashboard.summary.total_xp') }}</div>
                                 <div class="summary-value">{{user_points}} XP</div>
                             </div>
                         </div>
                         <div class="summary-item">
                             <i class="fas fa-heart summary-icon-heart"></i>
                             <div>
-                                <div class="summary-label">Lives</div>
+                                <div class="summary-label">{{ t('dashboard.summary.lives') }}</div>
                                 <div class="summary-value">{{user.lives}}</div>
                             </div>
                         </div>
@@ -228,10 +236,10 @@
                         <div class="premium-icon">
                             <i class="fas fa-crown"></i>
                         </div>
-                        <h3 class="subheading mb-2">Try Premium</h3>
-                        <p class="caption-white mb-3">No ads, daily quiz & unlimited hearts</p>
+                        <h3 class="subheading mb-2">{{ t('dashboard.premium.title') }}</h3>
+                        <p class="caption-white mb-3">{{ t('dashboard.premium.caption') }}</p>
                         <button class="btn-premium" onclick="window.location.href='/premium'">
-                            Upgrade Now
+                            {{ t('dashboard.premium.button') }}
                             <i class="fas fa-arrow-right"></i>
                         </button>
                     </div>
@@ -243,7 +251,7 @@
                             </div>
                             <div class="streak-count">
                                 <div class="streak-number">{{ current_streak }}</div>
-                                <div class="streak-label">day streak</div>
+                                <div class="streak-label">{{ t('dashboard.streak.label') }}</div>
                             </div>
                         </div>
                         
@@ -267,20 +275,20 @@
                         {% if current_streak >= 7 %}
                         <div class="streak-message success">
                             <i class="fas fa-trophy"></i>
-                            <strong>Amazing!</strong> You've maintained a full week streak! Keep it up!
+                            <strong>{{ t('dashboard.streak.amazing_title') }}</strong> {{ t('dashboard.streak.amazing_body') }}
                         </div>
                         {% elif current_streak >= 3 %}
                         <div class="streak-message success">
                             <i class="fas fa-fire"></i>
-                            <strong>Great work!</strong> You're building a solid learning habit!
+                            <strong>{{ t('dashboard.streak.great_title') }}</strong> {{ t('dashboard.streak.great_body') }}
                         </div>
                         {% elif current_streak == 0 %}
                         <div class="streak-message warning">
-                            <i class="fas fa-info-circle"></i>Complete a lesson today to start your streak!
+                            <i class="fas fa-info-circle"></i>{{ t('dashboard.streak.zero') }}
                         </div>
                         {% else %}
                         <div class="streak-message">
-                            <i class="fas fa-thumbs-up"></i>Keep going! Complete lessons daily to build your streak.
+                            <i class="fas fa-thumbs-up"></i>{{ t('dashboard.streak.keep_going') }}
                         </div>
                         {% endif %}
                     </div>
@@ -288,14 +296,14 @@
                     <div class="rank-card mb-4">
                         <div class="rank-header">
                             <i class="fas fa-trophy"></i>
-                            <h3 class="subheading">Your League</h3>
+                            <h3 class="subheading">{{ t('dashboard.rank.title') }}</h3>
                         </div>
                         <div class="rank-content">
                             <div class="rank-badge {{ user_league|lower }}">
                                 <i class="fas fa-medal"></i>
                             </div>
                             <div class="rank-info">
-                                <div class="rank-league">{{ user_league }} league</div>
+                                <div class="rank-league">{{ user_league }} {{ t('dashboard.rank.league_suffix') }}</div>
                                 <div class="rank-position rank-{{ user_rank }}">
                                     {{ ordinal(user_rank) }} · {{ user_points }} XP
                                 </div>
@@ -308,6 +316,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../static/js/navbar_logic.js"></script>
+    <script src="/static/js/navbar_logic.js"></script>
 </body>
 </html>

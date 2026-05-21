@@ -120,3 +120,11 @@ def seed_initial_data():
         # IMPORTANT: In a real application, you must protect and rotate this default admin credential.
         admin_user.set_password("admin")
         admin_user.save(update_fields=["password"])
+
+
+def ensure_seed_data():
+    # When the app falls back to a fresh SQLite database, bootstrap the minimum legacy data
+    # so dashboard/lesson flows still work without a separate manual seed step.
+    if Lesson.objects.exists():
+        return
+    seed_initial_data()
