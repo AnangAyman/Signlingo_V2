@@ -1,13 +1,59 @@
 import os
 from pathlib import Path
+from urllib.parse import urlparse, urlunparse
 
 import dj_database_url
+
+try:
+    import pymysql
+
+    pymysql.install_as_MySQLdb()
+except ImportError:
+    # If PyMySQL is missing, Django will surface a clearer backend error later.
+    pass
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 PROJECT_ROOT = BASE_DIR.parent
 DJANGO_INSTANCE_DIR = PROJECT_ROOT / "django_instance"
 DJANGO_INSTANCE_DIR.mkdir(exist_ok=True)
+
+
+def _load_local_env(path: Path) -> None:
+    """Load a local .env file without adding a new dependency."""
+    if not path.exists():
+        return
+
+    for raw_line in path.read_text().splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key and key not in os.environ:
+            os.environ[key] = value
+
+
+def _normalize_database_url(value: str) -> str:
+    """Convert SQLAlchemy-style URLs into a form dj-database-url understands."""
+    if not value:
+        return value
+
+    parsed = urlparse(value)
+    if parsed.scheme == "mysql+pymysql":
+        return urlunparse(parsed._replace(scheme="mysql"))
+    return value
+
+
+# Keep local development aligned with the repo's .env file.
+_load_local_env(PROJECT_ROOT / ".env")
+
+# Support both names so older docs and current Django settings stay in sync.
+if "DATABASE_URL" not in os.environ and "DATABASE_URI" in os.environ:
+    os.environ["DATABASE_URL"] = _normalize_database_url(os.environ["DATABASE_URI"])
+if "DATABASE_URI" not in os.environ and "DATABASE_URL" in os.environ:
+    os.environ["DATABASE_URI"] = os.environ["DATABASE_URL"]
 
 # Required for session management, mirroring the role Flask's SECRET_KEY had in app.py.
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-signlingo-dev-key")
@@ -23,6 +69,10 @@ EMAIL_USE_TLS = os.environ.get("DJANGO_EMAIL_USE_TLS", "true").lower() == "true"
 EMAIL_HOST_USER = os.environ.get("DJANGO_EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("DJANGO_EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = os.environ.get("DJANGO_DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "signlingo@example.com")
+
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
+GOOGLE_REDIRECT_URI = os.environ.get("GOOGLE_REDIRECT_URI", "http://127.0.0.1:8000/login/google/callback")
 
 render_hostname = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
 allowed_hosts = [host.strip() for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "*").split(",") if host.strip()]

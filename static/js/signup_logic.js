@@ -54,6 +54,10 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.social-button').forEach(button => {
         button.addEventListener('click', function() {
             const provider = this.textContent.trim();
+            if (this.getAttribute('data-provider') === 'google') {
+                window.location.href = '/login/google';
+                return;
+            }
             alert(`Sign in with ${provider} initiated`);
         });
     });

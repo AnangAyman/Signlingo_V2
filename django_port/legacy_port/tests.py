@@ -171,6 +171,51 @@ class LegacyPortFlowTests(TestCase):
         self.assertIn(self.user.league, body)
         self.assertIn(self.friend.name, body)
 
+    def test_leaderboard_renders_without_friends(self):
+        self.user.friendships.all().delete()
+        self.friend.friendships.all().delete()
+
+        response = self.client.get("/leaderboard")
+
+        self.assertEqual(response.status_code, 200)
+        body = response.content.decode("utf-8")
+        self.assertIn("Friends", body)
+        self.assertIn(self.user.league, body)
+        self.assertNotIn(self.friend.name, body)
+
+    def test_leaderboard_redirects_when_not_logged_in(self):
+        self.client.logout()
+
+        response = self.client.get("/leaderboard")
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/login", response["Location"])
+
+    def test_add_friend_creates_bidirectional_links(self):
+        self.user.add_friend(self.friend)
+
+        self.assertTrue(self.user.is_friends_with(self.friend))
+        self.assertTrue(self.friend.is_friends_with(self.user))
+        self.assertEqual(User.objects.get(id=self.user.id).friendships.count(), 1)
+        self.assertEqual(User.objects.get(id=self.friend.id).friendships.count(), 1)
+
+    def test_remove_friend_deletes_bidirectional_links(self):
+        self.user.add_friend(self.friend)
+
+        self.user.remove_friend(self.friend)
+
+        self.assertFalse(self.user.is_friends_with(self.friend))
+        self.assertFalse(self.friend.is_friends_with(self.user))
+        self.assertEqual(User.objects.get(id=self.user.id).friendships.count(), 0)
+        self.assertEqual(User.objects.get(id=self.friend.id).friendships.count(), 0)
+
+    def test_add_friend_is_idempotent(self):
+        self.user.add_friend(self.friend)
+        self.user.add_friend(self.friend)
+
+        self.assertEqual(User.objects.get(id=self.user.id).friendships.count(), 1)
+        self.assertEqual(User.objects.get(id=self.friend.id).friendships.count(), 1)
+
     def test_remove_friend_json_response(self):
         self.user.add_friend(self.friend)
         response = self.client.post(
@@ -401,6 +446,106 @@ class LegacyPortFlowTests(TestCase):
         body = response.content.decode("utf-8")
         self.assertIn("password reset link has been sent", body)
         self.assertNotIn("/reset_password/", body)
+
+    @override_settings(
+        GOOGLE_CLIENT_ID="client-id",
+        GOOGLE_CLIENT_SECRET="client-secret",
+        GOOGLE_REDIRECT_URI="http://127.0.0.1:8000/login/google/callback",
+    )
+    def test_google_login_redirects_to_authorization_endpoint(self):
+        response = self.client.get("/login/google")
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("accounts.google.com/o/oauth2/v2/auth", response["Location"])
+        session = self.client.session
+        self.assertIn("google_oauth_state", session)
+
+    @override_settings(
+        GOOGLE_CLIENT_ID="client-id",
+        GOOGLE_CLIENT_SECRET="client-secret",
+        GOOGLE_REDIRECT_URI="http://127.0.0.1:8000/login/google/callback",
+    )
+    @patch("accounts_port.views.requests.post")
+    @patch("accounts_port.views.requests.get")
+    def test_google_callback_links_existing_account(self, mock_get, mock_post):
+        session = self.client.session
+        session["google_oauth_state"] = "state-token"
+        session.save()
+
+        mock_post.return_value.ok = True
+        mock_post.return_value.json.return_value = {"access_token": "token"}
+        mock_get.return_value.ok = True
+        mock_get.return_value.json.return_value = {
+            "sub": "google-sub-123",
+            "email": self.user.email,
+            "name": self.user.name,
+        }
+
+        response = self.client.get("/login/google/callback", {"state": "state-token", "code": "auth-code"})
+
+        self.assertEqual(response.status_code, 302)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.google_id, "google-sub-123")
+        self.assertEqual(self.client.session["user_id"], self.user.id)
+
+    @override_settings(
+        GOOGLE_CLIENT_ID="client-id",
+        GOOGLE_CLIENT_SECRET="client-secret",
+        GOOGLE_REDIRECT_URI="http://127.0.0.1:8000/login/google/callback",
+    )
+    @patch("accounts_port.views.requests.post")
+    @patch("accounts_port.views.requests.get")
+    def test_google_callback_creates_new_account(self, mock_get, mock_post):
+        session = self.client.session
+        session["google_oauth_state"] = "state-token"
+        session.save()
+
+        mock_post.return_value.ok = True
+        mock_post.return_value.json.return_value = {"access_token": "token"}
+        mock_get.return_value.ok = True
+        mock_get.return_value.json.return_value = {
+            "sub": "google-sub-456",
+            "email": "new-google@example.com",
+            "name": "Google Example",
+        }
+
+        response = self.client.get("/login/google/callback", {"state": "state-token", "code": "auth-code"})
+
+        self.assertEqual(response.status_code, 302)
+        created_user = User.objects.get(email="new-google@example.com")
+        self.assertEqual(created_user.google_id, "google-sub-456")
+        self.assertTrue(created_user.is_verified)
+        self.assertEqual(self.client.session["user_id"], created_user.id)
+
+    @override_settings(
+        GOOGLE_CLIENT_ID="client-id",
+        GOOGLE_CLIENT_SECRET="client-secret",
+        GOOGLE_REDIRECT_URI="http://127.0.0.1:8000/login/google/callback",
+    )
+    @patch("accounts_port.views.requests.post")
+    @patch("accounts_port.views.requests.get")
+    def test_google_callback_flash_message_is_consumed_on_dashboard(self, mock_get, mock_post):
+        session = self.client.session
+        session["google_oauth_state"] = "state-token"
+        session.save()
+
+        mock_post.return_value.ok = True
+        mock_post.return_value.json.return_value = {"access_token": "token"}
+        mock_get.return_value.ok = True
+        mock_get.return_value.json.return_value = {
+            "sub": "google-sub-789",
+            "email": "flash-google@example.com",
+            "name": "Flash Google",
+        }
+
+        response = self.client.get("/login/google/callback", {"state": "state-token", "code": "auth-code"}, follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Signed in with Google successfully.", response.content.decode("utf-8"))
+
+        login_response = self.client.get("/login")
+        self.assertEqual(login_response.status_code, 200)
+        self.assertNotIn("Signed in with Google successfully.", login_response.content.decode("utf-8"))
 
     def test_edit_account_updates_profile_and_password(self):
         response = self.client.post(

@@ -13,6 +13,7 @@ class User(models.Model):
     age = models.IntegerField(blank=True, null=True)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=128)
+    google_id = models.CharField(max_length=128, blank=True, null=True, unique=True)
     points = models.IntegerField(default=0)
     is_verified = models.BooleanField(default=False)
     lives = models.IntegerField(default=5)
@@ -77,12 +78,10 @@ class User(models.Model):
 class Friendship(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="friendships")
     friend = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reverse_friendships")
+    pk = models.CompositePrimaryKey("user", "friend")
 
     class Meta:
         db_table = "friendship"
-        constraints = [
-            models.UniqueConstraint(fields=["user", "friend"], name="unique_friendship_pair"),
-        ]
 
 
 class Course(models.Model):
