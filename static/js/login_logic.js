@@ -12,8 +12,12 @@ document.querySelector('.login-button').addEventListener('click', function(e) {
 
 document.querySelectorAll('.social-button').forEach(button => {
     button.addEventListener('click', function(e) {
-        e.preventDefault();
         const provider = this.getAttribute('data-provider');
+        if (provider === 'google') {
+            window.location.href = '/login/google';
+            return;
+        }
+        e.preventDefault();
         alert(provider.toUpperCase() + ' login selected');
     });
 });

@@ -91,6 +91,18 @@
 
     <div class="main-content">
          <div class="content-wrapper">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="mb-4">
+                        {% for category, message in messages %}
+                        <div class="alert alert-{{ 'success' if category == 'success' else 'warning' if category == 'warning' else 'danger' }} mb-2" role="alert">
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
             <div class="welcome-section mb-4">
                 <h1 class="hero-title">Welcome, {{ full_name.split()[0] }}!</h1>
             </div>

@@ -13,3 +13,16 @@ env/
 /static/uploads
 
 .DS_Store
+.env
+ca.pem
+Oracle_DB/
+*.key
+*.pem
+
+#local files
+document/
+!DOCX/
+document.md
+excute.md
+!DOCX/excute.md
+!DOCX/excute_django.md
