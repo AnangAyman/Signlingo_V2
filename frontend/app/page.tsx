@@ -13,9 +13,11 @@ import { CTASection } from "@/components/cta-section";
 import { Footer } from "@/components/footer";
 import { useAuthStore } from "@/lib/store";
 import { RotateCcw } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function LandingPage() {
   const { skipIntro, setSkipIntro } = useAuthStore();
+  const { t } = useTranslation();
   const [showContent, setShowContent] = useState(skipIntro);
   const [isIntroPlaying, setIsIntroPlaying] = useState(!skipIntro);
   const characterRef = useRef<WelcomeCharacterRef>(null);
@@ -93,11 +95,11 @@ export default function LandingPage() {
               transition={{ delay: 1 }}
               onClick={handleReplayIntro}
               className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-full shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 group"
-              aria-label="Replay welcome animation"
+              aria-label={t("intro.replayLabel")}
             >
               <RotateCcw className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors group-hover:rotate-180 duration-500" />
               <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
-                Replay Intro
+                {t("intro.replayText")}
               </span>
             </motion.button>
           </motion.div>
@@ -115,7 +117,7 @@ export default function LandingPage() {
             onClick={handleAnimationComplete}
             className="fixed bottom-6 right-6 z-[60] px-4 py-2 bg-card/80 backdrop-blur-sm border border-border rounded-full text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
-            Skip Intro →
+            {t("intro.skip")}
           </motion.button>
         )}
       </AnimatePresence>

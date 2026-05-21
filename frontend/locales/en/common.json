@@ -3,7 +3,8 @@
     "features": "Features",
     "leagues": "Leagues",
     "reviews": "Reviews",
-    "pricing": "Pricing"
+    "pricing": "Pricing",
+    "toggleMobileMenu": "Toggle mobile menu"
   },
   "appNav": {
     "home": "Home",
@@ -12,7 +13,17 @@
     "achievements": "Achievements",
     "aiGame": "AI Game",
     "profile": "Profile",
-    "dayStreak": "{{count}} day streak"
+    "dayStreak": "{{count}} day streak",
+    "level": "Level {{level}}",
+    "leagueLabel": "{{league}} League",
+    "mainNavigation": "Main navigation",
+    "mobileNavigation": "Mobile navigation",
+    "openNavigation": "Open navigation",
+    "closeNavigation": "Close navigation",
+    "notifications": "Notifications",
+    "unreadNotifications": "Unread notifications",
+    "settings": "Settings",
+    "yourProfile": "Your profile"
   },
   "auth": {
     "login": "Log in",
@@ -29,7 +40,8 @@
     "iLoveYou": "I Love You",
     "hello": "Hello!",
     "xpChip": "+100 XP",
-    "socialProof": "Join 50K+ learners"
+    "socialProof": "50,000+ learners",
+    "socialProofSubtext": "joined this month"
   },
   "features": {
     "badge": "Why SignLingo?",
@@ -94,7 +106,71 @@
     "subtitle": "Join thousands of happy learners who have transformed their communication skills with SignLingo.",
     "leagueBadge": "{{league}} League",
     "previousAriaLabel": "Previous testimonial",
-    "nextAriaLabel": "Next testimonial"
+    "nextAriaLabel": "Next testimonial",
+    "dotAriaLabel": "Go to testimonial {{index}}",
+    "items": [
+      {
+        "id": 1,
+        "name": "Sarah Chen",
+        "role": "Teacher",
+        "avatar": "SC",
+        "quote": "SignLingo transformed how I communicate with my deaf students. The AI feedback is incredibly accurate and helped me learn ASL in just 3 months!",
+        "rating": 5,
+        "leagueTier": "Gold",
+        "leagueLabel": "Gold"
+      },
+      {
+        "id": 2,
+        "name": "Marcus Johnson",
+        "role": "Parent",
+        "avatar": "MJ",
+        "quote": "My daughter was born deaf, and this app helped our whole family learn to sign together. The gamification keeps everyone motivated!",
+        "rating": 5,
+        "leagueTier": "Silver",
+        "leagueLabel": "Silver"
+      },
+      {
+        "id": 3,
+        "name": "Emily Rodriguez",
+        "role": "Healthcare Worker",
+        "avatar": "ER",
+        "quote": "As a nurse, being able to communicate in sign language has been invaluable. The bite-sized lessons fit perfectly into my busy schedule.",
+        "rating": 5,
+        "leagueTier": "Gold",
+        "leagueLabel": "Gold"
+      },
+      {
+        "id": 4,
+        "name": "David Kim",
+        "role": "Student",
+        "avatar": "DK",
+        "quote": "The leagues make learning so competitive and fun! I never thought I'd be this excited about learning a new language.",
+        "rating": 5,
+        "leagueTier": "Bronze",
+        "leagueLabel": "Bronze"
+      },
+      {
+        "id": 5,
+        "name": "Lisa Thompson",
+        "role": "Interpreter",
+        "avatar": "LT",
+        "quote": "Even as a professional interpreter, I use SignLingo to practice and stay sharp. The community features are fantastic!",
+        "rating": 5,
+        "leagueTier": "Gold",
+        "leagueLabel": "Gold"
+      }
+    ],
+    "stats": [
+      { "value": "500K+", "label": "Active Learners" },
+      { "value": "4.9", "label": "App Store Rating" },
+      { "value": "50+", "label": "Countries" },
+      { "value": "98%", "label": "Satisfaction Rate" }
+    ]
+  },
+  "intro": {
+    "replayLabel": "Replay welcome animation",
+    "replayText": "Replay Intro",
+    "skip": "Skip Intro →"
   },
   "cta": {
     "badge": "Start for Free",

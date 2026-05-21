@@ -157,8 +157,8 @@ export function HeroSection() {
                   ))}
                 </div>
                 <div>
-                  <p className="font-semibold text-foreground">50,000+ learners</p>
-                  <p className="text-sm text-muted-foreground">joined this month</p>
+                  <p className="font-semibold text-foreground">{t("hero.socialProof")}</p>
+                  <p className="text-sm text-muted-foreground">{t("hero.socialProofSubtext")}</p>
                 </div>
               </div>
             </motion.div>

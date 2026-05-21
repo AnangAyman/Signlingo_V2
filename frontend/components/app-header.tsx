@@ -76,7 +76,7 @@ export function AppHeader() {
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-1" aria-label="Main navigation">
+          <nav className="hidden lg:flex items-center gap-1" aria-label={t("appNav.mainNavigation")}>
             {NAV_LINK_CONFIGS.map(({ href, labelKey, icon: Icon }) => {
               const isActive = pathname === href || pathname.startsWith(href + "/");
               return (
@@ -106,7 +106,7 @@ export function AppHeader() {
             <div className="hidden md:flex items-center gap-3 px-3 py-1.5 rounded-full bg-muted/60 border border-border/50">
               <span className="flex items-center gap-1 text-sm font-semibold text-foreground">
                 <Flame className="w-4 h-4 text-orange-500" aria-hidden />
-                {user.dailyStreak}d
+                {t("appNav.dayStreak", { count: user.dailyStreak })}
               </span>
               <span className="w-px h-4 bg-border" aria-hidden />
               <span className="flex items-center gap-1 text-sm font-semibold text-foreground">
@@ -115,30 +115,30 @@ export function AppHeader() {
               </span>
               <span className="w-px h-4 bg-border" aria-hidden />
               <Badge variant="secondary" className="text-xs px-1.5 py-0">
-                Lv {user.level}
+                {t("appNav.level", { level: user.level })}
               </Badge>
             </div>
 
             {/* Notifications */}
-            <Link href="/notifications" aria-label="Notifications">
+            <Link href="/notifications" aria-label={t("appNav.notifications")}>
               <Button variant="ghost" size="icon" className="relative" tabIndex={-1}>
                 <Bell className="w-5 h-5" />
                 <span
                   className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-destructive rounded-full"
-                  aria-label="Unread notifications"
+                  aria-label={t("appNav.unreadNotifications")}
                 />
               </Button>
             </Link>
 
             {/* Settings */}
-            <Link href="/settings" aria-label="Settings">
+            <Link href="/settings" aria-label={t("appNav.settings")}>
               <Button variant="ghost" size="icon" tabIndex={-1}>
                 <Settings className="w-5 h-5" />
               </Button>
             </Link>
 
             {/* Avatar / Profile */}
-            <Link href="/profile" className="hidden sm:flex items-center gap-2 pl-2 border-l border-border" aria-label="Your profile">
+            <Link href="/profile" className="hidden sm:flex items-center gap-2 pl-2 border-l border-border" aria-label={t("appNav.yourProfile")}>
               <Avatar className="w-8 h-8">
                 <AvatarImage src={user.avatar} />
                 <AvatarFallback className="bg-secondary text-secondary-foreground text-xs font-bold">
@@ -147,7 +147,9 @@ export function AppHeader() {
               </Avatar>
               <div className="hidden xl:block text-left">
                 <p className="text-sm font-medium text-foreground leading-tight">{user.name}</p>
-                <p className="text-xs text-muted-foreground leading-tight capitalize">{user.league} League</p>
+                <p className="text-xs text-muted-foreground leading-tight capitalize">
+                  {t("appNav.leagueLabel", { league: user.league })}
+                </p>
               </div>
             </Link>
 
@@ -171,7 +173,7 @@ export function AppHeader() {
               size="icon"
               className="lg:hidden"
               onClick={() => setMobileOpen((o) => !o)}
-              aria-label="Open navigation"
+              aria-label={mobileOpen ? t("appNav.closeNavigation") : t("appNav.openNavigation")}
             >
               {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
@@ -188,7 +190,7 @@ export function AppHeader() {
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="lg:hidden overflow-hidden border-t border-border bg-background"
-            aria-label="Mobile navigation"
+            aria-label={t("appNav.mobileNavigation")}
           >
             <div className="container mx-auto px-4 py-3 space-y-1">
               {/* Mobile stats */}
@@ -202,7 +204,7 @@ export function AppHeader() {
                   {user.xp} XP
                 </span>
                 <Badge variant="secondary" className="text-xs">
-                  Level {user.level}
+                  {t("appNav.level", { level: user.level })}
                 </Badge>
               </div>
 

@@ -7,58 +7,21 @@ import { ChevronLeft, ChevronRight, Quote, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 
-const TESTIMONIALS = [
-  {
-    id: 1,
-    name: "Sarah Chen",
-    role: "Teacher",
-    avatar: "SC",
-    quote:
-      "SignLingo transformed how I communicate with my deaf students. The AI feedback is incredibly accurate and helped me learn ASL in just 3 months!",
-    rating: 5,
-    league: "Gold",
-  },
-  {
-    id: 2,
-    name: "Marcus Johnson",
-    role: "Parent",
-    avatar: "MJ",
-    quote:
-      "My daughter was born deaf, and this app helped our whole family learn to sign together. The gamification keeps everyone motivated!",
-    rating: 5,
-    league: "Silver",
-  },
-  {
-    id: 3,
-    name: "Emily Rodriguez",
-    role: "Healthcare Worker",
-    avatar: "ER",
-    quote:
-      "As a nurse, being able to communicate in sign language has been invaluable. The bite-sized lessons fit perfectly into my busy schedule.",
-    rating: 5,
-    league: "Gold",
-  },
-  {
-    id: 4,
-    name: "David Kim",
-    role: "Student",
-    avatar: "DK",
-    quote:
-      "The leagues make learning so competitive and fun! I never thought I&apos;d be this excited about learning a new language.",
-    rating: 5,
-    league: "Bronze",
-  },
-  {
-    id: 5,
-    name: "Lisa Thompson",
-    role: "Interpreter",
-    avatar: "LT",
-    quote:
-      "Even as a professional interpreter, I use SignLingo to practice and stay sharp. The community features are fantastic!",
-    rating: 5,
-    league: "Gold",
-  },
-];
+interface TestimonialItem {
+  id: number;
+  name: string;
+  role: string;
+  avatar: string;
+  quote: string;
+  rating: number;
+  leagueTier: "Gold" | "Silver" | "Bronze";
+  leagueLabel: string;
+}
+
+interface TestimonialStat {
+  value: string;
+  label: string;
+}
 
 export function TestimonialsSection() {
   const ref = useRef(null);
@@ -66,14 +29,16 @@ export function TestimonialsSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const { t } = useTranslation();
+  const testimonials = t("testimonials.items", { returnObjects: true }) as TestimonialItem[];
+  const stats = t("testimonials.stats", { returnObjects: true }) as TestimonialStat[];
 
   const nextTestimonial = () => {
-    setCurrentIndex((prev) => (prev + 1) % TESTIMONIALS.length);
+    setCurrentIndex((prev) => (prev + 1) % testimonials.length);
   };
 
   const prevTestimonial = () => {
     setCurrentIndex(
-      (prev) => (prev - 1 + TESTIMONIALS.length) % TESTIMONIALS.length
+      (prev) => (prev - 1 + testimonials.length) % testimonials.length
     );
   };
 
@@ -87,7 +52,7 @@ export function TestimonialsSection() {
     return () => clearInterval(interval);
   }, [isAutoPlaying]);
 
-  const currentTestimonial = TESTIMONIALS[currentIndex];
+  const currentTestimonial = testimonials[currentIndex];
 
   return (
     <section id="testimonials" className="py-24 relative overflow-hidden">
@@ -184,15 +149,15 @@ export function TestimonialsSection() {
                       <span
                         className={cn(
                           "px-3 py-1 rounded-full text-xs font-semibold",
-                          currentTestimonial.league === "Gold" &&
+                          currentTestimonial.leagueTier === "Gold" &&
                             "bg-[#FFD700]/20 text-[#DAA520]",
-                          currentTestimonial.league === "Silver" &&
+                          currentTestimonial.leagueTier === "Silver" &&
                             "bg-[#C0C0C0]/20 text-[#808080]",
-                          currentTestimonial.league === "Bronze" &&
+                          currentTestimonial.leagueTier === "Bronze" &&
                             "bg-[#CD7F32]/20 text-[#8B5A2B]"
                         )}
                       >
-                        {t("testimonials.leagueBadge", { league: currentTestimonial.league })}
+                        {t("testimonials.leagueBadge", { league: currentTestimonial.leagueLabel })}
                       </span>
                     </div>
                   </div>
@@ -213,7 +178,7 @@ export function TestimonialsSection() {
 
             {/* Dots */}
             <div className="flex gap-2">
-              {TESTIMONIALS.map((_, index) => (
+              {testimonials.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentIndex(index)}
@@ -223,7 +188,7 @@ export function TestimonialsSection() {
                       ? "bg-primary w-8"
                       : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
                   )}
-                  aria-label={`Go to testimonial ${index + 1}`}
+                  aria-label={t("testimonials.dotAriaLabel", { index: index + 1 })}
                 />
               ))}
             </div>
@@ -245,12 +210,7 @@ export function TestimonialsSection() {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20"
         >
-          {[
-            { value: "500K+", label: "Active Learners" },
-            { value: "4.9", label: "App Store Rating" },
-            { value: "50+", label: "Countries" },
-            { value: "98%", label: "Satisfaction Rate" },
-          ].map((stat, index) => (
+          {stats.map((stat, index) => (
             <div key={stat.label} className="text-center">
               <motion.div
                 initial={{ scale: 0.5 }}
