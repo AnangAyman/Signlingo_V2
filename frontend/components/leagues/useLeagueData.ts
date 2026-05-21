@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 import { Medal, Award, Trophy, Crown, Star } from "lucide-react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { dashboardApi, leaderboardApi, type ApiLeaderboardEntry } from "@/lib/api";
+import i18n from "@/lib/i18n";
 
 // ============================================================
 // TYPES
@@ -281,7 +282,9 @@ export function useLeagueData({ userId, onPromotion, onDemotion }: UseLeagueData
         setShowDemotionTooltip(true);
       }
     } catch (err) {
-      setError(err instanceof Error ? err : new Error("Failed to fetch league data"));
+      setError(
+        err instanceof Error ? err : new Error(i18n.t("leagues:failedToLoad"))
+      );
     } finally {
       setLoading(false);
     }
