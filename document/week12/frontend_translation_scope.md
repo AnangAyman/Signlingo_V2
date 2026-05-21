@@ -171,3 +171,4 @@
 - `document/week12/korean_translation_inventory.md`
 - `document/week12/development_merge_2026-05-22.md`
 - `document/week12/translation_style_guide.md`
+- `document/week12/frontend_translation_review_checklist.md`
