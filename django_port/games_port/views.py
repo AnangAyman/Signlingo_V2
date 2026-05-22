@@ -175,3 +175,28 @@ def magic_touch(request):
     context = _user_shell_context(user)
     context["frontend_dashboard_url"] = os.environ.get("FRONTEND_APP_URL", "").rstrip("/")
     return _render(request, "magic_touch_game.html", context)
+
+
+def magic_touch_advanced(request):
+    user, redirect_response = _require_user(request)
+    if redirect_response:
+        return redirect_response
+    context = _user_shell_context(user)
+    context["frontend_dashboard_url"] = os.environ.get("FRONTEND_APP_URL", "").rstrip("/")
+    return _render(request, "magic_touch_advanced.html", context)
+
+
+@csrf_exempt
+def predict_gru(request):
+    try:
+        payload = json.loads(request.body or "{}")
+        sequence = payload.get("sequence")
+        if not sequence or len(sequence) != 30:
+            return JsonResponse({"error": "Invalid sequence provided, must be length 30."}, status=400)
+        
+        result = game_services.predict_gru_sequence(sequence)
+        request.session["today_login"] = True
+        return JsonResponse(result)
+    except Exception as exc:
+        print(f"Prediction Error: {exc}")
+        return JsonResponse({"error": "Prediction failed due to an ML runtime error."}, status=500)
