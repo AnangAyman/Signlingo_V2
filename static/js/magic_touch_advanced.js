@@ -19,14 +19,14 @@ let lives = 3;
 let enemies = [];
 let spawnInterval;
 let gameLoopRef;
-let spawnRate = 5000;
-let enemySpeed = 0.4;
+let spawnRate = 4000;
+let enemySpeed = 0.6;
 
 const ACTIONS = [
-    'Apa', 'Apa Kabar', 'Bagaimana', 'Baik', 'Belajar', 'Berapa', 'Berdiri', 'Bingung', 
-    'Dia', 'Dimana', 'Duduk', 'Halo', 'Kalian', 'Kami', 'Kamu', 'Kapan', 'Kemana', 'Kita', 
-    'Makan', 'Mandi', 'Marah', 'Melihat', 'Membaca', 'Menulis', 'Mereka', 'Minum', 'Pendek', 
-    'Ramah', 'Sabar', 'Saya', 'Sedih', 'Selamat Malam', 'Selamat Pagi', 'Selamat Siang', 
+    'Apa', 'Apa Kabar', 'Bagaimana', 'Baik', 'Belajar', 'Berapa', 'Berdiri', 'Bingung',
+    'Dia', 'Dimana', 'Duduk', 'Halo', 'Kalian', 'Kami', 'Kamu', 'Kapan', 'Kemana', 'Kita',
+    'Makan', 'Mandi', 'Marah', 'Melihat', 'Membaca', 'Menulis', 'Mereka', 'Minum', 'Pendek',
+    'Ramah', 'Sabar', 'Saya', 'Sedih', 'Selamat Malam', 'Selamat Pagi', 'Selamat Siang',
     'Selamat Sore', 'Senang', 'Siapa', 'Terima Kasih', 'Tidur', 'Tinggi'
 ];
 
@@ -38,16 +38,20 @@ const SELECTED_FACE_IDS = [
 ];
 
 // MediaPipe Recording State
-let sequence = [];
+let recordingBuffer = [];
+let recordingStartTime = 0;
+const RECORDING_DURATION = 1500; // 2.5 seconds
 let isRecording = false;
 let holistic;
 let camera;
 
 function initializeMediaPipe() {
-    holistic = new Holistic({locateFile: (file) => {
-        return `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`;
-    }});
-    
+    holistic = new Holistic({
+        locateFile: (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`;
+        }
+    });
+
     holistic.setOptions({
         modelComplexity: 1,
         smoothLandmarks: true,
@@ -57,12 +61,12 @@ function initializeMediaPipe() {
         minDetectionConfidence: 0.5,
         minTrackingConfidence: 0.5
     });
-    
+
     holistic.onResults(onResults);
-    
+
     camera = new Camera(video, {
         onFrame: async () => {
-            await holistic.send({image: video});
+            await holistic.send({ image: video });
         },
         width: 640,
         height: 480
@@ -73,15 +77,15 @@ function initializeMediaPipe() {
 function extractAndNormalizeKeypoints(results) {
     let cx = 0.0, cy = 0.0, cz = 0.0;
     let scale = 1.0;
-    
+
     if (results.poseLandmarks) {
         let l_sh = results.poseLandmarks[11];
         let r_sh = results.poseLandmarks[12];
-        
+
         cx = (l_sh.x + r_sh.x) / 2.0;
         cy = (l_sh.y + r_sh.y) / 2.0;
         cz = (l_sh.z + r_sh.z) / 2.0;
-        
+
         let shoulder_dist = Math.sqrt(Math.pow(l_sh.x - r_sh.x, 2) + Math.pow(l_sh.y - r_sh.y, 2) + Math.pow(l_sh.z - r_sh.z, 2));
         if (shoulder_dist > 0) scale = shoulder_dist;
     }
@@ -107,31 +111,47 @@ function extractAndNormalizeKeypoints(results) {
     } else {
         pose = new Array(33 * 3).fill(0);
     }
-    
+
     let face = norm(results.faceLandmarks, true);
     let lh = norm(results.leftHandLandmarks, false);
     let rh = norm(results.rightHandLandmarks, false);
-    
+
     return [].concat(pose, face, lh, rh);
 }
 
 async function onResults(results) {
     if (!isPlaying) return;
-    
+
     if (isRecording) {
         let keypoints = extractAndNormalizeKeypoints(results);
-        sequence.push(keypoints);
-        
-        currentPredictionEl.innerText = `Recording: ${sequence.length}/30`;
-        startGestureBtn.innerText = `Recording (${sequence.length}/30)...`;
+        recordingBuffer.push(keypoints);
+
+        let elapsed = performance.now() - recordingStartTime;
+        let progress = Math.min(100, (elapsed / RECORDING_DURATION) * 100);
+
+        currentPredictionEl.innerText = `Recording: ${Math.round(progress)}%`;
+        startGestureBtn.innerText = `Recording (${Math.round(progress)}%)...`;
         startGestureBtn.disabled = true;
-        
-        if (sequence.length === 30) {
+
+        if (elapsed >= RECORDING_DURATION) {
             isRecording = false;
             startGestureBtn.innerText = "Processing...";
             currentPredictionEl.innerText = `Predicting...`;
-            await sendSequenceForPrediction(sequence);
-            sequence = [];
+
+            // Uniformly sample exactly 30 frames from the buffer
+            let sampledSequence = [];
+            let total_f = recordingBuffer.length;
+            if (total_f > 0) {
+                for (let i = 0; i < 30; i++) {
+                    let idx = total_f === 1 ? 0 : Math.floor((i / 29) * (total_f - 1));
+                    sampledSequence.push(recordingBuffer[idx]);
+                }
+            } else {
+                for (let i = 0; i < 30; i++) sampledSequence.push(new Array(447).fill(0));
+            }
+
+            await sendSequenceForPrediction(sampledSequence);
+            recordingBuffer = [];
             startGestureBtn.innerText = "Start Gesturing (Space)";
             startGestureBtn.disabled = false;
         }
@@ -147,7 +167,7 @@ async function sendSequenceForPrediction(seq) {
             },
             body: JSON.stringify({ sequence: seq })
         });
-        
+
         if (res.ok) {
             const data = await res.json();
             handlePrediction(data.result, data.confidence);
@@ -155,7 +175,7 @@ async function sendSequenceForPrediction(seq) {
             console.error("Prediction failed");
             currentPredictionEl.innerText = "Prediction Error";
         }
-    } catch(e) {
+    } catch (e) {
         console.error(e);
         currentPredictionEl.innerText = "Prediction Error";
     }
@@ -182,7 +202,8 @@ startGestureBtn.addEventListener('click', () => {
 
 function triggerRecording() {
     isRecording = true;
-    sequence = [];
+    recordingBuffer = [];
+    recordingStartTime = performance.now();
 }
 
 
@@ -192,21 +213,21 @@ function startGame() {
     lives = 3;
     enemies.forEach(e => { if (e.element) e.element.remove(); });
     enemies = [];
-    spawnRate = 5000;
-    enemySpeed = 0.4;
-    
+    spawnRate = 4000;
+    enemySpeed = 0.6;
+
     updateScoreUI();
     updateLivesUI();
-    
+
     startScreen.style.display = 'none';
     gameOverScreen.style.display = 'none';
     currentPredictionEl.innerText = "-";
     startGestureBtn.innerText = "Start Gesturing (Space)";
-    
+
     if (!holistic) {
         initializeMediaPipe();
     }
-    
+
     scheduleSpawn();
     gameLoopRef = requestAnimationFrame(gameLoop);
 }
@@ -224,8 +245,8 @@ function scheduleSpawn() {
     if (!isPlaying) return;
     spawnInterval = setTimeout(() => {
         spawnEnemy();
-        spawnRate = Math.max(2000, spawnRate * 0.98);
-        enemySpeed += 0.02;
+        spawnRate = Math.max(800, spawnRate * 0.98);
+        enemySpeed += 0.05;
         scheduleSpawn();
     }, spawnRate);
 }
@@ -234,21 +255,21 @@ function spawnEnemy() {
     let isBoss = Math.random() < 0.2;
     let wordCount = isBoss ? Math.floor(Math.random() * 2) + 2 : 1; // 1 for normal, 2-3 for boss
     let words = [];
-    
+
     for (let i = 0; i < wordCount; i++) {
         let randomWord = ACTIONS[Math.floor(Math.random() * ACTIONS.length)];
         words.push(randomWord);
     }
-    
+
     const enemyEl = document.createElement('div');
     enemyEl.classList.add('enemy');
     if (isBoss) enemyEl.classList.add('boss');
-    
+
     const balloonContainer = document.createElement('div');
     balloonContainer.classList.add('balloon-container');
     // Align items stacked for bosses
     balloonContainer.style.flexDirection = 'column';
-    
+
     let balloonEls = [];
     for (let i = 0; i < words.length; i++) {
         const b = document.createElement('div');
@@ -261,23 +282,23 @@ function spawnEnemy() {
         balloonContainer.appendChild(b);
         balloonEls.push({ word: words[i], element: b });
     }
-    
+
     const stringEl = document.createElement('div');
     stringEl.classList.add('string');
-    
+
     const characterEl = document.createElement('div');
     characterEl.classList.add('enemy-character');
-    
+
     enemyEl.appendChild(balloonContainer);
     enemyEl.appendChild(stringEl);
     enemyEl.appendChild(characterEl);
-    
+
     const randomX = Math.random() * 80 + 10;
     enemyEl.style.left = `${randomX}%`;
     enemyEl.style.top = `-100px`;
-    
+
     gameArea.appendChild(enemyEl);
-    
+
     enemies.push({
         element: enemyEl,
         x: randomX,
@@ -292,12 +313,12 @@ function spawnEnemy() {
 
 function gameLoop() {
     if (!isPlaying) return;
-    
+
     for (let i = enemies.length - 1; i >= 0; i--) {
         let e = enemies[i];
         e.y += e.speed;
         e.element.style.top = `${e.y}px`;
-        
+
         const areaHeight = gameArea.clientHeight;
         if (e.y > areaHeight) {
             e.element.remove();
@@ -307,7 +328,7 @@ function gameLoop() {
             }
         }
     }
-    
+
     gameLoopRef = requestAnimationFrame(gameLoop);
 }
 
@@ -322,11 +343,11 @@ function loseLife() {
     playSound(hurtSound);
     lives--;
     updateLivesUI();
-    
+
     livesContainer.classList.remove('pulse');
     void livesContainer.offsetWidth;
     livesContainer.classList.add('pulse');
-    
+
     if (lives <= 0) {
         stopGame();
     }
@@ -348,25 +369,29 @@ function updateLivesUI() {
 function handlePrediction(predictedWord, confidence) {
     const cfPercent = Math.round(confidence * 100);
     currentPredictionEl.innerText = `${predictedWord} (${cfPercent}%)`;
-    
+
     if (confidence > 0.60) {
         currentPredictionEl.classList.add('confident');
-        
+
         let targetEnemy = null;
         let highestY = -Infinity;
-        
+        let targetBalloonIndex = -1;
+
         for (let i = 0; i < enemies.length; i++) {
             let e = enemies[i];
-            if (e.balloons.length > 0 && e.balloons[0].word === predictedWord) {
+            let foundIndex = e.balloons.findIndex(b => b.word === predictedWord);
+
+            if (foundIndex !== -1) {
                 if (e.y > highestY) {
                     highestY = e.y;
                     targetEnemy = e;
+                    targetBalloonIndex = foundIndex;
                 }
             }
         }
-        
-        if (targetEnemy) {
-            registerHit(targetEnemy);
+
+        if (targetEnemy && targetBalloonIndex !== -1) {
+            registerHit(targetEnemy, targetBalloonIndex);
         }
     } else {
         currentPredictionEl.classList.remove('confident');
@@ -374,26 +399,26 @@ function handlePrediction(predictedWord, confidence) {
     }
 }
 
-function registerHit(targetEnemy) {
+function registerHit(targetEnemy, balloonIndex) {
     playSound(popSound);
-    
-    let poppedBalloon = targetEnemy.balloons.shift();
-    
+
+    let poppedBalloon = targetEnemy.balloons.splice(balloonIndex, 1)[0];
+
     poppedBalloon.element.classList.add('popping');
     setTimeout(() => {
         if (poppedBalloon.element.parentNode) {
             poppedBalloon.element.parentNode.removeChild(poppedBalloon.element);
         }
     }, 200);
-    
+
     score += 20;
     updateScoreUI();
-    
+
     if (targetEnemy.balloons.length === 0) {
         targetEnemy.element.classList.add('falling');
         targetEnemy.speed += 15;
         targetEnemy.isDefeated = true;
-        
+
         score += targetEnemy.isBoss ? 100 : 20;
         updateScoreUI();
     }
