@@ -5,6 +5,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  allowedDevOrigins: ['127.0.0.1', 'localhost'],
   turbopack: {
     // Keep Next.js rooted in the frontend package even when parent folders contain lockfiles.
     root: __dirname,
