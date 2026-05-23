@@ -3,7 +3,15 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, Circle, PlayCircle, ChevronRight, RefreshCcw, ExternalLink } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle,
+  Circle,
+  PlayCircle,
+  ChevronRight,
+  RefreshCcw,
+  ExternalLink,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/lib/store";
 import { backendPath, lessonsApi, type ApiLesson } from "@/lib/api";
@@ -36,6 +44,13 @@ function getBackendLessonVideoUrl(url: string): string | null {
     return backendPath("/static/Assets/Learn ASL Alphabet Video.mp4");
   }
   return null;
+}
+
+function getBackendActivityLabel(url: string): string {
+  if (url === "/gamepage") return "Open Quiz Challenge";
+  if (url === "/ml_game") return "Open Camera Practice";
+  if (url === "/magic_touch") return "Open Magic Touch";
+  return "Open Activity";
 }
 
 function StatusIcon({ status }: { status: ApiLesson["status"] }) {
@@ -152,7 +167,15 @@ export default function LessonsPage() {
       {/* Header */}
       <div className="border-b bg-card px-6 py-5">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-2xl font-bold text-foreground mb-1">Video Lessons</h1>
+          <Button
+            variant="ghost"
+            onClick={() => router.push("/dashboard")}
+            className="gap-2 px-0 mb-3 text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Dashboard
+          </Button>
+          <h1 className="text-2xl font-bold text-foreground mb-1">Lessons</h1>
           <p className="text-sm text-muted-foreground mb-3">
             {completed} of {total} lessons completed
           </p>
@@ -174,7 +197,7 @@ export default function LessonsPage() {
         {/* Lesson list */}
         <aside className="w-full lg:w-72 shrink-0">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 px-1">
-            All Lessons
+            Lessons & Activities
           </h2>
           <ul className="space-y-1">
             {lessons.map((lesson) => (
@@ -241,17 +264,16 @@ export default function LessonsPage() {
                     <PlayCircle className="w-16 h-16 text-primary/70" />
                     <div>
                       <h3 className="text-lg font-semibold text-foreground">
-                        This lesson is served by the Django backend.
+                        This is an interactive practice activity.
                       </h3>
                       <p className="text-sm text-muted-foreground mt-2 max-w-md">
-                        The current lesson flow still uses the migrated Django page,
-                        so open it from the connected backend instead of embedding a
-                        Vercel-local route.
+                        The React version of this activity is not built yet, so it
+                        still opens through the connected Django backend.
                       </p>
                     </div>
                     <Button asChild className="gap-2">
                       <a href={backendPath(selected.url)}>
-                        Open Lesson Flow
+                        {getBackendActivityLabel(selected.url)}
                         <ExternalLink className="w-4 h-4" />
                       </a>
                     </Button>
