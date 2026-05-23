@@ -31,6 +31,13 @@ function isBackendRoute(url: string): boolean {
   return url.startsWith("/");
 }
 
+function getBackendLessonVideoUrl(url: string): string | null {
+  if (url === "/video_learning") {
+    return backendPath("/static/Assets/Learn ASL Alphabet Video.mp4");
+  }
+  return null;
+}
+
 function StatusIcon({ status }: { status: ApiLesson["status"] }) {
   if (status === "completed")
     return <CheckCircle className="w-5 h-5 text-green-500 shrink-0" />;
@@ -216,6 +223,18 @@ export default function LessonsPage() {
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                     />
+                  </div>
+                ) : selected.url && getBackendLessonVideoUrl(selected.url) ? (
+                  <div className="relative w-full rounded-xl overflow-hidden bg-black">
+                    <video
+                      className="w-full aspect-video"
+                      controls
+                      preload="metadata"
+                      title={selected.title}
+                    >
+                      <source src={getBackendLessonVideoUrl(selected.url) ?? ""} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
                   </div>
                 ) : selected.url ? (
                   <div className="relative w-full rounded-xl border bg-muted/40 p-8 min-h-[320px] flex flex-col items-center justify-center text-center gap-4">

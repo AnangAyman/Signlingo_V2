@@ -24,7 +24,7 @@ def video_learning(request):
             "completed_lessons_count": completed_lessons_count,
             "total_lessons_count": total_lessons_count,
             "module_progress_percent": module_progress_percent,
-            "frontend_dashboard_url": os.environ.get("FRONTEND_APP_URL", "").rstrip("/"),
+            "frontend_app_url": os.environ.get("FRONTEND_APP_URL", "").rstrip("/"),
         }
     )
     return _render(request, "video_learning.html", context)
