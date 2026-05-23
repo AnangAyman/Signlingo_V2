@@ -1,15 +1,26 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Camera, ExternalLink, Gamepad2 } from "lucide-react";
 import { AppHeader } from "@/components/app-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { backendPath } from "@/lib/api";
+import { useAuthStore } from "@/lib/store";
 
 export default function AIGamePage() {
+  const router = useRouter();
+  const { isAuthenticated, hasCheckedSession } = useAuthStore();
   const magicTouchUrl = backendPath("/magic_touch");
   const cameraPracticeUrl = backendPath("/capture");
+
+  useEffect(() => {
+    if (hasCheckedSession && !isAuthenticated) router.push("/login");
+  }, [hasCheckedSession, isAuthenticated, router]);
+
+  if (!hasCheckedSession || !isAuthenticated) return null;
 
   return (
     <div className="min-h-screen bg-background">

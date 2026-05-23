@@ -24,16 +24,16 @@ import Link from "next/link";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, hasCheckedSession } = useAuthStore();
   const { t } = useTranslation("dashboard");
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (hasCheckedSession && !isAuthenticated) {
       router.push("/login");
     }
-  }, [isAuthenticated, router]);
+  }, [hasCheckedSession, isAuthenticated, router]);
 
-  if (!isAuthenticated || !user) {
+  if (!hasCheckedSession || !isAuthenticated || !user) {
     return null;
   }
 

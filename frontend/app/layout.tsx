@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Nunito, Nunito_Sans } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { AuthSessionHydrator } from '@/components/common/AuthSessionHydrator'
 import { I18nProvider } from '@/components/common/I18nProvider'
 import './globals.css'
 
@@ -58,6 +59,7 @@ export default function RootLayout({
     <html lang="en" className={`${nunito.variable} ${nunitoSans.variable}`}>
       <body className="font-sans antialiased bg-background text-foreground">
         <I18nProvider>
+          <AuthSessionHydrator />
           {children}
           {process.env.NODE_ENV === 'production' && <Analytics />}
         </I18nProvider>

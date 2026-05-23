@@ -45,7 +45,7 @@ function StatusIcon({ status }: { status: ApiLesson["status"] }) {
 
 export default function LessonsPage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, hasCheckedSession } = useAuthStore();
 
   const [lessons, setLessons] = useState<ApiLesson[]>([]);
   const [completed, setCompleted] = useState(0);
@@ -58,8 +58,8 @@ export default function LessonsPage() {
 
   // Redirect if not authenticated
   useEffect(() => {
-    if (!isAuthenticated) router.push("/login");
-  }, [isAuthenticated, router]);
+    if (hasCheckedSession && !isAuthenticated) router.push("/login");
+  }, [hasCheckedSession, isAuthenticated, router]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -114,7 +114,7 @@ export default function LessonsPage() {
   // Render
   // ---------------------------------------------------------------------------
 
-  if (!isAuthenticated) return null;
+  if (!hasCheckedSession || !isAuthenticated) return null;
 
   if (loading) {
     return (
