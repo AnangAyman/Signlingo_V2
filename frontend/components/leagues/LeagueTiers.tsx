@@ -106,12 +106,12 @@ export default function LeagueTiers({
   const previousLeague = currentTierIndex > 0 ? LEAGUES[TIER_ORDER[currentTierIndex - 1]] : null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-5 md:space-y-6 w-full">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-foreground mb-1">{t("title")}</h2>
-          <p className="text-muted-foreground">
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-1">{t("title")}</h2>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             {t("subtitle")}
           </p>
         </div>
@@ -142,7 +142,7 @@ export default function LeagueTiers({
       <motion.div
         initial={reducedMotion ? {} : { opacity: 0, y: 20 }}
         animate={reducedMotion ? {} : { opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl p-6"
+        className="relative overflow-hidden rounded-xl sm:rounded-2xl p-4 sm:p-6"
         style={{
           background: `linear-gradient(135deg, ${currentLeague.gradientFrom}20 0%, ${currentLeague.gradientTo}20 100%)`,
           borderColor: currentLeague.borderColor,
@@ -158,10 +158,10 @@ export default function LeagueTiers({
           />
         </div>
 
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-6">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-3 sm:gap-4 md:gap-6">
           {/* League Icon */}
           <motion.div
-            className="w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg"
+            className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0"
             style={{
               background: `linear-gradient(135deg, ${currentLeague.gradientFrom} 0%, ${currentLeague.gradientTo} 100%)`,
             }}
@@ -174,7 +174,7 @@ export default function LeagueTiers({
             }}
             transition={{ duration: 2, repeat: Infinity }}
           >
-            <currentLeague.icon className="w-10 h-10 text-white" />
+            <currentLeague.icon className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
           </motion.div>
 
           {/* Status Info */}
@@ -195,31 +195,31 @@ export default function LeagueTiers({
               </Badge>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
               <div>
-                <p className="text-sm text-muted-foreground">{t("weeklyXp")}</p>
-                <p className="text-lg font-bold text-foreground flex items-center gap-1">
-                  <Zap className="w-4 h-4 text-primary" />
+                <p className="text-xs sm:text-sm text-muted-foreground">{t("weeklyXp")}</p>
+                <p className="text-base sm:text-lg font-bold text-foreground flex items-center gap-1">
+                  <Zap className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
                   {formatNumber(status.weeklyXp)}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">{t("xpToPromote")}</p>
-                <p className="text-lg font-bold text-foreground flex items-center gap-1">
-                  <TrendingUp className="w-4 h-4 text-green-500" />
+                <p className="text-xs sm:text-sm text-muted-foreground">{t("xpToPromote")}</p>
+                <p className="text-base sm:text-lg font-bold text-foreground flex items-center gap-1">
+                  <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-green-500" />
                   {formatNumber(Math.max(0, status.xpToNext))}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">{t("streak")}</p>
-                <p className="text-lg font-bold text-foreground flex items-center gap-1">
-                  <Flame className="w-4 h-4 text-orange-500" />
+                <p className="text-xs sm:text-sm text-muted-foreground">{t("streak")}</p>
+                <p className="text-base sm:text-lg font-bold text-foreground flex items-center gap-1">
+                  <Flame className="w-3 h-3 sm:w-4 sm:h-4 text-orange-500" />
                   {t("streakDays", { count: status.streakDays })}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">{t("leagueSize")}</p>
-                <p className="text-lg font-bold text-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground">{t("leagueSize")}</p>
+                <p className="text-base sm:text-lg font-bold text-foreground">
                   {t("players", { count: currentLeague.leagueSize })}
                 </p>
               </div>
@@ -255,7 +255,7 @@ export default function LeagueTiers({
 
         <TabsContent value="overview" className="mt-6">
           {/* League Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid w-full gap-3 sm:gap-4 md:gap-5 lg:gap-6 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
             {TIER_ORDER.map((tier, index) => {
               const league = LEAGUES[tier];
               const isActive = tier === status.currentTier;

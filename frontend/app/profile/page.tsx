@@ -1,12 +1,21 @@
-import { PlaceholderPage } from "@/components/placeholder-page";
+"use client";
 
-export default function ProfilePage() {
-  return (
-    <PlaceholderPage
-      icon="👤"
-      title="Profile Coming Soon"
-      message="Profile customization is on its way. Soon you can upload an avatar, edit your details, and showcase your badges."
-      hint="Bio, social links, and achievement showcase are all planned."
-    />
-  );
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/lib/store";
+import { ProfilePage as ProfilePageView } from "@/components/profile/ProfilePage";
+
+export default function ProfileRoute() {
+  const router = useRouter();
+  const { isAuthenticated } = useAuthStore();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/login");
+    }
+  }, [isAuthenticated, router]);
+
+  if (!isAuthenticated) return null;
+
+  return <ProfilePageView />;
 }

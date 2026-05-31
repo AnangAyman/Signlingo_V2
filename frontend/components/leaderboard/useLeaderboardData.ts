@@ -11,7 +11,7 @@ const API_URL =
 // TYPES
 // ============================================================
 
-export type LeaderboardView = "global" | "friends";
+export type LeaderboardView = "global" | "friends" | "leagues";
 
 export interface LeaderboardEntry {
   id: string;
@@ -29,6 +29,7 @@ export interface LeaderboardEntry {
   isCurrentUser: boolean;
   friendRequestSent?: boolean;
   badges?: string[];
+  league?: string;
 }
 
 export interface LeaderboardState {

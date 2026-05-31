@@ -1,11 +1,7 @@
 /**
  * Centralised API client for the Django backend.
  *
- * Set NEXT_PUBLIC_API_URL in `.env.local` to point at your backend, e.g.
- *   NEXT_PUBLIC_API_URL=http://localhost:8000
- *
- * All calls include `credentials: "include"` so the Django session cookie
- * is sent automatically after login.
+ * Set NEXT_PUBLIC_API_URL in .env.local to point at your backend.
  */
 
 const BASE_URL =
@@ -48,6 +44,23 @@ export interface ApiLesson {
   url: string;
   status: "not_started" | "in_progress" | "completed";
   isCurrent: boolean;
+}
+
+export interface ApiShopItem {
+  id: number;
+  name: string;
+  description: string;
+  cost_xp: number;
+  item_type: string;
+  icon_url: string;
+  is_limited: boolean;
+  stock_remaining: number;
+  level_requirement: number;
+  league_requirement: string;
+  slot?: string | null;
+  duration_minutes?: number | null;
+  uses_left?: number | null;
+  discount_percent?: number | null;
 }
 
 export interface ApiDashboard {
@@ -141,6 +154,47 @@ export const lessonsApi = {
       method: "POST",
       body: JSON.stringify({ lesson_key: lessonKey, status }),
     }),
+};
+
+// ---------------------------------------------------------------------------
+// Shop
+// ---------------------------------------------------------------------------
+
+export const shopApi = {
+  listItems: () => request<{ items: ApiShopItem[] }>("/api/shop/items/"),
+
+  getUserInventory: () =>
+    request<{ item_ids: number[] }>("/api/shop/user-inventory/"),
+
+  purchase: (itemId: number) =>
+    request<{ user_xp: number; item: ApiShopItem; inventory?: number[] }>(
+      "/api/shop/purchase/",
+      {
+        method: "POST",
+        body: JSON.stringify({ item_id: itemId }),
+      }
+    ),
+
+  equip: (itemId: number, slot: string) =>
+    request<{ equipped: Record<string, number>; item?: ApiShopItem }>(
+      "/api/shop/equip/",
+      {
+        method: "POST",
+        body: JSON.stringify({ item_id: itemId, slot }),
+      }
+    ),
+
+  getEquipped: () =>
+    request<{ equipped: Record<string, number> }>("/api/shop/user-equipped/"),
+
+  getDailyDeal: () =>
+    request<{ item: ApiShopItem | null }>("/api/shop/daily-deal/"),
+
+  buyMysteryBox: () =>
+    request<{ item: ApiShopItem; user_xp?: number }>(
+      "/api/shop/buy-mystery-box/",
+      { method: "POST" }
+    ),
 };
 
 // ---------------------------------------------------------------------------

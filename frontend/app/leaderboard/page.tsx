@@ -23,17 +23,17 @@ export default function LeaderboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background w-full">
       <Toaster richColors position="top-right" />
       <AppHeader />
 
       {/* Main content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="w-full px-3 sm:px-4 md:px-6 py-6 sm:py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="max-w-4xl mx-auto"
+          className="w-full max-w-6xl mx-auto"
         >
           <Leaderboard
             currentUserId={user.id}

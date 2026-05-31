@@ -1,12 +1,21 @@
-import { PlaceholderPage } from "@/components/placeholder-page";
+"use client";
 
-export default function AIGamePage() {
-  return (
-    <PlaceholderPage
-      icon="🤖"
-      title="AI Hand-Sign Game – Coming Soon!"
-      message="Practice sign language with real-time webcam-based AI recognition. Challenge yourself and earn XP for every correct sign."
-      hint="Get ready to practice with your webcam — launching very soon!"
-    />
-  );
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/lib/store";
+import { AIGamePage } from "@/components/learning/AIGamePage";
+
+export default function AIGameRoute() {
+  const router = useRouter();
+  const { isAuthenticated } = useAuthStore();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/login");
+    }
+  }, [isAuthenticated, router]);
+
+  if (!isAuthenticated) return null;
+
+  return <AIGamePage />;
 }
