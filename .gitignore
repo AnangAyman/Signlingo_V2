@@ -7,7 +7,12 @@ __pycache__/
 
 # Ignore virtual environment folder
 venv/
+.venv/
 env/
+
+# Ignore local env files
+.env.local
+.env*.local
 
 /instance
 /static/uploads

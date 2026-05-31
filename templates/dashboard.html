@@ -101,9 +101,17 @@
                         <div class="hero-content">
                             <span class="hero-label">Let's start</span>
                             <h2 class="section-title">Bisindo Letters</h2>
-                            <p class="body-large">Test your skills in Bisindo Letters, where you'll learn to express written communication effectively using Bahasa Isyarat Indonesia (Indonesian Sign Language).</p>
-                            <button class="btn-primary" onclick="window.location.href='/video_learning'">
-                                Resume Learning
+                            <p class="body-large">
+                                {% if module_complete %}
+                                You've completed the Bisindo path. Review any lesson or jump back in for more practice.
+                                {% elif current_lesson %}
+                                Next step: <strong>{{ current_lesson.title }}</strong>. Keep moving through the Bisindo path one lesson at a time.
+                                {% else %}
+                                Test your skills in Bisindo Letters, where you'll learn to express written communication effectively using Bahasa Isyarat Indonesia (Indonesian Sign Language).
+                                {% endif %}
+                            </p>
+                            <button class="btn-primary" onclick="window.location.href='{{ current_lesson.url if current_lesson else '/video_learning' }}'">
+                                {% if module_complete %}Review Lessons{% else %}Resume {{ current_lesson.title if current_lesson else 'Learning' }}{% endif %}
                                 <i class="fas fa-arrow-right"></i>
                             </button>
                         </div>
@@ -135,10 +143,10 @@
                             </button>
                         </div>
                         <div class="progress-container">
-                            <div class="progress-bar" style="width: 0%"></div>
+                            <div class="progress-bar" style="width: {{ module_progress_percent }}%"></div>
                         </div>
                         <div class="module-footer">
-                            <span class="caption">0% practiced</span>
+                            <span class="caption">{{ module_progress_percent|round|int }}% practiced · {{ completed_lessons_count }}/{{ total_lessons_count }} lessons</span>
                         </div>
                     </div>
 

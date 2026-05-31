@@ -1,0 +1,196 @@
+{
+  "nav": {
+    "features": "기능",
+    "leagues": "리그",
+    "reviews": "후기",
+    "pricing": "요금제"
+  },
+  "appNav": {
+    "home": "홈",
+    "lessons": "레슨",
+    "shop": "상점",
+    "leaderboard": "리더보드",
+    "achievements": "업적",
+    "aiGame": "AI 게임",
+    "profile": "프로필",
+    "dayStreak": "{{count}}일 연속"
+  },
+  "auth": {
+    "login": "로그인",
+    "startLearning": "학습 시작",
+    "logout": "로그아웃"
+  },
+  "hero": {
+    "badge": "AI 기반 학습",
+    "headline": "수어를 배워요",
+    "headlineSuffix": "즐겁게!",
+    "subtitle": "게임화된 레슨, AI 손 인식, 경쟁 리그를 통해 수어를 마스터하세요. 수천 명과 함께 소통을 배워보세요.",
+    "ctaPrimary": "무료로 학습 시작",
+    "ctaSecondary": "데모 보기",
+    "iLoveYou": "사랑해요",
+    "hello": "안녕하세요!",
+    "xpChip": "+100 XP",
+    "socialProof": "5만 명+ 학습자 합류"
+  },
+  "features": {
+    "badge": "SignLingo를 선택하는 이유",
+    "title": "수어 마스터를 위한",
+    "titleSuffix": "모든 것",
+    "subtitle": "최첨단 AI 기술과 검증된 학습 방법을 결합하여 수어를 누구에게나 접근 가능하고 즐겁게 만들었습니다.",
+    "aiHandRecognition": {
+      "title": "AI 손 인식",
+      "description": "고급 AI가 손동작을 실시간으로 분석하여 수어를 완벽하게 익힐 수 있도록 즉각적인 피드백을 제공합니다."
+    },
+    "interactiveVideoLessons": {
+      "title": "인터랙티브 동영상 레슨",
+      "description": "원어민 수화자의 짧은 동영상 레슨으로 배우세요. 반복 재생으로 자신만의 속도에 맞게 연습하세요."
+    },
+    "gamifiedLeagues": {
+      "title": "게임화된 리그",
+      "description": "브론즈, 실버, 골드 리그에서 경쟁하세요. XP를 획득하고, 순위를 올리며, 독점 보상을 잠금 해제하세요."
+    },
+    "adaptiveLearning": {
+      "title": "적응형 학습",
+      "description": "스마트 시스템이 학습 스타일과 속도에 맞춰져 최적의 기억력과 진도를 보장합니다."
+    },
+    "communityPractice": {
+      "title": "커뮤니티 연습",
+      "description": "다른 학습자들과 연결하여 연습 세션을 진행하세요. 친구에게 도전하고 함께 배워보세요."
+    },
+    "dailyChallenges": {
+      "title": "일일 챌린지",
+      "description": "일일 퀘스트를 완료하여 보너스 XP를 획득하고 연속 기록을 유지하세요. 매일 새로운 챌린지!"
+    }
+  },
+  "leagues": {
+    "badge": "경쟁 리그",
+    "title": "순위를 올려,",
+    "titleSuffix": "보상을 획득하세요",
+    "subtitle": "전 세계 학습자들과 계층화된 리그 시스템에서 경쟁하세요. 더 많이 연습할수록 더 높이 올라갑니다!",
+    "bronze": {
+      "name": "브론즈",
+      "requirement": "여정을 시작하세요",
+      "benefits": ["기본 레슨", "일일 퀘스트", "커뮤니티 접근"]
+    },
+    "silver": {
+      "name": "실버",
+      "requirement": "주당 500 XP 획득",
+      "benefits": ["고급 레슨", "연습 파트너", "배지 잠금 해제"]
+    },
+    "gold": {
+      "name": "골드",
+      "requirement": "주당 1500 XP 획득",
+      "benefits": ["전문가 콘텐츠", "1:1 세션", "독점 보상"]
+    },
+    "joinLeague": "{{league}} 리그 참가",
+    "yourLeague": "내 리그",
+    "locked": "잠금",
+    "unlockAt": "{{xp}} XP에서 잠금 해제",
+    "weeklyXp": "주당 {{xp}} XP"
+  },
+  "testimonials": {
+    "badge": "성공 사례",
+    "title": "전 세계",
+    "titleSuffix": "학습자들의 사랑",
+    "subtitle": "SignLingo로 의사소통 능력을 향상시킨 수천 명의 행복한 학습자들과 함께하세요.",
+    "leagueBadge": "{{league}} 리그",
+    "previousAriaLabel": "이전 후기",
+    "nextAriaLabel": "다음 후기"
+  },
+  "cta": {
+    "badge": "무료로 시작",
+    "title": "수어 여정을 시작할 준비가 되셨나요?",
+    "subtitle": "오늘 50만 명 이상의 학습자와 함께 수어로 소통을 시작하세요. 첫 번째 레슨은 무료입니다!",
+    "primaryBtn": "무료로 시작하기",
+    "secondaryBtn": "요금제 보기"
+  },
+  "pricing": {
+    "badge": "간편한 요금제",
+    "title": "학습 플랜을",
+    "titleSuffix": "선택하세요",
+    "subtitle": "무료로 시작하고, 준비되면 업그레이드하세요. 언제든지 취소 가능.",
+    "monthly": "월간",
+    "yearly": "연간",
+    "savePercent": "20% 절약",
+    "perMonth": "/월",
+    "mostPopular": "가장 인기",
+    "free": {
+      "name": "무료",
+      "description": "시작하기에 완벽",
+      "cta": "시작하기",
+      "features": [
+        "기본 수어 레슨",
+        "하루 5개 레슨",
+        "브론즈 리그 접근",
+        "커뮤니티 포럼",
+        "기본 진도 추적"
+      ]
+    },
+    "pro": {
+      "name": "프로",
+      "description": "진지한 학습자를 위한",
+      "cta": "무료 체험 시작",
+      "features": [
+        "무제한 레슨",
+        "전체 리그 단계",
+        "AI 손 인식",
+        "오프라인 모드",
+        "고급 분석",
+        "우선 지원",
+        "광고 없는 경험"
+      ]
+    },
+    "team": {
+      "name": "팀",
+      "description": "학교 및 기관용",
+      "cta": "영업팀 문의",
+      "features": [
+        "프로의 모든 기능",
+        "팀 관리",
+        "진도 보고서",
+        "맞춤형 콘텐츠",
+        "API 접근",
+        "전담 지원",
+        "SSO 통합"
+      ]
+    }
+  },
+  "footer": {
+    "tagline": "게임화된 학습과 AI 기술을 통해 모든 사람이 수어를 접할 수 있게 합니다.",
+    "stayUpdated": "최신 소식 받기",
+    "stayUpdatedDesc": "최신 뉴스와 학습 팁을 이메일로 받아보세요.",
+    "emailPlaceholder": "이메일을 입력하세요",
+    "subscribe": "구독",
+    "copyright": "© {{year}} SignLingo. 모든 권리 보유.",
+    "madeWith": "청각 장애인 커뮤니티를 위해 ❤️를 담아 만들었습니다",
+    "sections": {
+      "product": "제품",
+      "company": "회사",
+      "resources": "리소스",
+      "legal": "법적 정보"
+    },
+    "links": {
+      "features": "기능",
+      "leagues": "리그",
+      "pricing": "요금제",
+      "mobileApp": "모바일 앱",
+      "aboutUs": "회사 소개",
+      "careers": "채용",
+      "blog": "블로그",
+      "pressKit": "프레스 킷",
+      "helpCenter": "고객센터",
+      "community": "커뮤니티",
+      "signDictionary": "수어 사전",
+      "tutorials": "튜토리얼",
+      "privacyPolicy": "개인정보 처리방침",
+      "termsOfService": "서비스 이용약관",
+      "accessibility": "접근성",
+      "cookiePolicy": "쿠키 정책"
+    }
+  },
+  "language": {
+    "toggle": "언어 전환",
+    "en": "EN",
+    "ko": "KO"
+  }
+}

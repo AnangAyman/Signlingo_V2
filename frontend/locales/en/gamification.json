@@ -1,0 +1,66 @@
+{
+  "pageTitle": "Achievements",
+  "addXpBtn": "+50 XP",
+  "addXpLargeBtn": "+200 XP",
+  "addXpSmallLabel": "Add 50 XP (demo)",
+  "addXpLargeLabel": "Add 200 XP (demo)",
+  "resetLabel": "Reset demo state",
+  "resetToast": "Demo state reset to defaults.",
+  "xpSummary": {
+    "level": "Level {{level}}",
+    "xpToNext": "{{xp}} XP to next level",
+    "streak": "🔥 {{days}}-day streak"
+  },
+  "earnMore": {
+    "title": "💡 Earn more XP by:",
+    "items": [
+      "Completing daily quests",
+      "Finishing lessons in the course",
+      "Scoring 80%+ on quizzes",
+      "Practising with the AI camera"
+    ]
+  },
+  "levelCard": {
+    "levelLabel": "Level",
+    "xpLabel": "XP",
+    "xpToNext": "{{xp}} XP to level {{level}}",
+    "streakDays": "{{days}}-day streak!",
+    "keepItUp": "Keep it up!",
+    "dayStreak": "day streak",
+    "celebrateBtn": "Celebrate"
+  },
+  "badges": {
+    "newBadgeToast": "New badge unlocked: {{name}}! {{icon}}",
+    "lockedLabel": "locked",
+    "unlockedLabel": "unlocked",
+    "unlockedOn": "Unlocked on {{date}}",
+    "moreToUnlock": "{{remaining}} more to unlock"
+  },
+  "quests": {
+    "title": "Daily Quests",
+    "xpAvailable": "{{xp}} XP available today",
+    "allComplete": "🎉 All quests complete for today!",
+    "simulateNewDay": "Simulate New Day",
+    "simulateNewDayLabel": "Simulate a new day to reset daily quests",
+    "simulateNewDayToast": "Simulated a new day – quests have been reset!",
+    "questCompleteToast": "+{{xp}} XP – Quest complete!",
+    "questNotReady": "Quest not ready: {{description}}",
+    "markComplete": "Mark complete: {{description}}",
+    "completed": "{{description}} – completed",
+    "progress": "{{current}}/{{total}}"
+  },
+  "rewards": {
+    "redeemed": "Redeemed",
+    "redeem": "Redeem",
+    "cost": "{{cost}} XP"
+  },
+  "levelUp": {
+    "title": "Level Up!",
+    "message": "You've reached Level {{level}}! Keep signing to unlock more rewards and badges!",
+    "ctaBtn": "Awesome, keep going!",
+    "closeLabel": "Close level up modal",
+    "dismissLabel": "Dismiss level up modal and continue",
+    "ariaLabel": "Level up – you reached level {{level}}",
+    "toast": "Congratulations! You reached level {{level}}!"
+  }
+}

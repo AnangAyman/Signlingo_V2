@@ -1,0 +1,196 @@
+{
+  "nav": {
+    "features": "Features",
+    "leagues": "Leagues",
+    "reviews": "Reviews",
+    "pricing": "Pricing"
+  },
+  "appNav": {
+    "home": "Home",
+    "lessons": "Lessons",
+    "shop": "Shop",
+    "leaderboard": "Leaderboard",
+    "achievements": "Achievements",
+    "aiGame": "AI Game",
+    "profile": "Profile",
+    "dayStreak": "{{count}} day streak"
+  },
+  "auth": {
+    "login": "Log in",
+    "startLearning": "Start Learning",
+    "logout": "Log out"
+  },
+  "hero": {
+    "badge": "AI-Powered Learning",
+    "headline": "Learn Sign Language",
+    "headlineSuffix": "the Fun Way",
+    "subtitle": "Master ASL and other sign languages through gamified lessons, AI hand recognition, and competitive leagues. Join thousands learning to communicate.",
+    "ctaPrimary": "Start Learning Free",
+    "ctaSecondary": "Watch Demo",
+    "iLoveYou": "I Love You",
+    "hello": "Hello!",
+    "xpChip": "+100 XP",
+    "socialProof": "Join 50K+ learners"
+  },
+  "features": {
+    "badge": "Why SignLingo?",
+    "title": "Everything you need to",
+    "titleSuffix": "master sign language",
+    "subtitle": "Our platform combines cutting-edge AI technology with proven learning methods to make sign language accessible and fun for everyone.",
+    "aiHandRecognition": {
+      "title": "AI Hand Recognition",
+      "description": "Our advanced AI analyzes your hand movements in real-time, providing instant feedback to perfect your signs."
+    },
+    "interactiveVideoLessons": {
+      "title": "Interactive Video Lessons",
+      "description": "Learn from native signers with bite-sized video lessons. Practice at your own pace with repeat playback."
+    },
+    "gamifiedLeagues": {
+      "title": "Gamified Leagues",
+      "description": "Compete in Bronze, Silver, and Gold leagues. Earn XP, climb rankings, and unlock exclusive rewards."
+    },
+    "adaptiveLearning": {
+      "title": "Adaptive Learning",
+      "description": "Our smart system adapts to your learning style and pace, ensuring optimal retention and progress."
+    },
+    "communityPractice": {
+      "title": "Community Practice",
+      "description": "Connect with fellow learners for practice sessions. Challenge friends and learn together."
+    },
+    "dailyChallenges": {
+      "title": "Daily Challenges",
+      "description": "Complete daily quests to earn bonus XP and keep your streak alive. New challenges every day!"
+    }
+  },
+  "leagues": {
+    "badge": "Competitive Leagues",
+    "title": "Climb the ranks,",
+    "titleSuffix": "earn rewards",
+    "subtitle": "Compete with learners worldwide in our tiered league system. The more you practice, the higher you climb!",
+    "bronze": {
+      "name": "Bronze",
+      "requirement": "Start your journey",
+      "benefits": ["Basic lessons", "Daily quests", "Community access"]
+    },
+    "silver": {
+      "name": "Silver",
+      "requirement": "Earn 500 XP weekly",
+      "benefits": ["Advanced lessons", "Practice partners", "Badge unlocks"]
+    },
+    "gold": {
+      "name": "Gold",
+      "requirement": "Earn 1500 XP weekly",
+      "benefits": ["Expert content", "1-on-1 sessions", "Exclusive rewards"]
+    },
+    "joinLeague": "Join {{league}} League",
+    "yourLeague": "Your League",
+    "locked": "Locked",
+    "unlockAt": "Unlock at {{xp}} XP",
+    "weeklyXp": "{{xp}} XP weekly"
+  },
+  "testimonials": {
+    "badge": "Success Stories",
+    "title": "Loved by",
+    "titleSuffix": "learners worldwide",
+    "subtitle": "Join thousands of happy learners who have transformed their communication skills with SignLingo.",
+    "leagueBadge": "{{league}} League",
+    "previousAriaLabel": "Previous testimonial",
+    "nextAriaLabel": "Next testimonial"
+  },
+  "cta": {
+    "badge": "Start for Free",
+    "title": "Ready to start your sign language journey?",
+    "subtitle": "Join over 500,000 learners and start communicating in sign language today. Your first lesson is free!",
+    "primaryBtn": "Get Started Free",
+    "secondaryBtn": "View Pricing"
+  },
+  "pricing": {
+    "badge": "Simple Pricing",
+    "title": "Choose your",
+    "titleSuffix": "learning plan",
+    "subtitle": "Start free, upgrade when ready. Cancel anytime.",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "savePercent": "Save 20%",
+    "perMonth": "/mo",
+    "mostPopular": "Most Popular",
+    "free": {
+      "name": "Free",
+      "description": "Perfect for getting started",
+      "cta": "Get Started",
+      "features": [
+        "Basic sign language lessons",
+        "5 lessons per day",
+        "Bronze league access",
+        "Community forums",
+        "Basic progress tracking"
+      ]
+    },
+    "pro": {
+      "name": "Pro",
+      "description": "For serious learners",
+      "cta": "Start Free Trial",
+      "features": [
+        "Unlimited lessons",
+        "All league tiers",
+        "AI hand recognition",
+        "Offline mode",
+        "Advanced analytics",
+        "Priority support",
+        "Ad-free experience"
+      ]
+    },
+    "team": {
+      "name": "Team",
+      "description": "For schools & organizations",
+      "cta": "Contact Sales",
+      "features": [
+        "Everything in Pro",
+        "Team management",
+        "Progress reports",
+        "Custom content",
+        "API access",
+        "Dedicated support",
+        "SSO integration"
+      ]
+    }
+  },
+  "footer": {
+    "tagline": "Making sign language accessible to everyone through gamified learning and AI technology.",
+    "stayUpdated": "Stay updated",
+    "stayUpdatedDesc": "Get the latest news and learning tips delivered to your inbox.",
+    "emailPlaceholder": "Enter your email",
+    "subscribe": "Subscribe",
+    "copyright": "© {{year}} SignLingo. All rights reserved.",
+    "madeWith": "Made with ❤️ for the deaf community",
+    "sections": {
+      "product": "Product",
+      "company": "Company",
+      "resources": "Resources",
+      "legal": "Legal"
+    },
+    "links": {
+      "features": "Features",
+      "leagues": "Leagues",
+      "pricing": "Pricing",
+      "mobileApp": "Mobile App",
+      "aboutUs": "About Us",
+      "careers": "Careers",
+      "blog": "Blog",
+      "pressKit": "Press Kit",
+      "helpCenter": "Help Center",
+      "community": "Community",
+      "signDictionary": "Sign Dictionary",
+      "tutorials": "Tutorials",
+      "privacyPolicy": "Privacy Policy",
+      "termsOfService": "Terms of Service",
+      "accessibility": "Accessibility",
+      "cookiePolicy": "Cookie Policy"
+    }
+  },
+  "language": {
+    "toggle": "Switch language",
+    "en": "EN",
+    "ko": "KO"
+  }
+}
