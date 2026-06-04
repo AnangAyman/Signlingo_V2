@@ -20,3 +20,4 @@ opencv-python==4.11.0.86
 pillow==11.2.1
 pytz==2025.2
 tensorflow==2.19.0
+google-genai==0.3.0

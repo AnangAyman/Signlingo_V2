@@ -1,6 +1,11 @@
 import json
 import os
 import random
+try:
+    from google import genai
+except ImportError:
+    genai = None
+
 
 from django.http import JsonResponse
 from django.shortcuts import redirect
@@ -200,3 +205,88 @@ def predict_gru(request):
     except Exception as exc:
         print(f"Prediction Error: {exc}")
         return JsonResponse({"error": "Prediction failed due to an ML runtime error."}, status=500)
+
+
+def translation_mode(request):
+    user, redirect_response = _require_user(request)
+    if redirect_response:
+        return redirect_response
+    context = _user_shell_context(user)
+    context["frontend_dashboard_url"] = os.environ.get("FRONTEND_APP_URL", "").rstrip("/")
+    return _render(request, "translation_mode.html", context)
+
+
+@csrf_exempt
+def translate_sequence(request):
+    try:
+        payload = json.loads(request.body or "{}")
+        words = payload.get("words", [])
+        if not words:
+            return JsonResponse({"error": "No words provided."}, status=400)
+            
+        if not genai:
+            return JsonResponse({"error": "google-genai library is not installed."}, status=500)
+
+        api_key = os.environ.get("GEMINI_API_KEY")
+        if not api_key:
+            return JsonResponse({"error": "GEMINI_API_KEY environment variable is not set."}, status=500)
+
+        # Initialize the GenAI client
+        client = genai.Client(api_key=api_key)
+        
+        # Construct the prompt
+        prompt = (
+            "You are given a list of words. Your task is to combine them into a single, natural-sounding Indonesian sentence.\n"
+            "You MUST add connecting words (like 'dan', 'karena', 'lalu', 'di', 'ke') to make the sentence grammatically correct and flow well. Do not just list the words.\n\n"
+            "Examples:\n"
+            "Words: Saya, Makan, Tidur\n"
+            'Translation: {"translation": "Saya makan dan tidur."}\n\n'
+            "Words: Saya, Makan, Tidur, Mereka, Bingung\n"
+            'Translation: {"translation": "Mereka bingung karena saya makan dan tidur."}\n\n'
+            "Words: Bapak, Beli, Baju, Celana\n"
+            'Translation: {"translation": "Bapak membeli baju dan celana."}\n\n'
+            "Now process this sequence:\n"
+            f"Words: {', '.join(words)}\n"
+        )
+        
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+            config={
+                'system_instruction': 'You are a strict translation assistant. You must respond ONLY with a valid JSON object containing the "translation" key. Never output markdown formatting or thoughts.',
+                'response_mime_type': 'application/json'
+            }
+        )
+        
+        raw_text = response.text.strip()
+        
+        # Clean markdown formatting if present (sometimes models ignore the instruction)
+        if raw_text.startswith("```json"):
+            raw_text = raw_text[7:]
+        elif raw_text.startswith("```"):
+            raw_text = raw_text[3:]
+        if raw_text.endswith("```"):
+            raw_text = raw_text[:-3]
+        raw_text = raw_text.strip()
+        
+        try:
+            response_data = json.loads(raw_text)
+            translated_text = response_data.get("translation", raw_text)
+        except Exception:
+            # Fallback regex to extract JSON if there is still surrounding text
+            import re
+            json_match = re.search(r'\{.*\}', raw_text, re.DOTALL)
+            if json_match:
+                try:
+                    response_data = json.loads(json_match.group())
+                    translated_text = response_data.get("translation", raw_text)
+                except Exception:
+                    translated_text = raw_text
+            else:
+                translated_text = raw_text
+            
+        return JsonResponse({"translated": translated_text})
+        
+    except Exception as exc:
+        print(f"Translation Error: {exc}")
+        return JsonResponse({"error": "Translation failed due to an error."}, status=500)
