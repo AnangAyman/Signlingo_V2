@@ -56,7 +56,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${nunito.variable} ${nunitoSans.variable}`}>
+    <html
+      lang="en"
+      className={`${nunito.variable} ${nunitoSans.variable}`}
+      suppressHydrationWarning
+    >
       <body className="font-sans antialiased bg-background text-foreground">
         <I18nProvider>
           <AuthSessionHydrator />

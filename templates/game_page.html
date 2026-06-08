@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/game_style.css') }}">
 </head>
 <body>
-    <button class="back-button" onclick="window.location.href='/dashboard'">
+    <button class="back-button" onclick="window.location.href='{{ (frontend_app_url ~ '/dashboard') if frontend_app_url else '/dashboard' }}'">
         <svg width="24" height="24" viewBox="0 0 24" fill="none">
             <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
@@ -110,7 +110,7 @@
                     Watch an Ad
                 </button>
                 
-                <button class="modal-button secondary-full-button" onclick="window.location.href='/dashboard'">
+                <button class="modal-button secondary-full-button" onclick="window.location.href='{{ (frontend_app_url ~ '/dashboard') if frontend_app_url else '/dashboard' }}'">
                     <i class="fa-solid fa-arrow-left"></i>
                     Back to Dashboard
                 </button>

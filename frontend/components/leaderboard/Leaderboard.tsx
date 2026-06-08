@@ -15,6 +15,7 @@ import { SegmentedControl } from "./SegmentedControl";
 import { LeaderboardRow } from "./LeaderboardRow";
 import { LeaderboardSkeleton } from "./LeaderboardSkeleton";
 import { UserProfileModal } from "./UserProfileModal";
+import { LeagueOverview } from "./LeagueOverview";
 import { useLeaderboardData, type LeaderboardEntry } from "./useLeaderboardData";
 import { useTranslation } from "react-i18next";
 
@@ -170,7 +171,7 @@ export default function Leaderboard({
   };
 
   return (
-    <div className="space-y-5">
+    <div className="w-full space-y-4 sm:space-y-5">
       {/* Header */}
       <LeaderboardHeader
         weeklyXp={currentUserEntry?.weeklyXp ?? 0}
@@ -187,55 +188,68 @@ export default function Leaderboard({
         reducedMotion={reducedMotion}
       />
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-        <Input
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder={t("searchPlaceholder")}
-          className="pl-10 pr-10 bg-muted/50"
-          aria-label={t("searchPlaceholder")}
+      {/* ── League Overview View ── */}
+      {view === "leagues" && currentUserEntry && (
+        <LeagueOverview
+          currentLeague={currentUserEntry.league || "bronze"}
+          currentXp={currentUserEntry.xp || 0}
+          reducedMotion={reducedMotion}
         />
-        <AnimatePresence>
-          {searchQuery && (
-            <motion.button
-              initial={{ opacity: 0, scale: 0.7 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.7 }}
-              transition={{ duration: 0.15 }}
-              onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground"
-              aria-label="Clear search"
-            >
-              <X className="w-4 h-4" />
-            </motion.button>
-          )}
-        </AnimatePresence>
-      </div>
+      )}
 
-      {/* Debug: +50 XP button */}
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-muted-foreground">
-          {view === "global"
-            ? t("globalCount", { count: Math.min(entries.length, 200) })
-            : t("friendsCount", { count: entries.length })}
-        </p>
-        <Button
-          size="sm"
-          variant="outline"
-          className="gap-1.5 text-xs border-dashed"
-          onClick={() => handlePractice(currentUserId, 50)}
-          aria-label="Add 50 practice XP"
-        >
-          <Zap className="w-3.5 h-3.5 text-amber-500" />
-          {t("addXpBtn")}
-        </Button>
-      </div>
+      {/* Search (hidden for leagues view) */}
+      {view !== "leagues" && (
+        <div className="relative w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+          <Input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t("searchPlaceholder")}
+            className="pl-10 pr-10 bg-muted/50 w-full"
+            aria-label={t("searchPlaceholder")}
+          />
+          <AnimatePresence>
+            {searchQuery && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.7 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.7 }}
+                transition={{ duration: 0.15 }}
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground"
+                aria-label="Clear search"
+              >
+                <X className="w-4 h-4" />
+              </motion.button>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
 
-      {/* ── Error ── */}
-      {error && (
-        <div className="p-6 text-center rounded-xl border border-destructive/20 bg-destructive/5">
+      {/* Debug: +50 XP button (hidden for leagues view) */}
+      {view !== "leagues" && (
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <p className="text-xs text-muted-foreground">
+            {view === "global"
+              ? t("globalCount", { count: Math.min(entries.length, 200) })
+              : t("friendsCount", { count: entries.length })}
+          </p>
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1.5 text-xs border-dashed"
+            onClick={() => handlePractice(currentUserId, 50)}
+            aria-label="Add 50 practice XP"
+          >
+            <Zap className="w-3.5 h-3.5 text-amber-500" />
+            {t("addXpBtn")}
+          </Button>
+        </div>
+      )}
+
+      {/* ── Error (hidden for leagues view) ── */}
+      {view !== "leagues" && error && (
+        <div className="p-4 sm:p-6 text-center rounded-xl border border-destructive/20 bg-destructive/5">
           <p className="text-sm text-destructive mb-3">{error}</p>
           <Button onClick={retryLoad} variant="outline" size="sm">
             {t("retry")}
@@ -244,11 +258,11 @@ export default function Leaderboard({
       )}
 
       {/* ── Empty: no friends ── */}
-      {!loading && !error && filteredEntries.length === 0 && view === "friends" && !searchQuery && (
-        <div className="py-16 text-center space-y-4">
-          <div className="text-5xl">🤝</div>
-          <h3 className="text-lg font-semibold">{t("noFriendsTitle")}</h3>
-          <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+      {view !== "leagues" && !loading && !error && filteredEntries.length === 0 && view === "friends" && !searchQuery && (
+        <div className="py-12 sm:py-16 text-center space-y-4">
+          <div className="text-4xl sm:text-5xl">🤝</div>
+          <h3 className="text-base sm:text-lg font-semibold">{t("noFriendsTitle")}</h3>
+          <p className="text-xs sm:text-sm text-muted-foreground max-w-xs mx-auto">
             {t("noFriendsMessage")}
           </p>
           <Button size="sm" className="gap-2">
@@ -259,23 +273,23 @@ export default function Leaderboard({
       )}
 
       {/* ── Empty: search no results ── */}
-      {!loading && !error && filteredEntries.length === 0 && searchQuery && (
-        <div className="py-12 text-center">
-          <div className="text-4xl mb-3">😕</div>
-          <p className="text-sm text-muted-foreground">
+      {view !== "leagues" && !loading && !error && filteredEntries.length === 0 && searchQuery && (
+        <div className="py-8 sm:py-12 text-center">
+          <div className="text-3xl sm:text-4xl mb-3">😕</div>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             {t("noResults", { query: searchQuery })}
           </p>
         </div>
       )}
 
-      {/* ── List ── */}
-      {!error && (filteredEntries.length > 0 || loading) && (
+      {/* ── List (hidden for leagues view) ── */}
+      {view !== "leagues" && !error && (filteredEntries.length > 0 || loading) && (
         <>
           <motion.div
             variants={listVariants}
             initial="hidden"
             animate="visible"
-            className="space-y-1.5"
+            className="space-y-1 sm:space-y-1.5 w-full"
           >
             <AnimatePresence mode="popLayout">
               {filteredEntries.map((entry, index) => (

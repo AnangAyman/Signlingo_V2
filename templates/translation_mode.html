@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignLingo - Translate</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global_style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/magic_touch.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ml_game.css') }}">
+    <style>
+        .translate-page-wrapper {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .translate-container {
+            display: flex;
+            gap: var(--space-l);
+            align-items: stretch;
+            min-height: calc(100vh - 96px);
+        }
+
+        .camera-section,
+        .transcript-section {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        .camera-section {
+            flex: 1;
+        }
+
+        .transcript-section {
+            flex: 1.2;
+        }
+
+        .quiz-visual-area {
+            position: relative;
+        }
+
+        .recording-overlay {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(239, 68, 68, 0.92);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .recording-overlay.active {
+            opacity: 1;
+        }
+
+        .recording-dot {
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+
+        .words-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-content: flex-start;
+            padding: var(--space-m);
+            background: var(--neutral-light);
+            border-radius: 12px;
+            border: 2px dashed var(--border);
+            min-height: 240px;
+            margin-bottom: var(--space-m);
+        }
+
+        .word-chip {
+            background: var(--primary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 999px;
+            font-size: 16px;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(0, 194, 203, 0.2);
+            animation: popIn 0.25s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            height: fit-content;
+        }
+
+        .word-chip button {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.85);
+            cursor: pointer;
+            padding: 0;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .translation-result {
+            margin-top: var(--space-m);
+            padding: var(--space-l);
+            background: #f0fdf4;
+            border-radius: 12px;
+            border: 1px solid #bbf7d0;
+            display: none;
+        }
+
+        .translation-result h4 {
+            margin: 0 0 8px 0;
+            color: #166534;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .translation-result p {
+            margin: 0;
+            font-size: 24px;
+            color: #15803d;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        .controls {
+            display: flex;
+            gap: var(--space-s);
+            margin-top: auto;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: var(--space-m);
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-clear {
+            background: var(--neutral-light);
+            color: var(--neutral-dark);
+            border: 1px solid var(--border);
+        }
+
+        .btn-record {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-translate {
+            background: #7c3aed;
+            color: white;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+        }
+
+        .instruction-box {
+            text-align: center;
+            padding: 12px;
+            background: #eef2ff;
+            border-radius: 12px;
+            color: #4338ca;
+            margin-bottom: var(--space-m);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .instruction-box kbd {
+            background: white;
+            color: #4338ca;
+            border: 1px solid #c7d2fe;
+            padding: 2px 6px;
+            border-radius: 6px;
+            box-shadow: 0 2px 0 #c7d2fe;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.85); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @media (max-width: 992px) {
+            .translate-container {
+                flex-direction: column;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <a class="back-button" href="{{ frontend_dashboard_url }}/dashboard" aria-label="Back to SignLingo dashboard">
+        <svg width="24" height="24" viewBox="0 0 24" fill="none">
+            <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+        </svg>
+    </a>
+
+    <div class="translate-page-wrapper">
+        <div class="translate-container">
+            <div class="quiz-card camera-section">
+                <div class="game-header">
+                    <div class="header-text">
+                        <span class="module-badge">CAMERA</span>
+                        <h1>Sign Here</h1>
+                    </div>
+                </div>
+
+                <div class="quiz-visual-area mt-3">
+                    <video id="webcam" autoplay playsinline muted></video>
+                    <div class="recording-overlay" id="recording-indicator">
+                        <div class="recording-dot"></div>
+                        Recording...
+                    </div>
+                </div>
+
+                <p class="webcam-disclaimer" style="text-align: center;">
+                    <i class="fa-solid fa-camera"></i>
+                    For best results, stay centered in the frame.
+                </p>
+
+                <div class="mt-4 text-center">
+                    <div id="current-prediction" style="font-size: 24px; font-weight: 700; color: var(--neutral-dark); height: 36px;">
+                        Ready
+                    </div>
+                </div>
+            </div>
+
+            <div class="quiz-card transcript-section">
+                <div class="game-header">
+                    <div class="header-text">
+                        <span class="module-badge">TRANSLATION</span>
+                        <h1>Transcript</h1>
+                    </div>
+                </div>
+
+                <div class="instruction-box">
+                    Press and hold <kbd>Space</kbd> or click the button below to sign a word.
+                </div>
+
+                <div class="words-list" id="words-list"></div>
+
+                <div class="controls">
+                    <button class="btn-action btn-clear" id="btn-clear">
+                        <i class="fa-solid fa-trash"></i> Clear
+                    </button>
+                    <button class="btn-action btn-record" id="btn-record">
+                        <i class="fa-solid fa-video"></i> Record Sign
+                    </button>
+                    <button class="btn-action btn-translate" id="btn-translate">
+                        <i class="fa-solid fa-language"></i> Translate
+                    </button>
+                </div>
+
+                <div class="translation-result" id="translation-result">
+                    <h4>Translated Sentence:</h4>
+                    <p id="translated-text"></p>
+                    <button class="btn-action" id="btn-speak" style="margin-top: 15px; width: 100%; background: var(--neutral-dark); color: white;">
+                        <i class="fa-solid fa-volume-up"></i> Play Audio
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic/holistic.js" crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename='js/translation_mode.js') }}"></script>
+</body>
+
+</html>

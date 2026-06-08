@@ -19,6 +19,7 @@ import {
   Zap,
   Menu,
   X,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -40,10 +41,19 @@ export function AppHeader() {
   const router = useRouter();
   const { user, logout } = useAuthStore();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { t } = useTranslation();
 
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    const handleClickOutside = () => setDropdownOpen(false);
+    if (dropdownOpen) {
+      window.addEventListener("click", handleClickOutside);
+      return () => window.removeEventListener("click", handleClickOutside);
+    }
+  }, [dropdownOpen]);
 
   const handleLogout = () => {
     logout();
@@ -62,9 +72,9 @@ export function AppHeader() {
   const initials = user.name.slice(0, 2).toUpperCase();
 
   return (
-    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-      <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border w-full overflow-visible">
+      <div className="w-full px-4 py-3">
+        <div className="flex items-center justify-between gap-4 max-w-full">
           {/* Logo */}
           <Link href="/dashboard" className="flex items-center gap-2 shrink-0">
             <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
@@ -75,7 +85,7 @@ export function AppHeader() {
             </span>
           </Link>
 
-          {/* Desktop Nav */}
+          {/* Desktop Nav with Responsive Dropdown */}
           <nav className="hidden lg:flex items-center gap-1" aria-label="Main navigation">
             {NAV_LINK_CONFIGS.map(({ href, labelKey, icon: Icon }) => {
               const isActive = pathname === href || pathname.startsWith(href + "/");
@@ -98,6 +108,80 @@ export function AppHeader() {
                 </Link>
               );
             })}
+          </nav>
+
+          {/* Tablet Responsive Nav (640px - 1024px) */}
+          <nav className="hidden md:flex lg:hidden items-center gap-1" aria-label="Main navigation">
+            {NAV_LINK_CONFIGS.slice(0, -1).map(({ href, labelKey, icon: Icon }) => {
+              const isActive = pathname === href || pathname.startsWith(href + "/");
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={() => setDropdownOpen(false)}
+                  className={`
+                    flex items-center gap-1.5 px-2 py-2 rounded-lg text-sm font-medium
+                    transition-colors duration-150
+                    ${isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    }
+                  `}
+                  aria-current={isActive ? "page" : undefined}
+                >
+                  <Icon className="w-4 h-4" aria-hidden />
+                  <span className="hidden xl:inline">{t(labelKey)}</span>
+                </Link>
+              );
+            })}
+
+            {/* Dropdown for hidden/overflow links on medium screens */}
+            <div className="relative z-50">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDropdownOpen(!dropdownOpen);
+                }}
+                className="flex items-center gap-1 px-2 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                aria-label="More navigation options"
+                aria-expanded={dropdownOpen}
+              >
+                <ChevronDown className="w-4 h-4" aria-hidden />
+              </button>
+              <AnimatePresence>
+                {dropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-full mt-2 w-56 rounded-lg border border-border bg-background/95 backdrop-blur-md shadow-lg z-50 overflow-visible"
+                  >
+                    {NAV_LINK_CONFIGS.map(({ href, labelKey, icon: Icon }) => {
+                      const isActive = pathname === href || pathname.startsWith(href + "/");
+                      return (
+                        <Link
+                          key={href}
+                          href={href}
+                          onClick={() => setDropdownOpen(false)}
+                          className={`
+                            flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg
+                            transition-colors duration-150 first:rounded-t-lg last:rounded-b-lg
+                            ${isActive
+                              ? "bg-primary/10 text-primary"
+                              : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                            }
+                          `}
+                        >
+                          <Icon className="w-4 h-4" aria-hidden />
+                          {t(labelKey)}
+                        </Link>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </nav>
 
           {/* Stats + User Menu */}

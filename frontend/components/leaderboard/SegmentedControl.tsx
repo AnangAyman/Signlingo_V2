@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Globe, Users } from "lucide-react";
+import { Globe, Users, Trophy } from "lucide-react";
 import type { LeaderboardView } from "./useLeaderboardData";
 import { useTranslation } from "react-i18next";
 
@@ -21,13 +21,14 @@ export function SegmentedControl({
   const OPTIONS: { value: LeaderboardView; labelKey: string; Icon: typeof Globe }[] = [
     { value: "global", labelKey: "global", Icon: Globe },
     { value: "friends", labelKey: "friends", Icon: Users },
+    { value: "leagues", labelKey: "leagues", Icon: Trophy },
   ];
 
   return (
     <div
       role="tablist"
       aria-label={t("title")}
-      className="relative flex rounded-xl bg-muted p-1 gap-0.5"
+      className="relative flex rounded-xl bg-muted p-1 gap-0.5 overflow-x-auto"
     >
       {OPTIONS.map(({ value: v, labelKey, Icon }) => {
         const isActive = value === v;
@@ -40,9 +41,9 @@ export function SegmentedControl({
             aria-label={t("viewLabel", { view: label })}
             onClick={() => onChange(v)}
             className={`
-              relative flex-1 flex items-center justify-center gap-2
+              relative flex-1 min-w-max flex items-center justify-center gap-2
               px-5 py-2.5 text-sm font-semibold rounded-lg z-10
-              transition-colors duration-200
+              transition-colors duration-200 whitespace-nowrap
               ${isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"}
             `}
           >

@@ -1,22 +1,13 @@
 "use client";
 
-import { useState, useCallback, useRef, useMemo } from "react";
-import type { ApiLeaderboardEntry } from "@/lib/api";
-
-const DEFAULT_API_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://signlingo-django.onrender.com"
-    : "http://localhost:8000";
-
-const API_URL =
-  (typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_URL) ||
-  DEFAULT_API_URL;
+import { useState, useCallback, useRef, useMemo, useEffect } from "react";
+import { leaderboardApi, type ApiLeaderboardEntry } from "@/lib/api";
 
 // ============================================================
 // TYPES
 // ============================================================
 
-export type LeaderboardView = "global" | "friends";
+export type LeaderboardView = "global" | "friends" | "leagues";
 
 export interface LeaderboardEntry {
   id: string;
@@ -34,6 +25,7 @@ export interface LeaderboardEntry {
   isCurrentUser: boolean;
   friendRequestSent?: boolean;
   badges?: string[];
+  league?: string;
 }
 
 export interface LeaderboardState {
@@ -64,17 +56,13 @@ function mapEntry(e: ApiLeaderboardEntry): LeaderboardEntry {
     weeklyChange: e.weeklyChange,
     isFriend: e.isFriend,
     isCurrentUser: e.isCurrentUser,
+    league: e.league,
   };
 }
 
 async function fetchAllEntries(type: "global" | "friends"): Promise<LeaderboardEntry[]> {
-  const res = await fetch(`${API_URL}/api/leaderboard?type=${type}`, {
-    credentials: "include",
-    headers: { Accept: "application/json" },
-  });
-  if (!res.ok) throw new Error("Failed to fetch leaderboard");
-  const data = await res.json();
-  return (data.entries as ApiLeaderboardEntry[]).map(mapEntry);
+  const data = await leaderboardApi.get(type);
+  return data.entries.map(mapEntry);
 }
 
 const PAGE_COUNT = 10; // kept for hasMore logic
@@ -149,12 +137,12 @@ export function useLeaderboardData({
     setLoading(true);
     setError(null);
     try {
-      if (view === "global") {
+      if (view !== "friends") {
         const { entries: e, hasMore: hm } = await fetchGlobalPage(
           1, pageSize, currentUserId, currentUserXpRef.current
         );
         setEntriesSafe(e);
-        setHasMore(hm);
+        setHasMore(view === "global" ? hm : false);
         setPage(1);
       } else {
         const e = await fetchFriendsPage(currentUserId, currentUserXpRef.current);
@@ -169,12 +157,12 @@ export function useLeaderboardData({
   }, [view, pageSize, currentUserId]);
 
   // Run on mount and view change
-  useState(() => {
+  useEffect(() => {
     if (!isInitialisedRef.current) {
       isInitialisedRef.current = true;
-      loadInitial();
+      void loadInitial();
     }
-  });
+  }, [loadInitial]);
 
   // ── load more (infinite scroll – global only) ─────────────
   const loadMore = useCallback(async () => {
@@ -207,12 +195,12 @@ export function useLeaderboardData({
     // Load immediately without waiting for effect
     (async () => {
       try {
-        if (newView === "global") {
+        if (newView !== "friends") {
           const { entries: e, hasMore: hm } = await fetchGlobalPage(
             1, pageSize, currentUserId, currentUserXpRef.current
           );
           setEntriesSafe(e);
-          setHasMore(hm);
+          setHasMore(newView === "global" ? hm : false);
           setPage(1);
         } else {
           const e = await fetchFriendsPage(currentUserId, currentUserXpRef.current);
@@ -236,7 +224,7 @@ export function useLeaderboardData({
     _globalCache = null;
     _friendsCache = null;
     try {
-      if (view === "global") {
+      if (view !== "friends") {
         const { entries: freshEntries, hasMore: hm } = await fetchGlobalPage(
           1, pageSize, currentUserId, currentUserXpRef.current
         );
@@ -247,7 +235,7 @@ export function useLeaderboardData({
           })
           .map((e) => e.id);
         setEntriesSafe(freshEntries);
-        setHasMore(hm);
+        setHasMore(view === "global" ? hm : false);
         setPage(1);
         return { changedIds };
       } else {
