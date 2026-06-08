@@ -27,6 +27,7 @@ import {
 } from "@/lib/api";
 
 const TOTAL_ROUNDS = 10;
+const CAMERA_PREP_SECONDS = 5;
 const MAGIC_ALLOWED_LETTERS = "ABCDEFHIJLMOPQRSTUVWXZ";
 const MAGIC_CONFIDENCE_THRESHOLD = 0.7;
 
@@ -355,8 +356,11 @@ export function CameraPracticeActivity({ lessonKey, onCompleted }: ActivityProps
   const [feedback, setFeedback] = useState<{ type: "correct" | "incorrect" | "info"; message: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [predicting, setPredicting] = useState(false);
+  const [prepCountdown, setPrepCountdown] = useState<number | null>(null);
   const [finishing, setFinishing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const countdownIntervalRef = useRef<number | null>(null);
+  const captureTimeoutRef = useRef<number | null>(null);
 
   const loadQuestion = useCallback(async () => {
     setLoading(true);
@@ -373,6 +377,10 @@ export function CameraPracticeActivity({ lessonKey, onCompleted }: ActivityProps
 
   useEffect(() => {
     void loadQuestion();
+    return () => {
+      if (countdownIntervalRef.current) window.clearInterval(countdownIntervalRef.current);
+      if (captureTimeoutRef.current) window.clearTimeout(captureTimeoutRef.current);
+    };
   }, [loadQuestion]);
 
   const finish = useCallback(
@@ -400,9 +408,10 @@ export function CameraPracticeActivity({ lessonKey, onCompleted }: ActivityProps
   );
 
   const capturePrediction = async () => {
-    if (!question || predicting || finishing) return;
+    if (!question || predicting || finishing || prepCountdown !== null) return;
 
     setPredicting(true);
+    setPrepCountdown(null);
     setError(null);
     try {
       const blob = await capture();
@@ -432,6 +441,40 @@ export function CameraPracticeActivity({ lessonKey, onCompleted }: ActivityProps
     }
   };
 
+  const startPreparedCapture = async () => {
+    if (!cameraReady) {
+      await startCamera();
+      return;
+    }
+    if (!question || predicting || finishing || prepCountdown !== null) return;
+
+    setError(null);
+    setFeedback({
+      type: "info",
+      message: `Get ready. Capture starts in ${CAMERA_PREP_SECONDS} seconds.`,
+    });
+    setPrepCountdown(CAMERA_PREP_SECONDS);
+
+    if (countdownIntervalRef.current) window.clearInterval(countdownIntervalRef.current);
+    if (captureTimeoutRef.current) window.clearTimeout(captureTimeoutRef.current);
+
+    countdownIntervalRef.current = window.setInterval(() => {
+      setPrepCountdown((current) => {
+        if (current === null) return null;
+        const next = current - 1;
+        return next > 0 ? next : 0;
+      });
+    }, 1000);
+
+    captureTimeoutRef.current = window.setTimeout(() => {
+      if (countdownIntervalRef.current) {
+        window.clearInterval(countdownIntervalRef.current);
+        countdownIntervalRef.current = null;
+      }
+      void capturePrediction();
+    }, CAMERA_PREP_SECONDS * 1000);
+  };
+
   return (
     <ActivityShell
       icon={<Camera className="h-5 w-5" />}
@@ -458,19 +501,34 @@ export function CameraPracticeActivity({ lessonKey, onCompleted }: ActivityProps
                 {loading ? "Loading..." : question?.question || "No prompt"}
               </p>
             </div>
+            {prepCountdown !== null && (
+              <div className="rounded-lg border bg-primary/10 p-4 text-center text-primary">
+                <p className="text-sm font-semibold uppercase tracking-[0.18em]">Get Ready</p>
+                <p className="mt-1 text-5xl font-black">{prepCountdown}</p>
+              </div>
+            )}
             <Button
               className="w-full"
-              disabled={(cameraReady && !question) || predicting || finishing}
-              onClick={cameraReady ? () => void capturePrediction() : () => void startCamera()}
+              disabled={(cameraReady && !question) || predicting || finishing || prepCountdown !== null}
+              onClick={() => void startPreparedCapture()}
             >
-              {predicting ? (
+              {predicting || prepCountdown !== null ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 <Camera className="mr-2 h-4 w-4" />
               )}
-              {cameraReady ? "Capture Sign" : "Enable Camera"}
+              {cameraReady
+                ? prepCountdown !== null
+                  ? "Preparing..."
+                  : "Capture Sign"
+                : "Enable Camera"}
             </Button>
-            <Button variant="outline" className="w-full" onClick={() => void loadQuestion()} disabled={loading}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => void loadQuestion()}
+              disabled={loading || predicting || prepCountdown !== null}
+            >
               <RefreshCcw className="mr-2 h-4 w-4" />
               New Prompt
             </Button>

@@ -10,7 +10,7 @@
 
 function getDefaultApiUrl(): string {
   if (process.env.NODE_ENV === "production") {
-    return "https://signlingo-django.onrender.com";
+    return "https://signlingo-django-cloudrun-test-wnkjpwb6cq-du.a.run.app";
   }
 
   if (typeof window !== "undefined" && window.location.hostname) {
