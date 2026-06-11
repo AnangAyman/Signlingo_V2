@@ -13,6 +13,7 @@ import { LevelUpModal } from "./LevelUpModal";
 import { useGamificationStore } from "./useGamificationStore";
 import { AppHeader } from "@/components/app-header";
 import { useTranslation } from "react-i18next";
+import { useAuthStore } from "@/lib/store";
 
 interface GamificationPageProps {
   /** Optionally force reduced-motion (defaults to system preference). */
@@ -32,8 +33,10 @@ export function GamificationPage({
     newlyEarnedBadge,
     clearNewBadge,
     addXp,
+    syncFromUser,
     resetDemo,
   } = useGamificationStore();
+  const { user } = useAuthStore();
   const { t } = useTranslation("gamification");
 
   // Detect system reduced-motion preference
@@ -58,6 +61,12 @@ export function GamificationPage({
       clearNewBadge();
     }
   }, [newlyEarnedBadge, clearNewBadge]);
+
+  useEffect(() => {
+    if (user) {
+      syncFromUser(user);
+    }
+  }, [user, syncFromUser]);
 
   const handleAddXp = (amount: number) => {
     addXp(amount, "demo");

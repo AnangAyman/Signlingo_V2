@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import type { User } from "@/lib/store";
 
 // ============================================================
 // TYPES
@@ -282,10 +283,25 @@ interface GamificationStore {
   redeemReward: (rewardId: string) => boolean;
   completeQuest: (questId: string) => void;
   checkBadges: () => Badge | null;
+  syncFromUser: (user: User) => void;
   resetDemo: () => void;
   closeLevelUpModal: () => void;
   clearNewBadge: () => void;
   simulateNewDay: () => void;
+}
+
+function progressFromUser(user: Pick<User, "xp" | "level" | "dailyStreak">): UserProgress {
+  const currentLevelXp = user.xp % 500;
+  const xpToNextLevel = currentLevelXp === 0 ? 500 : 500 - currentLevelXp;
+
+  return {
+    level: user.level,
+    totalXp: user.xp,
+    xpToNextLevel,
+    levelProgressPercent: (currentLevelXp / 500) * 100,
+    dailyStreak: user.dailyStreak,
+    lastActiveDate: new Date().toISOString().split("T")[0],
+  };
 }
 
 export const useGamificationStore = create<GamificationStore>()(
@@ -392,6 +408,15 @@ export const useGamificationStore = create<GamificationStore>()(
         }
 
         return earnedBadge;
+      },
+
+      syncFromUser: (user: User) => {
+        set({
+          userProgress: {
+            ...get().userProgress,
+            ...progressFromUser(user),
+          },
+        });
       },
 
       resetDemo: () => {
