@@ -1,4 +1,4 @@
-# Frontend Translation Review Checklist — 2026-05-22
+# Frontend Translation Review Checklist — 2026-06-04
 
 ## 목적
 프론트 번역 작업을 커밋 단위로 나눠 검토할 때 확인해야 할 항목을 고정한다.
@@ -21,6 +21,7 @@
 - `47fbde0 frontend i18n: translate common landing components`
 - `f31ace9 frontend i18n: localize league data errors`
 - `4eb61af docs: update frontend translation status`
+- 2026-06-04 working tree batch: frontend i18n hardcoded string cleanup
 
 ---
 
@@ -110,6 +111,8 @@
 - rewards toast와 aria 문구가 전환되는지
 - daily quests, progress aria, simulate 버튼 보조 문구가 전환되는지
 - level-up modal 보조 문구가 전환되는지
+- 배지/보상/일일 퀘스트의 이름/설명/조건이 데이터 객체가 아니라 locale key에서 표시되는지
+- persisted Zustand state에 과거 문자열 필드가 남아 있어도 UI가 locale 값을 우선 사용하는지
 
 ### `a53b4a0` 리더보드 컴포넌트
 
@@ -152,6 +155,31 @@
 - 리그 데이터 fetch 실패 시 에러가 locale 문자열을 쓰는지
 - `frontend/components/leagues/LeagueTiers.tsx`에서 표시되는 실패 문구와 충돌하지 않는지
 
+### 2026-06-04 하드코딩 문구 정리
+
+대상:
+- `frontend/app/login/page.tsx`
+- `frontend/app/signup/page.tsx`
+- `frontend/components/hero-section.tsx`
+- `frontend/components/cta-section.tsx`
+- `frontend/components/navbar.tsx`
+- `frontend/components/footer.tsx`
+- `frontend/components/welcome-character.tsx`
+- `frontend/components/leagues-section.tsx`
+- `frontend/components/leagues/*`
+- `frontend/components/gamification/*`
+- `frontend/mocks/gamificationData.ts`
+- `frontend/locales/en/{auth,common,gamification,leagues}.json`
+- `frontend/locales/ko/{auth,common,gamification,leagues}.json`
+
+확인:
+- login stats 라벨이 `auth.login.stats.*`에서 표시되는지
+- 이미지 `alt`와 로고 `aria-label`이 `common.media.*` 또는 `auth.*.mascotAlt`에서 표시되는지
+- landing league tooltip/CTA/badge/XP label이 `common.leagues.*`에서 표시되는지
+- 리그 화면의 표시명이 `leagues.tiers.<tier>.name`에서 표시되는지
+- 배지/보상/일일 퀘스트 표시 문구가 `gamification` namespace의 `items` 하위 키에서 표시되는지
+- `frontend/components/ui/*` 내부 primitive 문구는 이번 배치 범위 밖으로 남아 있는지
+
 ### `4eb61af` 문서
 
 대상:
@@ -183,6 +211,17 @@ git show 4eb61af
 ```bash
 git diff b2514e6..HEAD -- frontend
 git diff b2514e6..HEAD -- document/week12
+```
+
+### locale 키 구조 검증
+```bash
+node -e 'const fs=require("fs"),path=require("path");const base="frontend/locales";function flat(o,p="",a=[]){for(const [k,v] of Object.entries(o)){const q=p?p+"."+k:k;if(v&&typeof v==="object"&&!Array.isArray(v))flat(v,q,a);else a.push(q)}return a}let bad=false;for(const f of fs.readdirSync(path.join(base,"en")).filter(x=>x.endsWith(".json")).sort()){const en=flat(JSON.parse(fs.readFileSync(path.join(base,"en",f),"utf8"))).sort();const ko=flat(JSON.parse(fs.readFileSync(path.join(base,"ko",f),"utf8"))).sort();const es=new Set(en),ks=new Set(ko);const missingKo=en.filter(k=>!ks.has(k));const missingEn=ko.filter(k=>!es.has(k));if(missingKo.length||missingEn.length){bad=true;console.log(f); if(missingKo.length) console.log("  missing ko:",missingKo.join(", ")); if(missingEn.length) console.log("  missing en:",missingEn.join(", "));}}process.exit(bad?1:0)'
+```
+
+### 타입 검증
+```bash
+cd frontend
+./node_modules/.bin/tsc --noEmit
 ```
 
 ### 브라우저 검수 페이지

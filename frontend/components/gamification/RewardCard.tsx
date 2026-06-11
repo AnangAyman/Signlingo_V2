@@ -31,6 +31,9 @@ export function RewardCard({
   onRedeem,
 }: RewardCardProps) {
   const { t } = useTranslation("gamification");
+  const name = t(`rewards.items.${reward.id}.name`);
+  const description = t(`rewards.items.${reward.id}.description`);
+
   return (
     <motion.div
       layout
@@ -61,10 +64,10 @@ export function RewardCard({
           {/* Info */}
           <div className="flex-1">
             <p className="font-semibold text-sm text-foreground leading-tight">
-              {reward.name}
+              {name}
             </p>
             <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
-              {reward.description}
+              {description}
             </p>
           </div>
 
@@ -91,7 +94,7 @@ export function RewardCard({
               onClick={() => onRedeem(reward.id)}
               disabled={!canAfford}
               className="w-full"
-              aria-label={t("rewards.redeemLabel", { name: reward.name, cost: reward.cost })}
+              aria-label={t("rewards.redeemLabel", { name, cost: reward.cost })}
             >
               <ShoppingBag className="w-3 h-3 mr-1.5" aria-hidden />
               {t("rewards.redeem")}

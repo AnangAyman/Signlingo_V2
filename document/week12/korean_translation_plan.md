@@ -146,7 +146,10 @@
 - `origin/development` 병합 이후 새 `frontend/`에도 별도 i18n 구조가 들어왔기 때문에, 이후 우선 번역 범위는 프론트 기준으로 다시 잡아야 한다.
 - 프론트 기준 상세 범위는 `document/week12/frontend_translation_scope.md`에서 관리한다.
 - 프론트 기준으로 `login`, `signup`, `lessons`, `ai-game`, `placeholder`, `gamification`, `leaderboard`, 랜딩 공통 컴포넌트의 고정 문구 번역은 반영된 상태다.
-- 현재 남은 프론트 후속 범위는 공용 UI primitive 접근성 문구와 동적 데이터 다국어화다.
+- 2026-06-04 기준으로 로그인 통계, 이미지 alt, 로고 aria-label, landing league tooltip/CTA, 리그 표시명, 게임화 배지/보상/퀘스트 mock 표시 문구도 locale JSON으로 이동했다.
+- 게임화 mock/store 데이터는 표시 문자열을 직접 갖지 않고 `id`를 기준으로 `gamification` namespace의 `items` 키를 조회한다.
+- 현재 남은 프론트 후속 범위는 `frontend/components/ui/*` 내부 공용 UI primitive 접근성 문구와 API/DB 동적 데이터 다국어화다.
+
 ## Deferred: Dynamic Data Localization
 
 - Current scope translates fixed template strings first.

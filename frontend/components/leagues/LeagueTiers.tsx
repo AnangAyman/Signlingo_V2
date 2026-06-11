@@ -102,6 +102,7 @@ export default function LeagueTiers({
   if (!status) return null;
 
   const currentLeague = LEAGUES[status.currentTier];
+  const currentLeagueName = t(currentLeague.displayNameKey);
   const currentTierIndex = TIER_ORDER.indexOf(status.currentTier);
   const previousLeague = currentTierIndex > 0 ? LEAGUES[TIER_ORDER[currentTierIndex - 1]] : null;
 
@@ -181,7 +182,7 @@ export default function LeagueTiers({
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <h3 className="text-xl font-bold text-foreground">
-                {currentLeague.displayName}
+                {currentLeagueName}
               </h3>
               <Badge
                 variant="secondary"
@@ -308,9 +309,9 @@ export default function LeagueTiers({
                       <div className="flex-1">
                         <p className="font-medium text-foreground">
                           {event.type === "promotion"
-                            ? t("promotedTo", { league: LEAGUES[event.toTier!].displayName })
+                            ? t("promotedTo", { league: t(LEAGUES[event.toTier!].displayNameKey) })
                             : event.type === "demotion"
-                            ? t("demotedTo", { league: LEAGUES[event.toTier!].displayName })
+                            ? t("demotedTo", { league: t(LEAGUES[event.toTier!].displayNameKey) })
                             : t("rankChanged", { rank: formatOrdinal(event.newRank) })}
                         </p>
                         <p className="text-sm text-muted-foreground">
@@ -331,7 +332,7 @@ export default function LeagueTiers({
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Trophy className="w-5 h-5 text-primary" />
-                  {t("standings", { league: currentLeague.displayName })}
+                  {t("standings", { league: currentLeagueName })}
                 </CardTitle>
                 <Badge variant="outline">{t("week", { week: Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000)) })}</Badge>
               </div>

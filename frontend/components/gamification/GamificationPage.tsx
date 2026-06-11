@@ -53,7 +53,10 @@ export function GamificationPage({
   useEffect(() => {
     if (newlyEarnedBadge) {
       toast.success(
-        t("badges.newBadgeToast", { name: newlyEarnedBadge.name, icon: newlyEarnedBadge.icon })
+        t("badges.newBadgeToast", {
+          name: t(`badges.items.${newlyEarnedBadge.id}.name`),
+          icon: newlyEarnedBadge.icon,
+        })
       );
       clearNewBadge();
     }

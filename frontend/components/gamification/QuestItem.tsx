@@ -23,6 +23,7 @@ export function QuestItem({
   onProgress,
 }: QuestItemProps) {
   const { t } = useTranslation("gamification");
+  const description = t(`quests.items.${quest.id}.description`);
   const progressPercent = Math.min(
     Math.round((quest.progress / quest.total) * 100),
     100
@@ -49,10 +50,10 @@ export function QuestItem({
           disabled={!isReady && !quest.completed}
           aria-label={
             quest.completed
-              ? t("quests.completed", { description: quest.description })
+              ? t("quests.completed", { description })
               : isReady
-              ? t("quests.markComplete", { description: quest.description })
-              : t("quests.questNotReady", { description: quest.description })
+              ? t("quests.markComplete", { description })
+              : t("quests.questNotReady", { description })
           }
           aria-pressed={quest.completed}
           className={[
@@ -79,7 +80,7 @@ export function QuestItem({
                   : "text-foreground"
               }`}
             >
-              {quest.description}
+              {description}
             </p>
             <span className="flex items-center gap-1 text-xs font-semibold text-primary whitespace-nowrap">
               <Zap className="w-3 h-3" aria-hidden />+{quest.xpReward} XP
@@ -96,7 +97,7 @@ export function QuestItem({
                 aria-valuenow={quest.progress}
                 aria-valuemin={0}
                 aria-valuemax={quest.total}
-                aria-label={t("quests.progressLabel", { description: quest.description })}
+                aria-label={t("quests.progressLabel", { description })}
               />
               <div className="flex items-center justify-between mt-1">
                 <p className="text-xs text-muted-foreground">
@@ -108,7 +109,7 @@ export function QuestItem({
                     size="sm"
                     className="h-5 text-xs px-2 py-0 text-muted-foreground hover:text-foreground"
                     onClick={() => onProgress(quest.id)}
-                    aria-label={t("quests.simulateProgressLabel", { description: quest.description })}
+                    aria-label={t("quests.simulateProgressLabel", { description })}
                   >
                     +1
                   </Button>

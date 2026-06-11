@@ -30,6 +30,7 @@ export function LeagueCard({
 }: LeagueCardProps) {
   const { t } = useTranslation("leagues");
   const Icon = league.icon;
+  const leagueName = t(league.displayNameKey);
   const progressPercent = userStatus
     ? Math.min(100, ((userStatus.weeklyXp - league.minXp) / (league.maxXp - league.minXp)) * 100)
     : 0;
@@ -110,7 +111,7 @@ export function LeagueCard({
                 <Icon className="w-6 h-6 text-white" />
               </motion.div>
               <div>
-                <h3 className="font-bold text-foreground">{league.displayName}</h3>
+                <h3 className="font-bold text-foreground">{leagueName}</h3>
                 <p className="text-sm text-muted-foreground">
                   {formatNumber(league.minXp)} - {formatNumber(league.maxXp)} XP
                 </p>
@@ -212,7 +213,7 @@ export function LeagueCard({
                       className="bg-amber-500/20 border border-amber-500/50 rounded-lg p-3 text-center cursor-help"
                     >
                       <span className="text-amber-500 font-semibold text-sm">
-                        {t("card.demotionWarningMsg", { league: league.displayName })}
+                        {t("card.demotionWarningMsg", { league: leagueName })}
                       </span>
                     </motion.div>
                   </TooltipTrigger>

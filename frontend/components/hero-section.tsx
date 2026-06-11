@@ -67,7 +67,7 @@ export function HeroSection() {
               <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-secondary/30 rounded-full blur-3xl scale-110" />
               <motion.img
                 src={CHARACTER_IMAGE_URL}
-                alt="SignLingo mascot - a friendly character with bob hair and glasses wearing a yellow cardigan"
+                alt={t("media.mascotDetailedAlt")}
                 className="relative object-contain drop-shadow-2xl
                            w-auto h-auto
                            max-w-[200px] max-h-[240px]

@@ -44,6 +44,58 @@
       "locked": "{{name}} badge – locked",
       "unlocked": "{{name}} badge – unlocked"
     },
+    "items": {
+      "first-sign": {
+        "name": "First Sign",
+        "description": "Complete your first lesson",
+        "requirement": "Complete 1 lesson"
+      },
+      "streak-starter": {
+        "name": "Streak Starter",
+        "description": "Maintain a 3-day streak",
+        "requirement": "3-day streak"
+      },
+      "week-warrior": {
+        "name": "Week Warrior",
+        "description": "Maintain a 7-day streak",
+        "requirement": "7-day streak"
+      },
+      "lesson-master": {
+        "name": "Lesson Master",
+        "description": "Complete 10 lessons",
+        "requirement": "Complete 10 lessons"
+      },
+      "quiz-ace": {
+        "name": "Quiz Ace",
+        "description": "Score 100% on 5 quizzes",
+        "requirement": "Perfect score on 5 quizzes"
+      },
+      "bronze-champion": {
+        "name": "Bronze Champion",
+        "description": "Reach the Silver league",
+        "requirement": "Promote from Bronze"
+      },
+      "silver-star": {
+        "name": "Silver Star",
+        "description": "Reach the Gold league",
+        "requirement": "Promote from Silver"
+      },
+      "gold-legend": {
+        "name": "Gold Legend",
+        "description": "Reach the Platinum league",
+        "requirement": "Promote from Gold"
+      },
+      "ai-explorer": {
+        "name": "AI Explorer",
+        "description": "Practice with AI camera 20 times",
+        "requirement": "Use AI camera 20 times"
+      },
+      "month-master": {
+        "name": "Month Master",
+        "description": "Maintain a 30-day streak",
+        "requirement": "30-day streak"
+      }
+    },
     "rarity": {
       "common": "Common",
       "rare": "Rare",
@@ -63,7 +115,18 @@
     "completed": "{{description}} – completed",
     "progress": "{{current}}/{{total}}",
     "progressLabel": "{{description}} progress",
-    "simulateProgressLabel": "Simulate one step of progress for: {{description}}"
+    "simulateProgressLabel": "Simulate one step of progress for: {{description}}",
+    "items": {
+      "quest-lesson": {
+        "description": "Complete 3 lessons"
+      },
+      "quest-quiz": {
+        "description": "Score 80%+ on a quiz"
+      },
+      "quest-practice": {
+        "description": "Practice with AI camera"
+      }
+    }
   },
   "rewards": {
     "title": "Rewards Shop",
@@ -78,7 +141,29 @@
     "redeem": "Redeem",
     "cost": "{{cost}} XP",
     "redeemedOnLabel": "Redeemed on {{date}}",
-    "redeemLabel": "Redeem {{name}} for {{cost}} XP"
+    "redeemLabel": "Redeem {{name}} for {{cost}} XP",
+    "items": {
+      "streak-freeze": {
+        "name": "Streak Freeze",
+        "description": "Protect your streak for one day"
+      },
+      "double-xp": {
+        "name": "Double XP (1hr)",
+        "description": "Earn double XP for one hour"
+      },
+      "custom-avatar": {
+        "name": "Custom Avatar",
+        "description": "Unlock a special avatar frame"
+      },
+      "bonus-lesson": {
+        "name": "Bonus Lesson",
+        "description": "Access an exclusive bonus lesson"
+      },
+      "hint-pack": {
+        "name": "Hint Pack (5)",
+        "description": "Get 5 hints for difficult signs"
+      }
+    }
   },
   "levelUp": {
     "title": "Level Up!",

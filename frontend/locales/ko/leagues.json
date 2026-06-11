@@ -25,6 +25,23 @@
   "xp": "XP",
   "failedToLoad": "리그 데이터를 불러오지 못했습니다",
   "tryAgain": "다시 시도",
+  "tiers": {
+    "bronze": {
+      "name": "브론즈 리그"
+    },
+    "silver": {
+      "name": "실버 리그"
+    },
+    "gold": {
+      "name": "골드 리그"
+    },
+    "platinum": {
+      "name": "플래티넘 리그"
+    },
+    "diamond": {
+      "name": "다이아몬드 리그"
+    }
+  },
   "card": {
     "weeklyXp": "주간 XP",
     "promotionZone": "승급 구간",

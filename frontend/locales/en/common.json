@@ -43,6 +43,11 @@
     "socialProof": "50,000+ learners",
     "socialProofSubtext": "joined this month"
   },
+  "media": {
+    "mascotAlt": "SignLingo mascot",
+    "mascotDetailedAlt": "SignLingo mascot - a friendly character with bob hair and glasses wearing a yellow cardigan",
+    "handLogoAlt": "SignLingo hand logo"
+  },
   "features": {
     "badge": "Why SignLingo?",
     "title": "Everything you need to",
@@ -93,6 +98,31 @@
       "requirement": "Earn 1500 XP weekly",
       "benefits": ["Expert content", "1-on-1 sessions", "Exclusive rewards"]
     },
+    "tiers": {
+      "bronze": {
+        "name": "Bronze",
+        "requirement": "Start your journey",
+        "benefits": ["Basic lessons", "Daily quests", "Community access"],
+        "tooltip": "Everyone starts here. Learn the basics and build your foundation."
+      },
+      "silver": {
+        "name": "Silver",
+        "requirement": "Earn 500 XP weekly",
+        "benefits": ["Advanced lessons", "Practice partners", "Badge unlocks"],
+        "tooltip": "Prove your dedication. Top 10 in Bronze advance to Silver weekly."
+      },
+      "gold": {
+        "name": "Gold",
+        "requirement": "Earn 1500 XP weekly",
+        "benefits": ["Expert content", "1-on-1 sessions", "Exclusive rewards"],
+        "tooltip": "The best of the best. Only top performers reach Gold status."
+      }
+    },
+    "xpRequired": "XP Required",
+    "eliteBadge": "ELITE",
+    "tooltipTitle": "{{league}} League",
+    "ctaPrompt": "Ready to start your competitive journey?",
+    "ctaButton": "Join the Competition",
     "joinLeague": "Join {{league}} League",
     "yourLeague": "Your League",
     "locked": "Locked",

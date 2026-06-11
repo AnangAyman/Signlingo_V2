@@ -18,8 +18,9 @@
 - 영어 기본값 + `EN / KO` 토글 구조 적용
 - 고정 UI 문구 기준으로 주요 템플릿 번역 리소스 연결 완료
 - `ml_game`는 템플릿, JS 런타임 문구, API 질문 프롬프트까지 번역 구조 연결 완료
-- 프론트 기준 핵심 번역 범위는 `login`, `signup`, `lessons`, `ai-game`까지 반영됨
+- 프론트 기준 핵심 번역 범위는 `login`, `signup`, `lessons`, `ai-game`, `placeholder`까지 반영됨
 - `gamification`, `leaderboard`, 랜딩 공통 컴포넌트의 잔여 하드코딩도 정리됨
+- 2026-06-04 기준 앱 고유 컴포넌트의 이미지 alt/aria-label, 리그 표시명, 게임화 mock 표시 문구도 locale JSON으로 이동됨
 - 이후 검토는 `frontend_translation_review_checklist.md` 기준으로 커밋 단위로 진행
 - 토글 위치/시각 스타일은 프론트엔드 정리 이후 보정 예정
-- 동적 데이터(`shop_items` 등) 다국어화는 문서 계획만 유지
+- 공용 UI primitive 접근성 문구와 동적 데이터(`shop_items` 등) 다국어화는 문서 계획만 유지

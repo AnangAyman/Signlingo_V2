@@ -26,6 +26,8 @@ export function DemotionWarning({
   reducedMotion = false,
 }: DemotionWarningProps) {
   const { t } = useTranslation("leagues");
+  const leagueName = t(league.displayNameKey);
+
   return (
     <AnimatePresence>
       {isVisible && (
@@ -87,7 +89,7 @@ export function DemotionWarning({
 
             {/* Message */}
             <p className="text-sm text-muted-foreground mb-4">
-              {t("demotionWarning.messagePre")}<strong className="text-foreground">{league.displayName}</strong>{t("demotionWarning.messagePost")}
+              {t("demotionWarning.messagePre")}<strong className="text-foreground">{leagueName}</strong>{t("demotionWarning.messagePost")}
             </p>
 
             {/* Actions */}

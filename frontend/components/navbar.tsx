@@ -33,7 +33,10 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <SignLingoLogo className="w-10 h-10 transition-transform group-hover:scale-110" />
+            <SignLingoLogo
+              ariaLabel={t("media.handLogoAlt")}
+              className="w-10 h-10 transition-transform group-hover:scale-110"
+            />
             <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               SignLingo
             </span>

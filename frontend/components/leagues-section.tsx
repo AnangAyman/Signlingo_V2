@@ -94,9 +94,9 @@ export function LeaguesSection() {
         <TooltipProvider delayDuration={200}>
           <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
             {LEAGUE_CONFIGS.map(({ key, icon: Icon, gradient, bgGradient, borderColor, xpRequired, position }, index) => {
-              const leagueName = t(`leagues.${key}.name`);
-              const requirement = t(`leagues.${key}.requirement`);
-              const benefits = t(`leagues.${key}.benefits`, { returnObjects: true }) as string[];
+              const leagueName = t(`leagues.tiers.${key}.name`);
+              const requirement = t(`leagues.tiers.${key}.requirement`);
+              const benefits = t(`leagues.tiers.${key}.benefits`, { returnObjects: true }) as string[];
               return (
               <motion.div
                 key={key}
@@ -179,7 +179,7 @@ export function LeaguesSection() {
                         <div className="mt-6 pt-6 border-t border-border/50">
                           <div className="flex items-center justify-between text-sm mb-2">
                             <span className="text-muted-foreground">
-                              XP Required
+                              {t("leagues.xpRequired")}
                             </span>
                             <span className="font-semibold">
                               {xpRequired.toLocaleString()}
@@ -203,20 +203,18 @@ export function LeaguesSection() {
                       {index === 2 && (
                         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                           <span className="px-4 py-1 bg-gradient-to-r from-[#FFD700] to-[#DAA520] text-white text-xs font-bold rounded-full shadow-lg">
-                            ELITE
+                            {t("leagues.eliteBadge")}
                           </span>
                         </div>
                       )}
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="max-w-xs">
-                    <p className="font-semibold mb-1">{leagueName} League</p>
+                    <p className="font-semibold mb-1">
+                      {t("leagues.tooltipTitle", { league: leagueName })}
+                    </p>
                     <p className="text-sm text-muted-foreground">
-                      {index === 0
-                        ? "Everyone starts here. Learn the basics and build your foundation."
-                        : index === 1
-                        ? "Prove your dedication. Top 10 in Bronze advance to Silver weekly."
-                        : "The best of the best. Only top performers reach Gold status."}
+                      {t(`leagues.tiers.${key}.tooltip`)}
                     </p>
                   </TooltipContent>
                 </Tooltip>
@@ -234,11 +232,11 @@ export function LeaguesSection() {
           className="text-center mt-12"
         >
           <p className="text-muted-foreground mb-4">
-            Ready to start your competitive journey?
+            {t("leagues.ctaPrompt")}
           </p>
           <button className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#FFD700] to-[#DAA520] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all" onClick={() => router.push('/leaderboard')}>
             <Trophy className="w-5 h-5" />
-            Join the Competition
+            {t("leagues.ctaButton")}
           </button>
         </motion.div>
       </div>

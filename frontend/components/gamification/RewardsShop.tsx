@@ -24,8 +24,10 @@ export function RewardsShop({ reducedMotion = false }: RewardsShopProps) {
     const reward = rewards.find((r) => r.id === rewardId);
     if (!reward) return;
 
+    const rewardName = t(`rewards.items.${reward.id}.name`);
+
     if (reward.isRedeemed) {
-      toast.info(t("rewards.alreadyRedeemedToast", { name: reward.name }));
+      toast.info(t("rewards.alreadyRedeemedToast", { name: rewardName }));
       return;
     }
 
@@ -39,7 +41,7 @@ export function RewardsShop({ reducedMotion = false }: RewardsShopProps) {
     const success = redeemReward(rewardId);
     if (success) {
       play("/sounds/coin.mp3");
-      toast.success(t("rewards.redeemedToast", { name: reward.name, cost: reward.cost }));
+      toast.success(t("rewards.redeemedToast", { name: rewardName, cost: reward.cost }));
     }
   };
 

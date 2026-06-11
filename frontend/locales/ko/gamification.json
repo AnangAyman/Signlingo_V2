@@ -44,6 +44,58 @@
       "locked": "{{name}} 배지 – 잠김",
       "unlocked": "{{name}} 배지 – 획득"
     },
+    "items": {
+      "first-sign": {
+        "name": "첫 수어",
+        "description": "첫 레슨을 완료하세요",
+        "requirement": "레슨 1개 완료"
+      },
+      "streak-starter": {
+        "name": "연속 학습 시작",
+        "description": "3일 연속 학습을 유지하세요",
+        "requirement": "3일 연속 학습"
+      },
+      "week-warrior": {
+        "name": "주간 도전자",
+        "description": "7일 연속 학습을 유지하세요",
+        "requirement": "7일 연속 학습"
+      },
+      "lesson-master": {
+        "name": "레슨 마스터",
+        "description": "레슨 10개를 완료하세요",
+        "requirement": "레슨 10개 완료"
+      },
+      "quiz-ace": {
+        "name": "퀴즈 에이스",
+        "description": "퀴즈 5개에서 100%를 달성하세요",
+        "requirement": "퀴즈 5개 만점"
+      },
+      "bronze-champion": {
+        "name": "브론즈 챔피언",
+        "description": "실버 리그에 도달하세요",
+        "requirement": "브론즈에서 승급"
+      },
+      "silver-star": {
+        "name": "실버 스타",
+        "description": "골드 리그에 도달하세요",
+        "requirement": "실버에서 승급"
+      },
+      "gold-legend": {
+        "name": "골드 레전드",
+        "description": "플래티넘 리그에 도달하세요",
+        "requirement": "골드에서 승급"
+      },
+      "ai-explorer": {
+        "name": "AI 탐험가",
+        "description": "AI 카메라로 20번 연습하세요",
+        "requirement": "AI 카메라 20번 사용"
+      },
+      "month-master": {
+        "name": "월간 마스터",
+        "description": "30일 연속 학습을 유지하세요",
+        "requirement": "30일 연속 학습"
+      }
+    },
     "rarity": {
       "common": "일반",
       "rare": "희귀",
@@ -63,7 +115,18 @@
     "completed": "{{description}} – 완료됨",
     "progress": "{{current}}/{{total}}",
     "progressLabel": "{{description}} 진행도",
-    "simulateProgressLabel": "{{description}}에 진행도 1단계 시뮬레이션"
+    "simulateProgressLabel": "{{description}}에 진행도 1단계 시뮬레이션",
+    "items": {
+      "quest-lesson": {
+        "description": "레슨 3개 완료"
+      },
+      "quest-quiz": {
+        "description": "퀴즈에서 80% 이상 득점"
+      },
+      "quest-practice": {
+        "description": "AI 카메라로 연습"
+      }
+    }
   },
   "rewards": {
     "title": "보상 상점",
@@ -78,7 +141,29 @@
     "redeem": "교환",
     "cost": "{{cost}} XP",
     "redeemedOnLabel": "{{date}}에 교환됨",
-    "redeemLabel": "{{name}}을(를) {{cost}} XP로 교환"
+    "redeemLabel": "{{name}}을(를) {{cost}} XP로 교환",
+    "items": {
+      "streak-freeze": {
+        "name": "연속 학습 보호권",
+        "description": "하루 동안 연속 학습 기록을 보호합니다"
+      },
+      "double-xp": {
+        "name": "더블 XP (1시간)",
+        "description": "한 시간 동안 XP를 두 배로 획득합니다"
+      },
+      "custom-avatar": {
+        "name": "커스텀 아바타",
+        "description": "특별한 아바타 프레임을 잠금 해제합니다"
+      },
+      "bonus-lesson": {
+        "name": "보너스 레슨",
+        "description": "전용 보너스 레슨을 이용합니다"
+      },
+      "hint-pack": {
+        "name": "힌트 팩 (5개)",
+        "description": "어려운 수어를 위한 힌트 5개를 받습니다"
+      }
+    }
   },
   "levelUp": {
     "title": "레벨 업!",

@@ -55,6 +55,13 @@ export function BadgesGrid({ badges, reducedMotion = false }: BadgesGridProps) {
     }
   };
 
+  const getBadgeText = (badge: Badge) => ({
+    name: t(`badges.items.${badge.id}.name`),
+    description: t(`badges.items.${badge.id}.description`),
+    requirement: t(`badges.items.${badge.id}.requirement`),
+  });
+  const selectedBadgeText = selectedBadge ? getBadgeText(selectedBadge) : null;
+
   return (
     <TooltipProvider>
       <Card>
@@ -71,74 +78,73 @@ export function BadgesGrid({ badges, reducedMotion = false }: BadgesGridProps) {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-3 gap-3">
-            {sortedBadges.map((badge, index) => (
-              <Tooltip key={badge.id}>
-                <TooltipTrigger asChild>
-                  <motion.div
-                    initial={reducedMotion ? {} : { opacity: 0, scale: 0.8 }}
-                    animate={reducedMotion ? {} : { opacity: 1, scale: 1 }}
-                    transition={{ delay: index * 0.05 }}
-                    onClick={() => setSelectedBadge(badge)}
-                    className={`
-                      relative p-4 rounded-xl border-2 cursor-pointer transition-all
-                      ${badge.isLocked 
-                        ? "border-muted bg-muted/30 opacity-60" 
-                        : getRarityColor(badge.rarity)
-                      }
-                      hover:scale-105 hover:shadow-lg
-                    `}
-                  >
-                    {/* Lock Icon */}
+            {sortedBadges.map((badge, index) => {
+              const badgeText = getBadgeText(badge);
+
+              return (
+                <Tooltip key={badge.id}>
+                  <TooltipTrigger asChild>
+                    <motion.div
+                      initial={reducedMotion ? {} : { opacity: 0, scale: 0.8 }}
+                      animate={reducedMotion ? {} : { opacity: 1, scale: 1 }}
+                      transition={{ delay: index * 0.05 }}
+                      onClick={() => setSelectedBadge(badge)}
+                      className={`
+                        relative p-4 rounded-xl border-2 cursor-pointer transition-all
+                        ${badge.isLocked 
+                          ? "border-muted bg-muted/30 opacity-60" 
+                          : getRarityColor(badge.rarity)
+                        }
+                        hover:scale-105 hover:shadow-lg
+                      `}
+                    >
+                      {badge.isLocked && (
+                        <div className="absolute top-1 right-1">
+                          <Lock className="w-3 h-3 text-muted-foreground" />
+                        </div>
+                      )}
+
+                      <div className="text-center mb-2">
+                        <span className={`text-3xl ${badge.isLocked ? "grayscale" : ""}`}>
+                          {badge.icon}
+                        </span>
+                      </div>
+
+                      <p className="text-xs font-medium text-center text-foreground truncate">
+                        {badgeText.name}
+                      </p>
+
+                      {badge.isLocked && (
+                        <div className="mt-2">
+                          <Progress
+                            value={(badge.currentProgress / badge.requiredValue) * 100}
+                            className="h-1"
+                          />
+                          <p className="text-xs text-center text-muted-foreground mt-1">
+                            {badge.currentProgress}/{badge.requiredValue}
+                          </p>
+                        </div>
+                      )}
+
+                      {!badge.isLocked && (
+                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                          <Check className="w-3 h-3 text-white" />
+                        </div>
+                      )}
+                    </motion.div>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-xs">
+                    <p className="font-semibold">{badgeText.name}</p>
+                    <p className="text-sm text-muted-foreground">{badgeText.description}</p>
                     {badge.isLocked && (
-                      <div className="absolute top-1 right-1">
-                        <Lock className="w-3 h-3 text-muted-foreground" />
-                      </div>
+                      <p className="text-xs text-primary mt-1">
+                        {t("badges.unlockRequirement", { requirement: badgeText.requirement })}
+                      </p>
                     )}
-
-                    {/* Badge Icon */}
-                    <div className="text-center mb-2">
-                      <span className={`text-3xl ${badge.isLocked ? "grayscale" : ""}`}>
-                        {badge.icon}
-                      </span>
-                    </div>
-
-                    {/* Badge Name */}
-                    <p className="text-xs font-medium text-center text-foreground truncate">
-                      {badge.name}
-                    </p>
-
-                    {/* Progress for locked badges */}
-                    {badge.isLocked && (
-                      <div className="mt-2">
-                        <Progress
-                          value={(badge.currentProgress / badge.requiredValue) * 100}
-                          className="h-1"
-                        />
-                        <p className="text-xs text-center text-muted-foreground mt-1">
-                          {badge.currentProgress}/{badge.requiredValue}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Earned checkmark */}
-                    {!badge.isLocked && (
-                      <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                        <Check className="w-3 h-3 text-white" />
-                      </div>
-                    )}
-                  </motion.div>
-                </TooltipTrigger>
-                <TooltipContent side="top" className="max-w-xs">
-                  <p className="font-semibold">{badge.name}</p>
-                  <p className="text-sm text-muted-foreground">{badge.description}</p>
-                  {badge.isLocked && (
-                    <p className="text-xs text-primary mt-1">
-                      {t("badges.unlockRequirement", { requirement: badge.requirement })}
-                    </p>
-                  )}
-                </TooltipContent>
-              </Tooltip>
-            ))}
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
           </div>
         </CardContent>
       </Card>
@@ -146,7 +152,7 @@ export function BadgesGrid({ badges, reducedMotion = false }: BadgesGridProps) {
       {/* Badge Detail Modal */}
       <Dialog open={!!selectedBadge} onOpenChange={() => setSelectedBadge(null)}>
         <DialogContent className="max-w-sm">
-          {selectedBadge && (
+          {selectedBadge && selectedBadgeText && (
             <>
               <DialogHeader className="text-center">
                 <motion.div
@@ -156,11 +162,11 @@ export function BadgesGrid({ badges, reducedMotion = false }: BadgesGridProps) {
                 >
                   {selectedBadge.icon}
                 </motion.div>
-                <DialogTitle className="text-xl">{selectedBadge.name}</DialogTitle>
+                <DialogTitle className="text-xl">{selectedBadgeText.name}</DialogTitle>
               </DialogHeader>
 
               <div className="text-center space-y-4">
-                <p className="text-muted-foreground">{selectedBadge.description}</p>
+                <p className="text-muted-foreground">{selectedBadgeText.description}</p>
 
                 <div className="flex justify-center">
                   <BadgeUI className={getRarityLabel(selectedBadge.rarity).className}>
@@ -171,7 +177,7 @@ export function BadgesGrid({ badges, reducedMotion = false }: BadgesGridProps) {
                 {selectedBadge.isLocked ? (
                   <div className="bg-muted/50 rounded-xl p-4">
                     <p className="text-sm text-muted-foreground mb-2">
-                      {selectedBadge.requirement}
+                      {selectedBadgeText.requirement}
                     </p>
                     <Progress
                       value={(selectedBadge.currentProgress / selectedBadge.requiredValue) * 100}

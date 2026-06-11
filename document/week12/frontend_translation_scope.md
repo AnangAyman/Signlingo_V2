@@ -1,4 +1,4 @@
-# Frontend Translation Scope — 2026-05-22
+# Frontend Translation Scope — 2026-06-04
 
 ## 목적
 `frontend/` 기준으로 현재 번역이 어디까지 적용되어 있고, 앞으로 어떤 화면을 우선 번역해야 하는지 다시 정의한다.
@@ -75,24 +75,43 @@
 - `frontend/components/ui/*` 내부의 공용 접근성 문구
   - 예: `More`, `Previous slide`, `Next slide`, `Toggle Sidebar`
 - API/모델에서 오는 동적 데이터의 locale-aware delivery
-- `leagues` / `dashboard` / `store` 등 훅 계층의 실패 메시지 재점검
 - 프론트 디자인 확정 후 토글 위치/형태 최종 정리
+
+### 4. 2026-06-04 추가 정리 완료
+
+다음 영역의 하드코딩 사용자 노출 문구는 locale JSON으로 이동했다.
+
+- 로그인/회원가입 보조 이미지 alt와 로그인 통계 라벨
+- 랜딩 hero/CTA/welcome character 이미지 alt와 로고 aria-label
+- navbar/footer의 `SignLingoLogo` aria-label
+- `leagues-section`의 tooltip, CTA, elite badge, XP label
+- `components/leagues/*`의 리그 표시명
+- `components/gamification/*`와 `mocks/gamificationData.ts`의 배지/보상/일일 퀘스트 표시 문구
+
+게임화 데이터는 이제 `id`를 기준으로 locale 키를 찾는다.
+
+- 배지: `gamification:badges.items.<badge-id>.*`
+- 보상: `gamification:rewards.items.<reward-id>.*`
+- 일일 퀘스트: `gamification:quests.items.<quest-id>.description`
+- 리그명: `leagues:tiers.<tier>.name`
 
 ---
 
 ## 우선 번역 대상
 
-### 1순위: 공용 UI 접근성 문구
+### 1순위: 공용 UI primitive 접근성 문구
 
 - `frontend/components/ui/*`
-- `frontend/components/common/*`
-- `frontend/components/app-header.tsx`
+
+앱 고유 컴포넌트의 `alt` / `aria-label`은 locale로 이동 완료했다.
+남은 범위는 shadcn/Radix 기반 primitive 안의 일반 접근성 문구다.
 
 ### 2순위: 동적 데이터 다국어화
 
 - `shop` / `course` / `profile` 류 API 응답값
 - backend error payload
 - locale-aware labels from backend models
+- mock 사용자명, 외부 서비스명, 브랜드명처럼 의도적으로 영어 유지할 수 있는 값은 `translation_style_guide.md` 기준으로 판단한다.
 
 ### 3순위: 최종 폴리싱
 
@@ -140,9 +159,12 @@
 - `lessons`
 - `ai-game`
 - `placeholder pages`
-- `gamification` 잔여 aria/toast/demo 문구
+- `gamification` 고정 UI/aria/toast/demo 문구
+- `gamification` 배지/보상/퀘스트 mock 표시 문구
 - `leaderboard` 잔여 aria/modal/error 문구
 - 랜딩 공통 컴포넌트의 후기/인트로/헤더 보조 문구
+- 랜딩 hero/CTA/leagues/welcome 이미지 alt 및 보조 접근성 문구
+- 리그 표시명과 landing 리그 tooltip/CTA 문구
 
 이 범위에서:
 - 사용자 노출 문구가 번역 키를 사용하고
@@ -151,7 +173,7 @@
 
 ### 후속 완료
 - 공용 UI primitive의 접근성 문구 정리
-- 콘텐츠성 영어 유지 기준 반영
+- API/DB 동적 데이터의 locale-aware delivery
 - locale 파일 구조를 실제 화면 소유권 기준으로 재분리
 
 ---
@@ -161,7 +183,9 @@
 이제 번역 작업의 중심은 Django 템플릿이 아니라 `frontend/`로 이동해야 한다.
 
 인증과 학습 진입 화면은 프론트 기준으로 이미 번역 적용이 끝났고,
-이제 남은 작업은 공용 UI 접근성 문구와 동적 데이터 다국어화로 좁혀진 상태다.
+앱 고유 컴포넌트의 고정 문구와 mock 표시 문구도 locale JSON으로 이동했다.
+
+현재 남은 작업은 공용 UI primitive 접근성 문구와 API/DB 동적 데이터 다국어화로 좁혀진 상태다.
 
 ---
 

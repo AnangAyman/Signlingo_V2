@@ -40,6 +40,10 @@ export function BadgeCard({
   onClick,
 }: BadgeCardProps) {
   const { t } = useTranslation("gamification");
+  const name = t(`badges.items.${badge.id}.name`);
+  const description = t(`badges.items.${badge.id}.description`);
+  const requirement = t(`badges.items.${badge.id}.requirement`);
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -60,7 +64,7 @@ export function BadgeCard({
           ].join(" ")}
           role="button"
           tabIndex={0}
-          aria-label={t(`badges.cardStateLabel.${badge.isLocked ? "locked" : "unlocked"}`, { name: badge.name })}
+          aria-label={t(`badges.cardStateLabel.${badge.isLocked ? "locked" : "unlocked"}`, { name })}
           whileTap={reducedMotion ? {} : { scale: 0.95 }}
         >
           {/* Lock icon */}
@@ -92,7 +96,7 @@ export function BadgeCard({
 
           {/* Name */}
           <p className="text-xs font-medium text-center text-foreground truncate">
-            {badge.name}
+            {name}
           </p>
 
           {/* Progress bar for locked badges */}
@@ -105,7 +109,7 @@ export function BadgeCard({
                 aria-valuenow={badge.currentProgress}
                 aria-valuemin={0}
                 aria-valuemax={badge.requiredValue}
-                aria-label={t("badges.progressLabel", { name: badge.name })}
+                aria-label={t("badges.progressLabel", { name })}
               />
               <p className="text-xs text-center text-muted-foreground mt-1">
                 {badge.currentProgress}/{badge.requiredValue}
@@ -116,11 +120,11 @@ export function BadgeCard({
       </TooltipTrigger>
 
       <TooltipContent side="top" className="max-w-xs">
-        <p className="font-semibold">{badge.name}</p>
-        <p className="text-sm text-muted-foreground">{badge.description}</p>
+        <p className="font-semibold">{name}</p>
+        <p className="text-sm text-muted-foreground">{description}</p>
         {badge.isLocked ? (
           <p className="text-xs text-primary mt-1">
-            {t("badges.unlockRequirement", { requirement: badge.requirement })}
+            {t("badges.unlockRequirement", { requirement })}
           </p>
         ) : (
           badge.earnedAt && (

@@ -261,7 +261,7 @@ export default function LoginPage() {
             {/* Character */}
             <motion.img
               src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Firefly_Gemini_Flash_can_you_generate_a_small__friendly_character_with_a_bob_and_glasses_with_a_yellow_and_599506-removebg-preview-f0y6dNmoZlhIHXK0EnPeZ6fVdomNYD.png"
-              alt="SignLingo Mascot"
+              alt={t("login.mascotAlt")}
               className="w-48 h-48 mx-auto mb-8 drop-shadow-2xl"
               animate={{
                 y: [0, -10, 0],
@@ -286,7 +286,7 @@ export default function LoginPage() {
                     <span className="text-xl">🏆</span>
                   </div>
                   <div className="text-left">
-                    <p className="text-sm text-muted-foreground">Active Learners</p>
+                    <p className="text-sm text-muted-foreground">{t("login.stats.activeLearners")}</p>
                     <p className="text-xl font-bold text-foreground">2.5M+</p>
                   </div>
                 </div>
@@ -303,7 +303,7 @@ export default function LoginPage() {
                     <span className="text-xl">✨</span>
                   </div>
                   <div className="text-left">
-                    <p className="text-sm text-muted-foreground">Lessons Completed</p>
+                    <p className="text-sm text-muted-foreground">{t("login.stats.lessonsCompleted")}</p>
                     <p className="text-xl font-bold text-foreground">50M+</p>
                   </div>
                 </div>
