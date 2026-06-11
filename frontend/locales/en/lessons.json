@@ -6,6 +6,10 @@
   "progressSummary": "{{completed}} of {{total}} lessons completed",
   "progressPercent": "{{progress}}% complete",
   "allLessons": "All Lessons",
+  "lessonTitles": {
+    "learn_with_video": "Learn with Video",
+    "quiz_challenge": "Quiz Challenge"
+  },
   "navigation": {
     "backToDashboard": "Back to Dashboard"
   },
@@ -42,6 +46,7 @@
     "quiz": {
       "title": "Quiz Challenge",
       "subtitle": "Answer Bisindo letter questions without leaving the Next.js app.",
+      "questionPrompt": "Which Bisindo letter is shown above?",
       "imageAlt": "Bisindo hand sign",
       "loadingQuestion": "Loading question...",
       "reload": "Reload",
@@ -55,6 +60,7 @@
       "title": "Show Your Signs",
       "subtitle": "Use the Django prediction API from a Next.js camera screen.",
       "targetSign": "Target sign",
+      "promptTemplate": "Show Bisindo Letter {{letter}}",
       "loadingPrompt": "Loading...",
       "noPrompt": "No prompt",
       "getReady": "Get Ready",

@@ -57,6 +57,34 @@ function roundProgress(round: number): number {
   return Math.min(100, Math.round((round / TOTAL_ROUNDS) * 100));
 }
 
+function localizeQuizQuestion(
+  t: (key: string, options?: Record<string, unknown>) => string,
+  question?: string
+): string {
+  if (!question) return t("activity.quiz.loadingQuestion");
+  if (question === "Which Bisindo letter is shown above?") {
+    return t("activity.quiz.questionPrompt", {
+      defaultValue: "Which Bisindo letter is shown above?",
+    });
+  }
+  return question;
+}
+
+function localizeCameraPrompt(
+  t: (key: string, options?: Record<string, unknown>) => string,
+  prompt?: string
+): string {
+  if (!prompt) return t("activity.camera.noPrompt");
+  const match = /^Show Bisindo Letter\s+(.+)$/.exec(prompt);
+  if (match) {
+    return t("activity.camera.promptTemplate", {
+      letter: match[1],
+      defaultValue: `Show Bisindo Letter ${match[1]}`,
+    });
+  }
+  return prompt;
+}
+
 async function captureFrame(
   video: HTMLVideoElement,
   canvas: HTMLCanvasElement,
@@ -321,7 +349,7 @@ export function QuizPracticeActivity({ lessonKey, onCompleted }: ActivityProps) 
 
           <div className="space-y-3">
             <p className="text-base font-semibold text-foreground">
-              {question?.question || t("activity.quiz.loadingQuestion")}
+              {localizeQuizQuestion(t, question?.question)}
             </p>
             <div className="grid grid-cols-2 gap-2">
               {(question?.choices || []).map((choice) => {
@@ -513,7 +541,7 @@ export function CameraPracticeActivity({ lessonKey, onCompleted }: ActivityProps
               <p className="mt-1 text-2xl font-bold text-foreground">
                 {loading
                   ? t("activity.camera.loadingPrompt")
-                  : question?.question || t("activity.camera.noPrompt")}
+                  : localizeCameraPrompt(t, question?.question)}
               </p>
             </div>
             {prepCountdown !== null && (

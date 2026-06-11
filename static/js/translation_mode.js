@@ -8,6 +8,20 @@ const btnTranslate = document.getElementById("btn-translate");
 const translationResult = document.getElementById("translation-result");
 const translatedTextEl = document.getElementById("translated-text");
 const btnSpeak = document.getElementById("btn-speak");
+const i18n = {
+  predicting: translationResult.dataset.predicting || "Predicting...",
+  predictionError: translationResult.dataset.predictionError || "Prediction Error",
+  tooLow: translationResult.dataset.tooLow || "Too low",
+  ready: translationResult.dataset.ready || "Ready",
+  recording: translationResult.dataset.recording || "Recording...",
+  remove: translationResult.dataset.remove || "Remove",
+  recordFirst: translationResult.dataset.recordFirst || "Please record some words first.",
+  translationFailed: translationResult.dataset.translationFailed || "Translation failed",
+  translationServiceError:
+    translationResult.dataset.translationServiceError || "Error connecting to translation service.",
+  ttsUnsupported:
+    translationResult.dataset.ttsUnsupported || "Text-to-speech is not supported in this browser.",
+};
 
 const SELECTED_FACE_IDS = [
   0, 13, 14, 17, 37, 39, 40, 61, 78, 80, 81, 82, 84, 87, 88, 91, 95, 146, 178, 181, 191,
@@ -116,7 +130,7 @@ async function onResults(results) {
 
   isRecording = false;
   recordingIndicator.classList.remove("active");
-  currentPredictionEl.innerText = "Predicting...";
+  currentPredictionEl.innerText = i18n.predicting;
   btnRecord.disabled = false;
 
   const sampledSequence = [];
@@ -146,11 +160,11 @@ async function sendSequenceForPrediction(sequence) {
       const data = await response.json();
       handlePrediction(data.result, data.confidence);
     } else {
-      currentPredictionEl.innerText = "Prediction Error";
+      currentPredictionEl.innerText = i18n.predictionError;
     }
   } catch (error) {
     console.error(error);
-    currentPredictionEl.innerText = "Prediction Error";
+    currentPredictionEl.innerText = i18n.predictionError;
   }
 }
 
@@ -162,13 +176,13 @@ function handlePrediction(predictedWord, confidence) {
     currentPredictionEl.style.color = "#16a34a";
     addWord(predictedWord);
   } else {
-    currentPredictionEl.innerText = `${predictedWord} (${confidencePercent}%) - Too low`;
+    currentPredictionEl.innerText = `${predictedWord} (${confidencePercent}%) - ${i18n.tooLow}`;
     currentPredictionEl.style.color = "#dc2626";
   }
 
   setTimeout(() => {
     if (!isRecording) {
-      currentPredictionEl.innerText = "Ready";
+      currentPredictionEl.innerText = i18n.ready;
       currentPredictionEl.style.color = "#000";
     }
   }, 2000);
@@ -191,7 +205,7 @@ function renderWords() {
     chip.className = "word-chip";
     chip.innerHTML = `
       ${word}
-      <button onclick="removeWord(${index})" title="Remove"><i class="fa-solid fa-xmark"></i></button>
+      <button onclick="removeWord(${index})" title="${i18n.remove}"><i class="fa-solid fa-xmark"></i></button>
     `;
     wordsList.appendChild(chip);
   });
@@ -203,7 +217,7 @@ function triggerRecording() {
   recordingBuffer = [];
   recordingStartTime = performance.now();
   recordingIndicator.classList.add("active");
-  currentPredictionEl.innerText = "Recording...";
+  currentPredictionEl.innerText = i18n.recording;
   currentPredictionEl.style.color = "#ef4444";
   btnRecord.disabled = true;
 }
@@ -227,12 +241,12 @@ btnClear.addEventListener("click", () => {
 
 btnTranslate.addEventListener("click", async () => {
   if (recordedWords.length === 0) {
-    alert("Please record some words first.");
+    alert(i18n.recordFirst);
     return;
   }
 
   const originalText = btnTranslate.innerHTML;
-  btnTranslate.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Translating...';
+  btnTranslate.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${i18n.predicting}`;
   btnTranslate.disabled = true;
   translationResult.style.display = "none";
 
@@ -250,11 +264,11 @@ btnTranslate.addEventListener("click", async () => {
       translationResult.style.display = "block";
       speakText(lastSpokenText);
     } else {
-      alert(`Translation failed: ${data.error || `HTTP ${response.status}`}`);
+      alert(`${i18n.translationFailed}: ${data.error || `HTTP ${response.status}`}`);
     }
   } catch (error) {
     console.error(error);
-    alert("Error connecting to translation service.");
+    alert(i18n.translationServiceError);
   } finally {
     btnTranslate.innerHTML = originalText;
     btnTranslate.disabled = false;
@@ -274,7 +288,7 @@ function speakText(text) {
     utterance.rate = 0.9;
     window.speechSynthesis.speak(utterance);
   } else {
-    alert("Text-to-speech is not supported in this browser.");
+    alert(i18n.ttsUnsupported);
   }
 }
 

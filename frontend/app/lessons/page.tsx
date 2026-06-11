@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import {
-  ArrowLeft,
   CheckCircle,
   Circle,
   PlayCircle,
@@ -13,6 +12,7 @@ import {
   RefreshCcw,
   ExternalLink,
 } from "lucide-react";
+import { AppHeader } from "@/components/app-header";
 import { Button } from "@/components/ui/button";
 import {
   QuizPracticeActivity,
@@ -45,6 +45,13 @@ function isBackendRoute(url: string): boolean {
 
 function statusLabel(t: (key: string) => string, status: ApiLesson["status"]): string {
   return t(`status.${status}`);
+}
+
+function lessonTitle(
+  t: (key: string, options?: Record<string, unknown>) => string,
+  lesson: ApiLesson
+): string {
+  return t(`lessonTitles.${lesson.key}`, { defaultValue: lesson.title });
 }
 
 function getBackendLessonVideoUrl(url: string): string | null {
@@ -188,17 +195,11 @@ export default function LessonsPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <AppHeader />
+
       {/* Header */}
       <div className="border-b bg-card px-6 py-5">
         <div className="max-w-6xl mx-auto">
-          <Button
-            variant="ghost"
-            onClick={() => router.push("/dashboard")}
-            className="gap-2 px-0 mb-3 text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            {t("navigation.backToDashboard")}
-          </Button>
           <h1 className="text-2xl font-bold text-foreground mb-1">{t("title")}</h1>
           <p className="text-sm text-muted-foreground mb-3">
             {t("progressSummary", { completed, total })}
@@ -237,7 +238,9 @@ export default function LessonsPage() {
                   }`}
                 >
                   <StatusIcon status={lesson.status} />
-                  <span className="text-sm flex-1 leading-snug">{lesson.title}</span>
+                  <span className="text-sm flex-1 leading-snug">
+                    {lessonTitle(t, lesson)}
+                  </span>
                   {selected?.id === lesson.id && (
                     <ChevronRight className="w-4 h-4 shrink-0" />
                   )}
@@ -268,7 +271,7 @@ export default function LessonsPage() {
                     <iframe
                       className="absolute inset-0 w-full h-full"
                       src={toEmbedUrl(selected.url)}
-                      title={selected.title}
+                      title={lessonTitle(t, selected)}
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                     />
@@ -279,7 +282,7 @@ export default function LessonsPage() {
                       className="w-full aspect-video"
                       controls
                       preload="metadata"
-                      title={selected.title}
+                      title={lessonTitle(t, selected)}
                     >
                       <source src={getBackendLessonVideoUrl(selected.url) ?? ""} type="video/mp4" />
                       {t("videoUnsupported")}
@@ -322,7 +325,9 @@ export default function LessonsPage() {
                 {/* Info + actions */}
                 <div className="flex items-start justify-between gap-4 flex-wrap">
                   <div>
-                    <h2 className="text-xl font-semibold text-foreground">{selected.title}</h2>
+                    <h2 className="text-xl font-semibold text-foreground">
+                      {lessonTitle(t, selected)}
+                    </h2>
                     <p className="text-sm text-muted-foreground mt-0.5 capitalize">
                       {statusLabel(t, selected.status)}
                     </p>

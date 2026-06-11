@@ -6,6 +6,10 @@
   "progressSummary": "{{completed}} / {{total}} 레슨 완료",
   "progressPercent": "{{progress}}% 완료",
   "allLessons": "전체 레슨",
+  "lessonTitles": {
+    "learn_with_video": "영상으로 배우기",
+    "quiz_challenge": "퀴즈 챌린지"
+  },
   "navigation": {
     "backToDashboard": "대시보드로 돌아가기"
   },
@@ -41,7 +45,8 @@
     },
     "quiz": {
       "title": "퀴즈 챌린지",
-      "subtitle": "Next.js 앱을 벗어나지 않고 비신도 문자 문제에 답하세요.",
+      "subtitle": "앱을 벗어나지 않고 비신도 문자 문제에 답하세요.",
+      "questionPrompt": "어떤 Bisindo 철자인가요?",
       "imageAlt": "비신도 수어 손동작",
       "loadingQuestion": "문제를 불러오는 중...",
       "reload": "다시 불러오기",
@@ -55,6 +60,7 @@
       "title": "수어 보여주기",
       "subtitle": "Next.js 카메라 화면에서 Django 예측 API를 사용합니다.",
       "targetSign": "목표 수어",
+      "promptTemplate": "Bisindo 철자 {{letter}}를 보여주세요",
       "loadingPrompt": "불러오는 중...",
       "noPrompt": "프롬프트가 없습니다",
       "getReady": "준비",

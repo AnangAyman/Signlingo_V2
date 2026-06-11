@@ -34,6 +34,9 @@ export function LeagueOverview({
   const activeIndex = TIER_ORDER.indexOf(activeTier);
   const activeLeague = LEAGUES[activeTier];
   const ActiveIcon = activeLeague.icon;
+  const activeLeagueName = tLeague(activeLeague.displayNameKey, {
+    defaultValue: activeLeague.tier[0].toUpperCase() + activeLeague.tier.slice(1),
+  });
 
   return (
     <section className="space-y-4">
@@ -56,15 +59,20 @@ export function LeagueOverview({
             </div>
             <div>
               <p className="text-sm text-muted-foreground">
-                {t("leagueOverview.currentLeague")}
+                {t("leagueOverview.currentLeague", {
+                  defaultValue: "Current league",
+                })}
               </p>
               <h3 className="text-xl font-bold text-foreground">
-                {tLeague(activeLeague.displayNameKey)}
+                {activeLeagueName}
               </h3>
             </div>
           </div>
           <Badge variant="secondary" className="w-fit text-sm">
-            {t("leagueOverview.xp", { xp: formatNumber(currentXp) })}
+            {t("leagueOverview.xp", {
+              xp: formatNumber(currentXp),
+              defaultValue: `${formatNumber(currentXp)} XP`,
+            })}
           </Badge>
         </div>
       </div>
@@ -108,7 +116,9 @@ export function LeagueOverview({
                   </div>
                   <div>
                     <h4 className="font-semibold text-foreground">
-                      {tLeague(league.displayNameKey)}
+                      {tLeague(league.displayNameKey, {
+                        defaultValue: league.tier[0].toUpperCase() + league.tier.slice(1),
+                      })}
                     </h4>
                     <p className="text-xs text-muted-foreground">
                       {formatNumber(league.minXp)} - {formatNumber(league.maxXp)} XP
