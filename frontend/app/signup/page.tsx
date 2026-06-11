@@ -117,7 +117,7 @@ export default function SignupPage() {
             <motion.img
               src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Firefly_Gemini_Flash_can_you_generate_a_small__friendly_character_with_a_bob_and_glasses_with_a_yellow_and_599506-removebg-preview-f0y6dNmoZlhIHXK0EnPeZ6fVdomNYD.png"
               alt={t("signup.mascotAlt")}
-              className="w-40 h-40 mx-auto mb-8 drop-shadow-2xl"
+              className="w-40 sm:w-48 md:w-56 lg:w-64 aspect-square mx-auto mb-8 drop-shadow-2xl object-contain"
               animate={{
                 y: [0, -10, 0],
                 rotate: [0, 2, -2, 0],

@@ -8,14 +8,21 @@
  * is sent automatically after login.
  */
 
-const DEFAULT_API_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://signlingo-django.onrender.com"
-    : "http://localhost:8000";
+function getDefaultApiUrl(): string {
+  if (process.env.NODE_ENV === "production") {
+    return "https://signlingo-django-cloudrun-test-wnkjpwb6cq-du.a.run.app";
+  }
+
+  if (typeof window !== "undefined" && window.location.hostname) {
+    return `http://${window.location.hostname}:8000`;
+  }
+
+  return "http://localhost:8000";
+}
 
 const BASE_URL =
   (typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_URL) ||
-  DEFAULT_API_URL;
+  getDefaultApiUrl();
 
 export const API_BASE_URL = BASE_URL.replace(/\/$/, "");
 
@@ -69,6 +76,26 @@ export interface ApiDashboard {
   totalLessons: number;
   moduleProgressPercent: number;
   currentLesson: { id: number; title: string; url: string } | null;
+}
+
+export interface ApiQuizQuestion {
+  id?: number;
+  question: string;
+  choices: string[];
+  answer: string;
+  image?: string;
+}
+
+export interface ApiMlQuestion {
+  id?: number;
+  question: string;
+  answer: string;
+}
+
+export interface ApiPrediction {
+  result: string;
+  confidence?: number;
+  error?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -152,6 +179,51 @@ export const lessonsApi = {
       method: "POST",
       body: JSON.stringify({ lesson_key: lessonKey, status }),
     }),
+};
+
+// ---------------------------------------------------------------------------
+// Interactive game / practice endpoints
+// ---------------------------------------------------------------------------
+
+export const gameApi = {
+  getQuestion: () => request<ApiQuizQuestion>("/get-question"),
+
+  getMlQuestion: () => request<ApiMlQuestion>("/get-question-ml"),
+
+  checkAnswer: (selected: string, correct: string) =>
+    request<{ result: boolean; points: number }>("/check-answer", {
+      method: "POST",
+      body: JSON.stringify({ selected, correct }),
+    }),
+
+  saveSessionResults: (payload: {
+    type: "game" | "ml";
+    xp: number;
+    accuracy: number;
+    skipped: boolean;
+  }) =>
+    request<{ success: boolean }>("/save-session-results", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  predict: async (image: Blob) => {
+    const formData = new FormData();
+    formData.append("image", image, "snapshot.jpg");
+
+    const res = await fetch(`${API_BASE_URL}/predict`, {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+      throw new Error((body as { error?: string }).error ?? `HTTP ${res.status}`);
+    }
+
+    return res.json() as Promise<ApiPrediction>;
+  },
 };
 
 // ---------------------------------------------------------------------------

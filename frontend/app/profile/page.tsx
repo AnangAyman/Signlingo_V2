@@ -1,3 +1,5 @@
+"use client";
+
 import { PlaceholderPage } from "@/components/placeholder-page";
 import { useTranslation } from "react-i18next";
 

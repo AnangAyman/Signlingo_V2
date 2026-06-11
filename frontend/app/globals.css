@@ -81,9 +81,9 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-nunito-sans), 'Nunito Sans', system-ui, sans-serif;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: 'Geist Mono', 'Geist Mono Fallback';
-  --font-display: var(--font-nunito), 'Nunito', system-ui, sans-serif;
+  --font-display: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

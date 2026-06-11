@@ -22,6 +22,7 @@ interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  hasCheckedSession: boolean;
   skipIntro: boolean;
   setSkipIntro: (skip: boolean) => void;
   login: (email: string, password: string) => Promise<void>;
@@ -49,6 +50,7 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isAuthenticated: false,
       isLoading: false,
+      hasCheckedSession: false,
       skipIntro: false,
 
       setSkipIntro: (skip) => set({ skipIntro: skip }),
@@ -57,9 +59,9 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
         try {
           const { user } = await authApi.login(email, password);
-          set({ user: mapApiUser(user), isAuthenticated: true, isLoading: false, skipIntro: true });
+          set({ user: mapApiUser(user), isAuthenticated: true, isLoading: false, hasCheckedSession: true, skipIntro: true });
         } catch (err) {
-          set({ isLoading: false });
+          set({ isLoading: false, hasCheckedSession: true });
           throw err;
         }
       },
@@ -70,16 +72,16 @@ export const useAuthStore = create<AuthState>()(
         } catch {
           // Ignore network errors — clear local state regardless.
         }
-        set({ user: null, isAuthenticated: false, skipIntro: false });
+        set({ user: null, isAuthenticated: false, hasCheckedSession: true, skipIntro: false });
       },
 
       signup: async (email: string, password: string, name: string) => {
         set({ isLoading: true });
         try {
           const { user } = await authApi.register(email, password, name);
-          set({ user: mapApiUser(user), isAuthenticated: true, isLoading: false, skipIntro: true });
+          set({ user: mapApiUser(user), isAuthenticated: true, isLoading: false, hasCheckedSession: true, skipIntro: true });
         } catch (err) {
-          set({ isLoading: false });
+          set({ isLoading: false, hasCheckedSession: true });
           throw err;
         }
       },
@@ -87,9 +89,9 @@ export const useAuthStore = create<AuthState>()(
       refreshUser: async () => {
         try {
           const { user } = await authApi.me();
-          set({ user: mapApiUser(user), isAuthenticated: true });
+          set({ user: mapApiUser(user), isAuthenticated: true, hasCheckedSession: true });
         } catch {
-          set({ user: null, isAuthenticated: false });
+          set({ user: null, isAuthenticated: false, hasCheckedSession: true });
         }
       },
     }),

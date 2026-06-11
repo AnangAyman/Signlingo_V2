@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -28,6 +29,7 @@ def video_learning(request):
             "completed_lessons_count": completed_lessons_count,
             "total_lessons_count": total_lessons_count,
             "module_progress_percent": module_progress_percent,
+            "frontend_app_url": os.environ.get("FRONTEND_APP_URL", "").rstrip("/"),
         }
     )
     return _render(request, "video_learning.html", context)

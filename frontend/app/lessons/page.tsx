@@ -4,8 +4,19 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { CheckCircle, Circle, PlayCircle, ChevronRight, RefreshCcw, ExternalLink } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle,
+  Circle,
+  PlayCircle,
+  ChevronRight,
+  RefreshCcw,
+  ExternalLink,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  QuizPracticeActivity,
+} from "@/components/lessons/InteractiveActivity";
 import { useAuthStore } from "@/lib/store";
 import { backendPath, lessonsApi, type ApiLesson } from "@/lib/api";
 
@@ -36,6 +47,17 @@ function statusLabel(t: (key: string) => string, status: ApiLesson["status"]): s
   return t(`status.${status}`);
 }
 
+function getBackendLessonVideoUrl(url: string): string | null {
+  if (url === "/video_learning") {
+    return backendPath("/static/Assets/Learn ASL Alphabet Video.mp4");
+  }
+  return null;
+}
+
+function isLessonPageItem(lesson: ApiLesson): boolean {
+  return lesson.url === "/video_learning" || lesson.url === "/gamepage";
+}
+
 function StatusIcon({ status }: { status: ApiLesson["status"] }) {
   if (status === "completed")
     return <CheckCircle className="w-5 h-5 text-green-500 shrink-0" />;
@@ -50,8 +72,8 @@ function StatusIcon({ status }: { status: ApiLesson["status"] }) {
 
 export default function LessonsPage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
   const { t } = useTranslation("lessons");
+  const { isAuthenticated, hasCheckedSession } = useAuthStore();
 
   const [lessons, setLessons] = useState<ApiLesson[]>([]);
   const [completed, setCompleted] = useState(0);
@@ -64,23 +86,27 @@ export default function LessonsPage() {
 
   // Redirect if not authenticated
   useEffect(() => {
-    if (!isAuthenticated) router.push("/login");
-  }, [isAuthenticated, router]);
+    if (hasCheckedSession && !isAuthenticated) router.push("/login");
+  }, [hasCheckedSession, isAuthenticated, router]);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const data = await lessonsApi.list();
-      setLessons(data.lessons);
-      setCompleted(data.completed);
-      setTotal(data.total);
-      setProgress(data.progress);
+      const lessonItems = data.lessons.filter(isLessonPageItem);
+      const completedLessonItems = lessonItems.filter((lesson) => lesson.status === "completed").length;
+      const totalLessonItems = lessonItems.length;
+
+      setLessons(lessonItems);
+      setCompleted(completedLessonItems);
+      setTotal(totalLessonItems);
+      setProgress(totalLessonItems ? Math.round((completedLessonItems / totalLessonItems) * 100) : 0);
       // Auto-select current lesson or first incomplete
       const current =
-        data.lessons.find((l) => l.isCurrent) ||
-        data.lessons.find((l) => l.status !== "completed") ||
-        data.lessons[0] ||
+        lessonItems.find((l) => l.isCurrent) ||
+        lessonItems.find((l) => l.status !== "completed") ||
+        lessonItems[0] ||
         null;
       setSelected(current);
     } catch (err) {
@@ -94,23 +120,37 @@ export default function LessonsPage() {
     if (isAuthenticated) load();
   }, [isAuthenticated, load]);
 
+  const markLessonCompleted = async (lessonKey: string) => {
+    const target = lessons.find((lesson) => lesson.key === lessonKey);
+    const alreadyCompleted = target?.status === "completed";
+
+    await lessonsApi.markStatus(lessonKey, "completed");
+
+    setLessons((prev) =>
+      prev.map((lesson) =>
+        lesson.key === lessonKey ? { ...lesson, status: "completed" } : lesson
+      )
+    );
+    setSelected((prev) =>
+      prev && prev.key === lessonKey ? { ...prev, status: "completed" } : prev
+    );
+
+    if (!alreadyCompleted) {
+      setCompleted((current) => {
+        const next = Math.min(total, current + 1);
+        setProgress(total ? Math.round((next / total) * 100) : 0);
+        return next;
+      });
+    }
+  };
+
   const handleMarkComplete = async () => {
     if (!selected) return;
     setMarking(true);
     try {
-      await lessonsApi.markStatus(selected.key, "completed");
-      // Optimistically update local state
-      setLessons((prev) =>
-        prev.map((l) => (l.id === selected.id ? { ...l, status: "completed" } : l))
-      );
-      setSelected((prev) => prev && { ...prev, status: "completed" });
-      setCompleted((c) => {
-        const next = c + 1;
-        setProgress(Math.round((next / total) * 100));
-        return next;
-      });
+      await markLessonCompleted(selected.key);
     } catch {
-      // non-fatal — user can try again
+      // non-fatal; user can try again
     } finally {
       setMarking(false);
     }
@@ -120,7 +160,7 @@ export default function LessonsPage() {
   // Render
   // ---------------------------------------------------------------------------
 
-  if (!isAuthenticated) return null;
+  if (!hasCheckedSession || !isAuthenticated) return null;
 
   if (loading) {
     return (
@@ -151,6 +191,14 @@ export default function LessonsPage() {
       {/* Header */}
       <div className="border-b bg-card px-6 py-5">
         <div className="max-w-6xl mx-auto">
+          <Button
+            variant="ghost"
+            onClick={() => router.push("/dashboard")}
+            className="gap-2 px-0 mb-3 text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Dashboard
+          </Button>
           <h1 className="text-2xl font-bold text-foreground mb-1">{t("title")}</h1>
           <p className="text-sm text-muted-foreground mb-3">
             {t("progressSummary", { completed, total })}
@@ -211,7 +259,7 @@ export default function LessonsPage() {
                 transition={{ duration: 0.25 }}
                 className="flex flex-col gap-4"
               >
-                {/* Video embed */}
+                {/* Lesson content */}
                 {selected.url && !isBackendRoute(selected.url) ? (
                   <div
                     className="relative w-full rounded-xl overflow-hidden bg-black"
@@ -225,6 +273,23 @@ export default function LessonsPage() {
                       allowFullScreen
                     />
                   </div>
+                ) : selected.url && getBackendLessonVideoUrl(selected.url) ? (
+                  <div className="relative w-full rounded-xl overflow-hidden bg-black">
+                    <video
+                      className="w-full aspect-video"
+                      controls
+                      preload="metadata"
+                      title={selected.title}
+                    >
+                      <source src={getBackendLessonVideoUrl(selected.url) ?? ""} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                ) : selected.url === "/gamepage" ? (
+                  <QuizPracticeActivity
+                    lessonKey={selected.key}
+                    onCompleted={() => markLessonCompleted(selected.key)}
+                  />
                 ) : selected.url ? (
                   <div className="relative w-full rounded-xl border bg-muted/40 p-8 min-h-[320px] flex flex-col items-center justify-center text-center gap-4">
                     <PlayCircle className="w-16 h-16 text-primary/70" />
@@ -287,9 +352,9 @@ export default function LessonsPage() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-              className="flex flex-col items-center justify-center py-24 text-muted-foreground"
-            >
-              <PlayCircle className="w-16 h-16 mb-4 opacity-30" />
+                className="flex flex-col items-center justify-center py-24 text-muted-foreground"
+              >
+                <PlayCircle className="w-16 h-16 mb-4 opacity-30" />
                 <p>{t("empty")}</p>
               </motion.div>
             )}

@@ -1,6 +1,12 @@
 import json
 import os
 import random
+from urllib.parse import urlparse
+
+try:
+    from google import genai
+except ImportError:
+    genai = None
 
 from django.http import JsonResponse
 from django.shortcuts import redirect
@@ -21,6 +27,18 @@ from signlingo_django.translations import get_translation
 
 
 # ----------------------------------- RESULT SUMMARY SYSTEM -----------------------------------
+def _frontend_app_url(request):
+    configured = os.environ.get("FRONTEND_APP_URL", "").rstrip("/")
+    if configured:
+        return configured
+
+    referer = request.META.get("HTTP_REFERER", "")
+    parsed = urlparse(referer)
+    if parsed.scheme and parsed.netloc and parsed.netloc != request.get_host():
+        return f"{parsed.scheme}://{parsed.netloc}".rstrip("/")
+    return ""
+
+
 @csrf_exempt
 def save_session_results(request):
     # Store per-session results so the result page can summarize mixed game modes.
@@ -77,6 +95,7 @@ def ml_game(request):
             "completed_lessons_count": completed_lessons_count,
             "total_lessons_count": total_lessons_count,
             "module_progress_percent": module_progress_percent,
+            "frontend_app_url": _frontend_app_url(request),
         }
     )
     return _render(request, "ml_game.html", context)
@@ -109,6 +128,7 @@ def gamepage(request):
             "completed_lessons_count": completed_lessons_count,
             "total_lessons_count": total_lessons_count,
             "module_progress_percent": module_progress_percent,
+            "frontend_app_url": _frontend_app_url(request),
         }
     )
     return _render(request, "game_page.html", context)
@@ -179,5 +199,118 @@ def magic_touch(request):
     if redirect_response:
         return redirect_response
     context = _user_shell_context(user)
-    context["frontend_dashboard_url"] = os.environ.get("FRONTEND_APP_URL", "").rstrip("/")
+    context["frontend_dashboard_url"] = _frontend_app_url(request)
     return _render(request, "magic_touch_game.html", context)
+
+
+def magic_touch_advanced(request):
+    user, redirect_response = _require_user(request)
+    if redirect_response:
+        return redirect_response
+    context = _user_shell_context(user)
+    context["frontend_dashboard_url"] = _frontend_app_url(request)
+    return _render(request, "magic_touch_advanced.html", context)
+
+
+@csrf_exempt
+def predict_gru(request):
+    try:
+        payload = json.loads(request.body or "{}")
+        sequence = payload.get("sequence")
+        if not sequence or len(sequence) != 30:
+            return JsonResponse({"error": "Invalid sequence provided, must be length 30."}, status=400)
+
+        result = game_services.predict_gru_sequence(sequence)
+        request.session["today_login"] = True
+        return JsonResponse(result)
+    except Exception as exc:
+        print(f"Prediction Error: {exc}")
+        return JsonResponse({"error": "Prediction failed due to an ML runtime error."}, status=500)
+
+
+def translation_mode(request):
+    user, redirect_response = _require_user(request)
+    if redirect_response:
+        return redirect_response
+    context = _user_shell_context(user)
+    context["frontend_dashboard_url"] = _frontend_app_url(request)
+    return _render(request, "translation_mode.html", context)
+
+
+@csrf_exempt
+def translate_sequence(request):
+    user, redirect_response = _require_user(request)
+    if redirect_response:
+        return JsonResponse({"error": "unauthorized"}, status=401)
+
+    try:
+        payload = json.loads(request.body or "{}")
+        words = payload.get("words", [])
+        if not words:
+            return JsonResponse({"error": "No words provided."}, status=400)
+
+        if not genai:
+            return JsonResponse({"error": "google-genai library is not installed."}, status=500)
+
+        api_key = os.environ.get("GEMINI_API_KEY")
+        if not api_key:
+            return JsonResponse({"error": "GEMINI_API_KEY environment variable is not set."}, status=500)
+
+        client = genai.Client(api_key=api_key)
+        prompt = (
+            "You are given a list of words. Combine them into one natural Indonesian sentence.\n"
+            "Add connecting words such as 'dan', 'karena', 'lalu', 'di', or 'ke' when needed. "
+            "Do not just list the words.\n\n"
+            "Examples:\n"
+            "Words: Saya, Makan, Tidur\n"
+            'Translation: {"translation": "Saya makan dan tidur."}\n\n'
+            "Words: Saya, Makan, Tidur, Mereka, Bingung\n"
+            'Translation: {"translation": "Mereka bingung karena saya makan dan tidur."}\n\n'
+            "Words: Bapak, Beli, Baju, Celana\n"
+            'Translation: {"translation": "Bapak membeli baju dan celana."}\n\n'
+            "Now process this sequence:\n"
+            f"Words: {', '.join(str(word) for word in words)}\n"
+        )
+
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
+            config={
+                "system_instruction": (
+                    'Respond only with a valid JSON object containing the "translation" key. '
+                    "Never output markdown formatting or additional commentary."
+                ),
+                "response_mime_type": "application/json",
+            },
+        )
+
+        raw_text = (response.text or "").strip()
+        if raw_text.startswith("```json"):
+            raw_text = raw_text[7:]
+        elif raw_text.startswith("```"):
+            raw_text = raw_text[3:]
+        if raw_text.endswith("```"):
+            raw_text = raw_text[:-3]
+        raw_text = raw_text.strip()
+
+        try:
+            response_data = json.loads(raw_text)
+            translated_text = response_data.get("translation", raw_text)
+        except Exception:
+            import re
+
+            json_match = re.search(r"\{.*\}", raw_text, re.DOTALL)
+            if json_match:
+                try:
+                    response_data = json.loads(json_match.group())
+                    translated_text = response_data.get("translation", raw_text)
+                except Exception:
+                    translated_text = raw_text
+            else:
+                translated_text = raw_text
+
+        request.session["today_login"] = True
+        return JsonResponse({"translated": translated_text, "user_id": user.id})
+    except Exception as exc:
+        print(f"Translation Error: {exc}")
+        return JsonResponse({"error": "Translation failed due to an error."}, status=500)

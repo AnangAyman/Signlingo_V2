@@ -12,6 +12,7 @@ MODEL_PATH = PROJECT_ROOT / "models" / "bisindo_static_model.h5"
 _ML_RUNTIME = None
 _MODEL_CACHE = None
 _HANDS_DETECTOR_CACHE = None
+_GRU_MODEL_CACHE = None
 
 
 def load_json(path: Path):
@@ -40,8 +41,8 @@ def _load_ml_runtime():
     import h5py
     import mediapipe as mp
     import numpy as np
-    from tensorflow.keras.layers import BatchNormalization, Dense, Dropout, Input
-    from tensorflow.keras.models import Sequential
+    from tensorflow.keras.layers import BatchNormalization, Dense, Dropout, Input, GRU
+    from tensorflow.keras.models import Sequential, load_model
 
     _ML_RUNTIME = {
         "cv2": cv2,
@@ -52,7 +53,9 @@ def _load_ml_runtime():
         "Dense": Dense,
         "Dropout": Dropout,
         "Input": Input,
+        "GRU": GRU,
         "Sequential": Sequential,
+        "load_model": load_model,
     }
     return _ML_RUNTIME
 
@@ -212,3 +215,77 @@ def predict_bisindo_image(file_bytes, upload_dir=None, model_path=MODEL_PATH):
         payload["debug_overlay_url"] = "/static/uploads/last_debug.jpg"
 
     return payload
+
+
+def _build_gru_model(runtime, model_path):
+    model = runtime["Sequential"]([
+        runtime["Input"](shape=(30, 447)),
+        runtime["GRU"](64, return_sequences=True, name='gru_1'),
+        runtime["Dropout"](0.2, name='dropout_1'),
+        runtime["GRU"](64, return_sequences=False, name='gru_2'),
+        runtime["Dropout"](0.2, name='dropout_2'),
+        runtime["Dense"](40, activation='softmax', name='output'),
+    ])
+    model.compile(optimizer='adam', loss='categorical_crossentropy')
+
+    # Manually load weights using h5py to bypass Keras version deserialization issues
+    with runtime["h5py"].File(str(model_path), "r") as file_handle:
+        if "model_weights" in file_handle:
+            weight_group = file_handle["model_weights"]
+        else:
+            weight_group = file_handle # Sometimes weights are at root
+
+        layer_names = [name.decode("utf-8") if isinstance(name, bytes) else name for name in weight_group.attrs.get("layer_names", [])]
+        keras_layers = [layer for layer in model.layers if layer.weights]
+
+        layer_index = 0
+        for layer_name in layer_names:
+            if layer_name not in weight_group:
+                continue
+            group = weight_group[layer_name]
+            weight_names = [name.decode("utf-8") if isinstance(name, bytes) else name for name in group.attrs.get("weight_names", [])]
+            weights = [group[weight_name][()] for weight_name in weight_names]
+            if weights and layer_index < len(keras_layers):
+                keras_layers[layer_index].set_weights(weights)
+                layer_index += 1
+
+    return model
+
+
+def get_gru_model(model_path=PROJECT_ROOT / "models" / "signlingo_v2_gru_4.h5"):
+    global _GRU_MODEL_CACHE
+    if _GRU_MODEL_CACHE is not None:
+        return _GRU_MODEL_CACHE
+    runtime = _load_ml_runtime()
+    if not model_path.exists():
+        raise FileNotFoundError(f"Missing GRU model file: {model_path}")
+    _GRU_MODEL_CACHE = _build_gru_model(runtime, model_path)
+    return _GRU_MODEL_CACHE
+
+
+def predict_gru_sequence(sequence):
+    # sequence should be a 2D array of (30, 447)
+    runtime = _load_ml_runtime()
+    model = get_gru_model()
+    np_module = runtime["np"]
+
+    # Convert to (1, 30, 447)
+    input_tensor = np_module.array([sequence], dtype=np_module.float32)
+
+    # Note: Actions need to match the ones used in training
+    ACTIONS = np_module.array([
+        'Apa', 'Apa Kabar', 'Bagaimana', 'Baik', 'Belajar', 'Berapa', 'Berdiri', 'Bingung',
+        'Dia', 'Dimana', 'Duduk', 'Halo', 'Kalian', 'Kami', 'Kamu', 'Kapan', 'Kemana', 'Kita',
+        'Makan', 'Mandi', 'Marah', 'Melihat', 'Membaca', 'Menulis', 'Mereka', 'Minum', 'Pendek',
+        'Ramah', 'Sabar', 'Saya', 'Sedih', 'Selamat Malam', 'Selamat Pagi', 'Selamat Siang',
+        'Selamat Sore', 'Senang', 'Siapa', 'Terima Kasih', 'Tidur', 'Tinggi'
+    ])
+
+    prediction = model.predict(input_tensor, verbose=0)[0]
+    prediction_idx = np_module.argmax(prediction)
+    prob = prediction[prediction_idx]
+
+    return {
+        "result": str(ACTIONS[prediction_idx]),
+        "confidence": float(prob)
+    }

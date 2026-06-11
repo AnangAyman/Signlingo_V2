@@ -16,38 +16,46 @@ import {
   Target,
   BookOpen,
   Trophy,
-  Zap,
+  Languages,
   ChevronRight,
   Play,
 } from "lucide-react";
 import Link from "next/link";
+import { backendPath } from "@/lib/api";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, hasCheckedSession } = useAuthStore();
   const { t } = useTranslation("dashboard");
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (hasCheckedSession && !isAuthenticated) {
       router.push("/login");
     }
-  }, [isAuthenticated, router]);
+  }, [hasCheckedSession, isAuthenticated, router]);
 
-  if (!isAuthenticated || !user) {
+  if (!hasCheckedSession || !isAuthenticated || !user) {
     return null;
   }
 
   const xpProgress = (user.xp % 500) / 5; // Progress within current level (0-100)
+  const quickActions = [
+    { icon: Play, label: t("actions.continueLearning"), href: "/lessons", color: "text-primary", external: false },
+    { icon: BookOpen, label: t("actions.practiceCamera"), href: "/ai-game", color: "text-secondary", external: false },
+    { icon: Languages, label: "Translation Mode", href: backendPath("/translation_mode"), color: "text-violet-500", external: true },
+    { icon: Trophy, label: t("actions.viewAchievements"), href: "/gamification", color: "text-amber-500", external: false },
+  ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background w-full">
       <AppHeader />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <main className="w-full px-3 sm:px-4 md:px-6 py-6 sm:py-8">
+        <div className="w-full max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
           {/* Left Column - Progress & Quick Actions */}
-          <div className="space-y-6">
+          <div className="w-full space-y-4 sm:space-y-5 md:space-y-6">
             {/* User Progress Card */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -146,31 +154,37 @@ export default function DashboardPage() {
                   <CardTitle className="text-lg">{t("quickActions")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  {[
-                    { icon: Play, labelKey: "actions.continueLearning", href: "/lessons", color: "text-primary" },
-                    { icon: BookOpen, labelKey: "actions.practiceCamera", href: "/practice", color: "text-secondary" },
-                    { icon: Trophy, labelKey: "actions.viewAchievements", href: "/achievements", color: "text-amber-500" },
-                  ].map((action, i) => (
-                    <Link key={i} href={action.href}>
+                  {quickActions.map((action, i) => {
+                    const content = (
                       <Button
                         variant="ghost"
                         className="w-full justify-between h-12 hover:bg-muted"
                       >
                         <div className="flex items-center gap-3">
                           <action.icon className={`w-5 h-5 ${action.color}`} />
-                          <span>{t(action.labelKey)}</span>
+                          <span>{action.label}</span>
                         </div>
                         <ChevronRight className="w-4 h-4 text-muted-foreground" />
                       </Button>
-                    </Link>
-                  ))}
+                    );
+
+                    return action.external ? (
+                      <a key={i} href={action.href}>
+                        {content}
+                      </a>
+                    ) : (
+                      <Link key={i} href={action.href}>
+                        {content}
+                      </Link>
+                    );
+                  })}
                 </CardContent>
               </Card>
             </motion.div>
           </div>
 
           {/* Right Column - League System */}
-          <div className="lg:col-span-2">
+          <div className="w-full lg:col-span-2">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -191,6 +205,7 @@ export default function DashboardPage() {
               />
             </motion.div>
           </div>
+        </div>
         </div>
       </main>
     </div>

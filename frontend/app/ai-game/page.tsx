@@ -1,75 +1,102 @@
 "use client";
 
-import Link from "next/link";
-import { Camera, ExternalLink, Gamepad2 } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Camera, Zap } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { AppHeader } from "@/components/app-header";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { backendPath } from "@/lib/api";
-import { useTranslation } from "react-i18next";
+import {
+  CameraPracticeActivity,
+  MagicTouchPracticeActivity,
+} from "@/components/lessons/InteractiveActivity";
+import { lessonsApi } from "@/lib/api";
+import { useAuthStore } from "@/lib/store";
+
+type PracticeMode = "magic" | "camera";
+
+const MODES: Array<{
+  value: PracticeMode;
+  lessonKey: string;
+  Icon: typeof Zap;
+}> = [
+  { value: "magic", lessonKey: "magic_touch", Icon: Zap },
+  { value: "camera", lessonKey: "show_your_signs", Icon: Camera },
+];
 
 export default function AIGamePage() {
+  const router = useRouter();
   const { t } = useTranslation("ai-game");
-  const magicTouchUrl = backendPath("/magic_touch");
-  const cameraPracticeUrl = backendPath("/capture");
+  const { isAuthenticated, hasCheckedSession } = useAuthStore();
+  const [mode, setMode] = useState<PracticeMode>("magic");
+  const [completedMessage, setCompletedMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (hasCheckedSession && !isAuthenticated) router.push("/login");
+  }, [hasCheckedSession, isAuthenticated, router]);
+
+  const markComplete = useCallback(async (lessonKey: string) => {
+    await lessonsApi.markStatus(lessonKey, "completed");
+    setCompletedMessage("Progress saved to Lessons.");
+  }, []);
+
+  if (!hasCheckedSession || !isAuthenticated) return null;
+
+  const activeMode = MODES.find((item) => item.value === mode) ?? MODES[0];
 
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
 
-      <main className="container mx-auto px-4 py-12 max-w-4xl">
-        <div className="mb-8">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-3">
-            {t("badge")}
-          </p>
-          <h1 className="text-4xl font-black text-foreground mb-3">
-            {t("title")}
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl">
-            {t("subtitle")}
-          </p>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card className="border-primary/30">
-            <CardHeader>
-              <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center mb-3">
-                <Gamepad2 className="w-6 h-6 text-primary" />
-              </div>
-              <CardTitle>{t("magicTouch.title")}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-muted-foreground">
-                {t("magicTouch.description")}
+      <main className="w-full px-3 sm:px-4 md:px-6 py-6 sm:py-8">
+        <div className="mx-auto w-full max-w-6xl space-y-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-primary">
+                {t("badge")}
               </p>
-              <Button asChild className="w-full">
-                <Link href={magicTouchUrl}>
-                  {t("magicTouch.button")}
-                  <ExternalLink className="w-4 h-4 ml-2" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <div className="w-12 h-12 rounded-xl bg-secondary/15 flex items-center justify-center mb-3">
-                <Camera className="w-6 h-6 text-secondary" />
-              </div>
-              <CardTitle>{t("cameraPractice.title")}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-muted-foreground">
-                {t("cameraPractice.description")}
+              <h1 className="text-2xl sm:text-3xl font-black text-foreground">
+                {t("title")}
+              </h1>
+            </div>
+            {completedMessage && (
+              <p className="rounded-lg border border-green-500/30 bg-green-500/10 px-3 py-2 text-sm text-green-700">
+                {completedMessage}
               </p>
-              <Button asChild variant="outline" className="w-full">
-                <Link href={cameraPracticeUrl}>
-                  {t("cameraPractice.button")}
-                  <ExternalLink className="w-4 h-4 ml-2" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {MODES.map(({ value, Icon }) => {
+              const active = mode === value;
+              return (
+                <Button
+                  key={value}
+                  variant={active ? "default" : "outline"}
+                  onClick={() => {
+                    setMode(value);
+                    setCompletedMessage(null);
+                  }}
+                  className="gap-2"
+                >
+                  <Icon className="h-4 w-4" />
+                  {value === "magic" ? t("magicTouch.title") : t("cameraPractice.title")}
+                </Button>
+              );
+            })}
+          </div>
+
+          {activeMode.value === "magic" ? (
+            <MagicTouchPracticeActivity
+              lessonKey={activeMode.lessonKey}
+              onCompleted={() => markComplete(activeMode.lessonKey)}
+            />
+          ) : (
+            <CameraPracticeActivity
+              lessonKey={activeMode.lessonKey}
+              onCompleted={() => markComplete(activeMode.lessonKey)}
+            />
+          )}
         </div>
       </main>
     </div>

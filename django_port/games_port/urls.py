@@ -15,5 +15,9 @@ urlpatterns = [
     path("check-answer", views.check_answer, name="check_answer"),
     path("capture", views.capture_page, name="capture_page"),
     path("predict", views.predict, name="predict"),
+    path("predict_gru", views.predict_gru, name="predict_gru"),
     path("magic_touch", views.magic_touch, name="magic_touch"),
+    path("magic_touch_advanced", views.magic_touch_advanced, name="magic_touch_advanced"),
+    path("translation_mode", views.translation_mode, name="translation_mode"),
+    path("translate_sequence", views.translate_sequence, name="translate_sequence"),
 ]

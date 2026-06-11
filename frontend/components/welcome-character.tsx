@@ -200,7 +200,7 @@ const WelcomeCharacter = forwardRef<WelcomeCharacterRef, WelcomeCharacterProps>(
             <motion.img
               src={CHARACTER_IMAGE_URL}
               alt={t("media.mascotDetailedAlt")}
-              className="w-auto h-auto max-w-[192px] max-h-[280px] md:max-w-[256px] md:max-h-[380px] lg:max-w-[320px] lg:max-h-[460px] object-contain drop-shadow-2xl"
+              className="w-32 sm:w-40 md:w-52 lg:w-64 xl:w-80 h-auto aspect-auto object-contain drop-shadow-2xl"
               draggable={false}
             />
           </div>
