@@ -37,8 +37,8 @@ export default function AIGamePage() {
 
   const markComplete = useCallback(async (lessonKey: string) => {
     await lessonsApi.markStatus(lessonKey, "completed");
-    setCompletedMessage("Progress saved to Lessons.");
-  }, []);
+    setCompletedMessage(t("progressSaved"));
+  }, [t]);
 
   if (!hasCheckedSession || !isAuthenticated) return null;
 

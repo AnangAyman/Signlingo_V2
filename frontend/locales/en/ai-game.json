@@ -11,5 +11,6 @@
     "title": "Camera Practice",
     "description": "Use the existing Django camera capture page to test live recognition before the final frontend game screen is finished.",
     "button": "Open Camera Practice"
-  }
+  },
+  "progressSaved": "Progress saved to Lessons."
 }

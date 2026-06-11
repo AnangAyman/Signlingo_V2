@@ -197,7 +197,7 @@ export default function LessonsPage() {
             className="gap-2 px-0 mb-3 text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Dashboard
+            {t("navigation.backToDashboard")}
           </Button>
           <h1 className="text-2xl font-bold text-foreground mb-1">{t("title")}</h1>
           <p className="text-sm text-muted-foreground mb-3">
@@ -282,7 +282,7 @@ export default function LessonsPage() {
                       title={selected.title}
                     >
                       <source src={getBackendLessonVideoUrl(selected.url) ?? ""} type="video/mp4" />
-                      Your browser does not support the video tag.
+                      {t("videoUnsupported")}
                     </video>
                   </div>
                 ) : selected.url === "/gamepage" ? (
