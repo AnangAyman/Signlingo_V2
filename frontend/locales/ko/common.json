@@ -30,6 +30,25 @@
     "startLearning": "학습 시작",
     "logout": "로그아웃"
   },
+  "ui": {
+    "loading": "불러오는 중",
+    "pagination": {
+      "navLabel": "페이지네이션",
+      "previousPage": "이전 페이지로 이동",
+      "previous": "이전",
+      "nextPage": "다음 페이지로 이동",
+      "next": "다음",
+      "morePages": "더 많은 페이지"
+    },
+    "carousel": {
+      "previousSlide": "이전 슬라이드",
+      "nextSlide": "다음 슬라이드"
+    },
+    "command": {
+      "title": "명령 팔레트",
+      "description": "실행할 명령을 검색하세요..."
+    }
+  },
   "hero": {
     "badge": "AI 기반 학습",
     "headline": "수어를 배워요",

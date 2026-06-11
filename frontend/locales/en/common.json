@@ -30,6 +30,25 @@
     "startLearning": "Start Learning",
     "logout": "Log out"
   },
+  "ui": {
+    "loading": "Loading",
+    "pagination": {
+      "navLabel": "Pagination",
+      "previousPage": "Go to previous page",
+      "previous": "Previous",
+      "nextPage": "Go to next page",
+      "next": "Next",
+      "morePages": "More pages"
+    },
+    "carousel": {
+      "previousSlide": "Previous slide",
+      "nextSlide": "Next slide"
+    },
+    "command": {
+      "title": "Command Palette",
+      "description": "Search for a command to run..."
+    }
+  },
   "hero": {
     "badge": "AI-Powered Learning",
     "headline": "Learn Sign Language",
