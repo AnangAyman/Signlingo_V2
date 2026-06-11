@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { CheckCircle2, Lock, Trophy } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -27,6 +28,8 @@ export function LeagueOverview({
   currentXp,
   reducedMotion = false,
 }: LeagueOverviewProps) {
+  const { t } = useTranslation("leaderboard");
+  const { t: tLeague } = useTranslation("leagues");
   const activeTier = normalizeLeague(currentLeague);
   const activeIndex = TIER_ORDER.indexOf(activeTier);
   const activeLeague = LEAGUES[activeTier];
@@ -52,14 +55,16 @@ export function LeagueOverview({
               <ActiveIcon className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Current league</p>
+              <p className="text-sm text-muted-foreground">
+                {t("leagueOverview.currentLeague")}
+              </p>
               <h3 className="text-xl font-bold text-foreground">
-                {activeLeague.displayName}
+                {tLeague(activeLeague.displayNameKey)}
               </h3>
             </div>
           </div>
           <Badge variant="secondary" className="w-fit text-sm">
-            {formatNumber(currentXp)} XP
+            {t("leagueOverview.xp", { xp: formatNumber(currentXp) })}
           </Badge>
         </div>
       </div>
@@ -103,7 +108,7 @@ export function LeagueOverview({
                   </div>
                   <div>
                     <h4 className="font-semibold text-foreground">
-                      {league.displayName}
+                      {tLeague(league.displayNameKey)}
                     </h4>
                     <p className="text-xs text-muted-foreground">
                       {formatNumber(league.minXp)} - {formatNumber(league.maxXp)} XP

@@ -2,6 +2,7 @@
   "title": "Leaderboard",
   "global": "Global",
   "friends": "Friends",
+  "leagues": "Leagues",
   "viewLabel": "View {{view}} leaderboard",
   "addXpBtn": "+50 XP",
   "xpEarnedToast": "+{{amount}} XP earned from practice!",
@@ -35,6 +36,10 @@
   "loading": "Loading leaderboard",
   "xpLabel": "XP",
   "rankLabel": "Rank {{rank}}: {{username}}, {{xp}} XP",
+  "leagueOverview": {
+    "currentLeague": "Current league",
+    "xp": "{{xp}} XP"
+  },
   "errors": {
     "fetch": "Failed to fetch leaderboard",
     "load": "Failed to load leaderboard. Tap Retry to try again.",
