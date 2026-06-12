@@ -26,14 +26,14 @@ def extract_and_normalize_keypoints(results):
     """Applies Shoulder Normalization to handle translation and distance/scale"""
     cx, cy, cz = 0.0, 0.0, 0.0
     scale = 1.0  # Default scale
-    
+
     if results.pose_landmarks:
-        l_sh = results.pose_landmarks.landmark[11] 
+        l_sh = results.pose_landmarks.landmark[11]
         r_sh = results.pose_landmarks.landmark[12]
-        
+
         # Find the center point between the shoulders
         cx, cy, cz = (l_sh.x + r_sh.x)/2, (l_sh.y + r_sh.y)/2, (l_sh.z + r_sh.z)/2
-        
+
         # Calculate the Euclidean distance between the shoulders
         shoulder_dist = np.linalg.norm([l_sh.x - r_sh.x, l_sh.y - r_sh.y, l_sh.z - r_sh.z])
         if shoulder_dist > 0:
@@ -50,13 +50,13 @@ def extract_and_normalize_keypoints(results):
 
     lh, rh = norm(results.left_hand_landmarks), norm(results.right_hand_landmarks)
     face = norm(results.face_landmarks, is_face=True)
-    
+
     if results.pose_landmarks:
-        pose = np.array([[(lm.x - cx) / scale, (lm.y - cy) / scale, (lm.z - cz) / scale] 
+        pose = np.array([[(lm.x - cx) / scale, (lm.y - cy) / scale, (lm.z - cz) / scale]
                          for lm in results.pose_landmarks.landmark]).flatten()
     else:
         pose = np.zeros(33*3)
-        
+
     return np.concatenate([pose, face, lh, rh])
 
 
@@ -72,18 +72,18 @@ def main():
     mp_drawing = mp.solutions.drawing_utils
 
     sequence = []
-    
+
     # State tracking
     state = "IDLE"
     last_prediction_str = None
     countdown_start_time = 0
-    
+
     cap = cv2.VideoCapture(0)
-    
+
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
         print("Starting webcam...")
         print("Press 'SPACE' to record a sign, and 'q' to quit.")
-        
+
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
@@ -92,17 +92,17 @@ def main():
                 print("2. You might need to restart your Terminal / IDE after granting permission.")
                 print("3. No other application is currently using your webcam.")
                 break
-            
+
             # Flip the frame for a mirror effect, easier to use that way
             # frame = cv2.flip(frame, 1)
 
             # Recolor Feed
             image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             image.flags.writeable = False
-            
+
             # Make Detections
             results = holistic.process(image)
-            
+
             # Recolor image back to BGR for rendering
             image.flags.writeable = True
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
@@ -116,63 +116,63 @@ def main():
             if state == "RECORDING":
                 keypoints = extract_and_normalize_keypoints(results)
                 sequence.append(keypoints)
-                
+
                 # Show recording progress
                 cv2.rectangle(image, (0,0), (640, 40), (0, 0, 255), -1)  # Red banner
-                cv2.putText(image, f'RECORDING: {len(sequence)}/{SEQUENCE_LENGTH} frames', (10,30), 
+                cv2.putText(image, f'RECORDING: {len(sequence)}/{SEQUENCE_LENGTH} frames', (10,30),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
-                
+
                 if len(sequence) == SEQUENCE_LENGTH:
                     # Run prediction
                     res = model.predict(np.expand_dims(sequence, axis=0), verbose=0)[0]
                     prediction_idx = np.argmax(res)
                     prob = res[prediction_idx]
-                    
+
                     last_prediction_str = f"Result: {ACTIONS[prediction_idx]} ({prob*100:.1f}%)"
-                    
+
                     # Print probabilities to terminal
                     print("\n" + "="*40)
                     print("PREDICTION RESULTS (Sorted by Match %)")
                     print("="*40)
-                    
+
                     action_probs = [(ACTIONS[i], res[i] * 100) for i in range(len(ACTIONS))]
                     action_probs.sort(key=lambda x: x[1], reverse=True)
-                    
+
                     for action_name, probability in action_probs:
                         # Print every word cleanly, left-aligned standard width, right-aligned percentage
                         print(f"  {action_name:.<25} {probability:>6.2f}%")
-                        
+
                     print("="*40 + "\n")
-                    
+
                     # Reset back to IDLE
                     state = "IDLE"
-                    
+
             elif state == "IDLE":
                 # Display instruction banner
                 cv2.rectangle(image, (0,0), (640, 40), (245, 117, 16), -1) # Orange banner
-                cv2.putText(image, "Press 'SPACE' to start recording", (10,30), 
+                cv2.putText(image, "Press 'SPACE' to start recording", (10,30),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
-                
+
                 # Display the last prediction if we have one
                 if last_prediction_str:
                     cv2.rectangle(image, (0, 40), (640, 80), (0, 128, 0), -1) # Green banner
-                    cv2.putText(image, last_prediction_str, (10,70), 
+                    cv2.putText(image, last_prediction_str, (10,70),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
-            
+
             elif state == "COUNTDOWN":
                 time_elapsed = time.time() - countdown_start_time
                 time_left = 5.0 - time_elapsed
-                
+
                 if time_left <= 0:
                     state = "RECORDING"
                     sequence = []
                 else:
                     # Display countdown
                     cv2.rectangle(image, (0,0), (640, 80), (0, 165, 255), -1)  # Yellow-orange banner
-                    cv2.putText(image, f"GET READY: {int(time_left) + 1}", (10,50), 
+                    cv2.putText(image, f"GET READY: {int(time_left) + 1}", (10,50),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 0), 3, cv2.LINE_AA)
 
-                 
+
             # Show to screen
             cv2.imshow('SignLingo Trigger Tester', image)
 
@@ -185,7 +185,7 @@ def main():
                     state = "COUNTDOWN"
                     countdown_start_time = time.time()
                     last_prediction_str = None
-                
+
     cap.release()
     cv2.destroyAllWindows()
 

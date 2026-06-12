@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import { leaderboardApi, type ApiLeaderboardEntry } from "@/lib/api";
+import i18n from "@/lib/i18n";
 
 // ============================================================
 // TYPES
@@ -64,8 +65,6 @@ async function fetchAllEntries(type: "global" | "friends"): Promise<LeaderboardE
   const data = await leaderboardApi.get(type);
   return data.entries.map(mapEntry);
 }
-
-const PAGE_COUNT = 10; // kept for hasMore logic
 
 async function fetchGlobalPage(
   page: number,
@@ -150,7 +149,7 @@ export function useLeaderboardData({
         setHasMore(false);
       }
     } catch {
-      setError("Failed to load leaderboard. Tap Retry to try again.");
+      setError(i18n.t("leaderboard:errors.load"));
     } finally {
       setLoading(false);
     }
@@ -177,7 +176,7 @@ export function useLeaderboardData({
       setEntriesSafe([...entriesRef.current, ...e]);
       setHasMore(hm);
     } catch {
-      setError("Failed to load more entries.");
+      setError(i18n.t("leaderboard:errors.loadMore"));
     } finally {
       setLoading(false);
     }
@@ -208,7 +207,7 @@ export function useLeaderboardData({
           setHasMore(false);
         }
       } catch {
-        setError("Failed to switch view.");
+        setError(i18n.t("leaderboard:errors.switchView"));
       } finally {
         setLoading(false);
       }
@@ -244,7 +243,7 @@ export function useLeaderboardData({
         return { changedIds: [] };
       }
     } catch {
-      setError("Failed to refresh leaderboard.");
+      setError(i18n.t("leaderboard:errors.refresh"));
       return { changedIds: [] };
     } finally {
       setLoading(false);

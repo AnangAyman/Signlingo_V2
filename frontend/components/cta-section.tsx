@@ -96,7 +96,7 @@ export function CTASection() {
             >
               <motion.img
                 src={CHARACTER_IMAGE_URL}
-                alt="SignLingo mascot"
+                alt={t("media.mascotAlt")}
                 className="w-64 h-auto drop-shadow-2xl"
                 animate={{
                   y: [0, -15, 0],

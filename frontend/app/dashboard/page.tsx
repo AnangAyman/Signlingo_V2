@@ -42,7 +42,7 @@ export default function DashboardPage() {
   const quickActions = [
     { icon: Play, label: t("actions.continueLearning"), href: "/lessons", color: "text-primary", external: false },
     { icon: BookOpen, label: t("actions.practiceCamera"), href: "/ai-game", color: "text-secondary", external: false },
-    { icon: Languages, label: "Translation Mode", href: backendPath("/translation_mode"), color: "text-violet-500", external: true },
+    { icon: Languages, label: t("actions.translationMode"), href: backendPath("/translation_mode"), color: "text-violet-500", external: true },
     { icon: Trophy, label: t("actions.viewAchievements"), href: "/gamification", color: "text-amber-500", external: false },
   ];
 

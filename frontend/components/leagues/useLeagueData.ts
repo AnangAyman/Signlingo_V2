@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 import { Medal, Award, Trophy, Crown, Star } from "lucide-react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { dashboardApi, leaderboardApi, type ApiLeaderboardEntry } from "@/lib/api";
+import i18n from "@/lib/i18n";
 
 // ============================================================
 // TYPES
@@ -13,7 +14,7 @@ export type LeagueTier = "bronze" | "silver" | "gold" | "platinum" | "diamond";
 
 export interface LeagueInfo {
   tier: LeagueTier;
-  displayName: string;
+  displayNameKey: string;
   minXp: number;
   maxXp: number;
   promotionRank: number;
@@ -62,7 +63,7 @@ export interface LeagueParticipant {
 export const LEAGUES: Record<LeagueTier, LeagueInfo> = {
   bronze: {
     tier: "bronze",
-    displayName: "Bronze League",
+    displayNameKey: "tiers.bronze.name",
     minXp: 0,
     maxXp: 500,
     promotionRank: 5,
@@ -76,7 +77,7 @@ export const LEAGUES: Record<LeagueTier, LeagueInfo> = {
   },
   silver: {
     tier: "silver",
-    displayName: "Silver League",
+    displayNameKey: "tiers.silver.name",
     minXp: 500,
     maxXp: 1500,
     promotionRank: 5,
@@ -90,7 +91,7 @@ export const LEAGUES: Record<LeagueTier, LeagueInfo> = {
   },
   gold: {
     tier: "gold",
-    displayName: "Gold League",
+    displayNameKey: "tiers.gold.name",
     minXp: 1500,
     maxXp: 3000,
     promotionRank: 5,
@@ -104,7 +105,7 @@ export const LEAGUES: Record<LeagueTier, LeagueInfo> = {
   },
   platinum: {
     tier: "platinum",
-    displayName: "Platinum League",
+    displayNameKey: "tiers.platinum.name",
     minXp: 3000,
     maxXp: 5000,
     promotionRank: 3,
@@ -118,7 +119,7 @@ export const LEAGUES: Record<LeagueTier, LeagueInfo> = {
   },
   diamond: {
     tier: "diamond",
-    displayName: "Diamond League",
+    displayNameKey: "tiers.diamond.name",
     minXp: 5000,
     maxXp: 10000,
     promotionRank: 1,
@@ -281,7 +282,9 @@ export function useLeagueData({ userId, onPromotion, onDemotion }: UseLeagueData
         setShowDemotionTooltip(true);
       }
     } catch (err) {
-      setError(err instanceof Error ? err : new Error("Failed to fetch league data"));
+      setError(
+        err instanceof Error ? err : new Error(i18n.t("leagues:failedToLoad"))
+      );
     } finally {
       setLoading(false);
     }

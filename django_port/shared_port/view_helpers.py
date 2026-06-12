@@ -8,7 +8,10 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 
 from legacy_port.models import Lesson, User
+from legacy_port.services import ensure_seed_data
 from legacy_port.services import get_initials
+from signlingo_django.language import get_request_language
+from signlingo_django.translations import DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES
 
 
 # Shared helpers live here so feature apps can stay focused on their own endpoints.
@@ -36,6 +39,9 @@ def _require_user(request):
 def _render(request, template_name, context=None):
     context = context or {}
     context.setdefault("session", request.session)
+    context.setdefault("ui_language", get_request_language(request))
+    context.setdefault("default_language", DEFAULT_LANGUAGE)
+    context.setdefault("supported_languages", SUPPORTED_LANGUAGES)
     return render(request, template_name, context)
 
 
@@ -54,6 +60,7 @@ def _user_shell_context(user):
 def _lesson_context(user):
     # Build the lesson progress snapshot once and reuse it across dashboard, course, and game pages.
     # Fetch all defined lessons from the database. This assumes the Lesson table has been seeded.
+    ensure_seed_data()
     lessons = list(Lesson.objects.order_by("order"))
     current_lesson = None
     completed_lessons_count = 0

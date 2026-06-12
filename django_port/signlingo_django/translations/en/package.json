@@ -1,0 +1,22 @@
+{
+  "package.page_title": "Choose Your Plan - SignLingo",
+  "package.nav.dashboard": "Dashboard",
+  "package.nav.courses": "Courses",
+  "package.nav.leaderboard": "Leaderboard",
+  "package.nav.shop": "Shop",
+  "package.nav.premium": "Premium",
+  "package.nav.logout": "Logout",
+  "package.header.badge": "PREMIUM",
+  "package.header.title": "Choose a plan for after your 7-day free trial",
+  "package.card.family_badge": "4-6 MEMBERS",
+  "package.card.family_title": "Family Plan",
+  "package.card.family_duration": "12 months",
+  "package.card.yearly_badge": "MOST POPULAR",
+  "package.card.yearly_duration": "12 months",
+  "package.card.monthly_duration": "1 month",
+  "package.pricing.prefix": "7 day free trial, then Rp",
+  "package.pricing.per_year": "per year",
+  "package.pricing.billed_prefix": "(Rp",
+  "package.pricing.billed_suffix": "/month, billed annually) plus applicable taxes",
+  "package.cta": "START MY FREE 7 DAYS"
+}

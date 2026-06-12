@@ -22,6 +22,8 @@ from shared_port.view_helpers import (
     _store_session_results,
     _user_shell_context,
 )
+from signlingo_django.language import get_request_language
+from signlingo_django.translations import get_translation
 
 
 # ----------------------------------- RESULT SUMMARY SYSTEM -----------------------------------
@@ -142,7 +144,11 @@ def get_question(request):
 
 def get_question_ml(request):
     # Keep the correct answer in the payload so the existing client logic can score responses.
-    return JsonResponse(_pick_question(request, "ml", game_services.load_ml_questions()))
+    question = dict(_pick_question(request, "ml", game_services.load_ml_questions()))
+    language = get_request_language(request)
+    prompt_template = get_translation(language, "game.ml.prompt_template")
+    question["question"] = prompt_template.format(letter=question.get("answer", ""))
+    return JsonResponse(question)
 
 
 @csrf_exempt
@@ -213,7 +219,7 @@ def predict_gru(request):
         sequence = payload.get("sequence")
         if not sequence or len(sequence) != 30:
             return JsonResponse({"error": "Invalid sequence provided, must be length 30."}, status=400)
-        
+
         result = game_services.predict_gru_sequence(sequence)
         request.session["today_login"] = True
         return JsonResponse(result)

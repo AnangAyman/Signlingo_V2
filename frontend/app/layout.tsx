@@ -1,21 +1,8 @@
 import type { Metadata, Viewport } from 'next'
-import { Nunito, Nunito_Sans } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { AuthSessionHydrator } from '@/components/common/AuthSessionHydrator'
 import { I18nProvider } from '@/components/common/I18nProvider'
 import './globals.css'
-
-const nunito = Nunito({ 
-  subsets: ["latin"],
-  variable: '--font-nunito',
-  display: 'swap',
-});
-
-const nunitoSans = Nunito_Sans({ 
-  subsets: ["latin"],
-  variable: '--font-nunito-sans',
-  display: 'swap',
-});
 
 export const metadata: Metadata = {
   title: 'SignLingo - Learn Sign Language the Fun Way',
@@ -58,7 +45,6 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${nunito.variable} ${nunitoSans.variable}`}
       suppressHydrationWarning
     >
       <body className="font-sans antialiased bg-background text-foreground">

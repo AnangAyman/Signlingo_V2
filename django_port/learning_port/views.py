@@ -1,11 +1,16 @@
 import json
+import logging
 import os
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from legacy_port.models import Lesson, UserLessonStatus
+from legacy_port.services import ensure_seed_data
 from shared_port.view_helpers import _lesson_context, _render, _require_user, _user_shell_context
+
+
+logger = logging.getLogger(__name__)
 
 
 # ----------------------------------- GAME PAGE ------------------------------------------------
@@ -38,6 +43,7 @@ def mark_lesson_status(request):
     if redirect_response:
         return JsonResponse({"error": "unauthorized"}, status=401)
 
+    ensure_seed_data()
     payload = json.loads(request.body or "{}")
     lesson = None
     if payload.get("lesson_id"):
@@ -45,8 +51,27 @@ def mark_lesson_status(request):
     if lesson is None and payload.get("lesson_key"):
         # Use the stable lesson_key when possible so front-end updates are not coupled to database IDs.
         lesson = Lesson.objects.filter(lesson_key=payload.get("lesson_key")).first()
+    if lesson is None and payload.get("lesson_url"):
+        # Fall back to the lesson URL to tolerate stale lesson keys in older seeded data.
+        lesson = Lesson.objects.filter(url=payload.get("lesson_url")).first()
     if lesson is None:
-        return JsonResponse({"success": False, "error": "Lesson not found"}, status=404)
+        logger.warning(
+            "mark_lesson_status lookup failed payload=%s available_lessons=%s",
+            payload,
+            list(Lesson.objects.values("id", "lesson_key", "title", "url")),
+        )
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "Lesson not found",
+                "debug": {
+                    "lesson_id": payload.get("lesson_id"),
+                    "lesson_key": payload.get("lesson_key"),
+                    "lesson_url": payload.get("lesson_url"),
+                },
+            },
+            status=400,
+        )
 
     item, _ = UserLessonStatus.objects.update_or_create(
         user=user,

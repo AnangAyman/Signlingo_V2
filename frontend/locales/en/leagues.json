@@ -25,6 +25,23 @@
   "xp": "XP",
   "failedToLoad": "Failed to load league data",
   "tryAgain": "Try Again",
+  "tiers": {
+    "bronze": {
+      "name": "Bronze League"
+    },
+    "silver": {
+      "name": "Silver League"
+    },
+    "gold": {
+      "name": "Gold League"
+    },
+    "platinum": {
+      "name": "Platinum League"
+    },
+    "diamond": {
+      "name": "Diamond League"
+    }
+  },
   "card": {
     "weeklyXp": "Weekly XP",
     "promotionZone": "Promotion Zone",

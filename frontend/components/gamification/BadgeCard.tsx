@@ -9,6 +9,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { Badge } from "./useGamificationStore";
+import { useTranslation } from "react-i18next";
 
 interface BadgeCardProps {
   badge: Badge;
@@ -38,6 +39,11 @@ export function BadgeCard({
   reducedMotion = false,
   onClick,
 }: BadgeCardProps) {
+  const { t } = useTranslation("gamification");
+  const name = t(`badges.items.${badge.id}.name`);
+  const description = t(`badges.items.${badge.id}.description`);
+  const requirement = t(`badges.items.${badge.id}.requirement`);
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -58,7 +64,7 @@ export function BadgeCard({
           ].join(" ")}
           role="button"
           tabIndex={0}
-          aria-label={`${badge.name} badge – ${badge.isLocked ? "locked" : "unlocked"}`}
+          aria-label={t(`badges.cardStateLabel.${badge.isLocked ? "locked" : "unlocked"}`, { name })}
           whileTap={reducedMotion ? {} : { scale: 0.95 }}
         >
           {/* Lock icon */}
@@ -90,7 +96,7 @@ export function BadgeCard({
 
           {/* Name */}
           <p className="text-xs font-medium text-center text-foreground truncate">
-            {badge.name}
+            {name}
           </p>
 
           {/* Progress bar for locked badges */}
@@ -103,7 +109,7 @@ export function BadgeCard({
                 aria-valuenow={badge.currentProgress}
                 aria-valuemin={0}
                 aria-valuemax={badge.requiredValue}
-                aria-label={`${badge.name} progress`}
+                aria-label={t("badges.progressLabel", { name })}
               />
               <p className="text-xs text-center text-muted-foreground mt-1">
                 {badge.currentProgress}/{badge.requiredValue}
@@ -114,16 +120,16 @@ export function BadgeCard({
       </TooltipTrigger>
 
       <TooltipContent side="top" className="max-w-xs">
-        <p className="font-semibold">{badge.name}</p>
-        <p className="text-sm text-muted-foreground">{badge.description}</p>
+        <p className="font-semibold">{name}</p>
+        <p className="text-sm text-muted-foreground">{description}</p>
         {badge.isLocked ? (
           <p className="text-xs text-primary mt-1">
-            {badge.requirement} to unlock
+            {t("badges.unlockRequirement", { requirement })}
           </p>
         ) : (
           badge.earnedAt && (
             <p className="text-xs text-green-500 mt-1">
-              Earned {safeDate(badge.earnedAt)}
+              {t("badges.earnedInline", { date: safeDate(badge.earnedAt) })}
             </p>
           )
         )}

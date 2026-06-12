@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import type { User } from "@/lib/store";
 
 // ============================================================
 // TYPES
@@ -9,10 +10,7 @@ import { persist } from "zustand/middleware";
 
 export interface Badge {
   id: string;
-  name: string;
-  description: string;
   icon: string;
-  requirement: string;
   requiredValue: number;
   currentProgress: number;
   isLocked: boolean;
@@ -23,8 +21,6 @@ export interface Badge {
 
 export interface Reward {
   id: string;
-  name: string;
-  description: string;
   cost: number;
   icon: string;
   isRedeemed: boolean;
@@ -33,7 +29,6 @@ export interface Reward {
 
 export interface DailyQuest {
   id: string;
-  description: string;
   xpReward: number;
   progress: number;
   total: number;
@@ -58,10 +53,7 @@ export interface UserProgress {
 const INITIAL_BADGES: Badge[] = [
   {
     id: "first-sign",
-    name: "First Sign",
-    description: "Complete your first lesson",
     icon: "🤟",
-    requirement: "Complete 1 lesson",
     requiredValue: 1,
     currentProgress: 1,
     isLocked: false,
@@ -71,10 +63,7 @@ const INITIAL_BADGES: Badge[] = [
   },
   {
     id: "streak-starter",
-    name: "Streak Starter",
-    description: "Maintain a 3-day streak",
     icon: "🔥",
-    requirement: "3-day streak",
     requiredValue: 3,
     currentProgress: 3,
     isLocked: false,
@@ -84,10 +73,7 @@ const INITIAL_BADGES: Badge[] = [
   },
   {
     id: "week-warrior",
-    name: "Week Warrior",
-    description: "Maintain a 7-day streak",
     icon: "⚡",
-    requirement: "7-day streak",
     requiredValue: 7,
     currentProgress: 5,
     isLocked: true,
@@ -96,10 +82,7 @@ const INITIAL_BADGES: Badge[] = [
   },
   {
     id: "lesson-master",
-    name: "Lesson Master",
-    description: "Complete 10 lessons",
     icon: "📚",
-    requirement: "Complete 10 lessons",
     requiredValue: 10,
     currentProgress: 7,
     isLocked: true,
@@ -108,10 +91,7 @@ const INITIAL_BADGES: Badge[] = [
   },
   {
     id: "quiz-ace",
-    name: "Quiz Ace",
-    description: "Score 100% on 5 quizzes",
     icon: "🎯",
-    requirement: "Perfect score on 5 quizzes",
     requiredValue: 5,
     currentProgress: 2,
     isLocked: true,
@@ -120,10 +100,7 @@ const INITIAL_BADGES: Badge[] = [
   },
   {
     id: "bronze-champion",
-    name: "Bronze Champion",
-    description: "Reach the Silver league",
     icon: "🥉",
-    requirement: "Promote from Bronze",
     requiredValue: 1,
     currentProgress: 1,
     isLocked: false,
@@ -133,10 +110,7 @@ const INITIAL_BADGES: Badge[] = [
   },
   {
     id: "silver-star",
-    name: "Silver Star",
-    description: "Reach the Gold league",
     icon: "🥈",
-    requirement: "Promote from Silver",
     requiredValue: 1,
     currentProgress: 0,
     isLocked: true,
@@ -145,10 +119,7 @@ const INITIAL_BADGES: Badge[] = [
   },
   {
     id: "gold-legend",
-    name: "Gold Legend",
-    description: "Reach the Platinum league",
     icon: "🥇",
-    requirement: "Promote from Gold",
     requiredValue: 1,
     currentProgress: 0,
     isLocked: true,
@@ -157,10 +128,7 @@ const INITIAL_BADGES: Badge[] = [
   },
   {
     id: "ai-explorer",
-    name: "AI Explorer",
-    description: "Practice with AI camera 20 times",
     icon: "🤖",
-    requirement: "Use AI camera 20 times",
     requiredValue: 20,
     currentProgress: 12,
     isLocked: true,
@@ -169,10 +137,7 @@ const INITIAL_BADGES: Badge[] = [
   },
   {
     id: "month-master",
-    name: "Month Master",
-    description: "Maintain a 30-day streak",
     icon: "🏆",
-    requirement: "30-day streak",
     requiredValue: 30,
     currentProgress: 5,
     isLocked: true,
@@ -184,32 +149,24 @@ const INITIAL_BADGES: Badge[] = [
 const INITIAL_REWARDS: Reward[] = [
   {
     id: "streak-freeze",
-    name: "Streak Freeze",
-    description: "Protect your streak for one day",
     cost: 200,
     icon: "🧊",
     isRedeemed: false,
   },
   {
     id: "double-xp",
-    name: "Double XP (1hr)",
-    description: "Earn double XP for one hour",
     cost: 350,
     icon: "⚡",
     isRedeemed: false,
   },
   {
     id: "custom-avatar",
-    name: "Custom Avatar",
-    description: "Unlock a special avatar frame",
     cost: 500,
     icon: "🎨",
     isRedeemed: false,
   },
   {
     id: "bonus-lesson",
-    name: "Bonus Lesson",
-    description: "Access an exclusive bonus lesson",
     cost: 300,
     icon: "🎁",
     isRedeemed: true,
@@ -217,8 +174,6 @@ const INITIAL_REWARDS: Reward[] = [
   },
   {
     id: "hint-pack",
-    name: "Hint Pack (5)",
-    description: "Get 5 hints for difficult signs",
     cost: 150,
     icon: "💡",
     isRedeemed: false,
@@ -228,7 +183,6 @@ const INITIAL_REWARDS: Reward[] = [
 const INITIAL_QUESTS: DailyQuest[] = [
   {
     id: "quest-lesson",
-    description: "Complete 3 lessons",
     xpReward: 50,
     progress: 2,
     total: 3,
@@ -238,7 +192,6 @@ const INITIAL_QUESTS: DailyQuest[] = [
   },
   {
     id: "quest-quiz",
-    description: "Score 80%+ on a quiz",
     xpReward: 30,
     progress: 1,
     total: 1,
@@ -247,7 +200,6 @@ const INITIAL_QUESTS: DailyQuest[] = [
   },
   {
     id: "quest-practice",
-    description: "Practice with AI camera",
     xpReward: 25,
     progress: 0,
     total: 1,
@@ -282,10 +234,25 @@ interface GamificationStore {
   redeemReward: (rewardId: string) => boolean;
   completeQuest: (questId: string) => void;
   checkBadges: () => Badge | null;
+  syncFromUser: (user: User) => void;
   resetDemo: () => void;
   closeLevelUpModal: () => void;
   clearNewBadge: () => void;
   simulateNewDay: () => void;
+}
+
+function progressFromUser(user: Pick<User, "xp" | "level" | "dailyStreak">): UserProgress {
+  const currentLevelXp = user.xp % 500;
+  const xpToNextLevel = currentLevelXp === 0 ? 500 : 500 - currentLevelXp;
+
+  return {
+    level: user.level,
+    totalXp: user.xp,
+    xpToNextLevel,
+    levelProgressPercent: (currentLevelXp / 500) * 100,
+    dailyStreak: user.dailyStreak,
+    lastActiveDate: new Date().toISOString().split("T")[0],
+  };
 }
 
 export const useGamificationStore = create<GamificationStore>()(
@@ -392,6 +359,15 @@ export const useGamificationStore = create<GamificationStore>()(
         }
 
         return earnedBadge;
+      },
+
+      syncFromUser: (user: User) => {
+        set({
+          userProgress: {
+            ...get().userProgress,
+            ...progressFromUser(user),
+          },
+        });
       },
 
       resetDemo: () => {

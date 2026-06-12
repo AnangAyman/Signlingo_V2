@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ current_language() }}">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SignLingo</title>
+    <title>{{ t('game.ml.page_title') }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,6 +17,10 @@
 </head>
 
 <body>
+    <div class="page-language-switcher" aria-label="{{ t('language.switcher_label') }}">
+        <a class="page-language-chip{% if current_language() == 'en' %} active{% endif %}" href="{{ url_for('auth.set_language', code='en') }}?next={{ request.path }}">{{ t('language.en') }}</a>
+        <a class="page-language-chip{% if current_language() == 'ko' %} active{% endif %}" href="{{ url_for('auth.set_language', code='ko') }}?next={{ request.path }}">{{ t('language.ko') }}</a>
+    </div>
 
     <button class="back-button" onclick="window.location.href='{{ (frontend_app_url ~ '/dashboard') if frontend_app_url else url_for('auth.dashboard') }}'">
         <svg width="24" height="24" viewBox="0 0 24" fill="none">
@@ -28,15 +32,27 @@
     <div class="game-page-wrapper">
         {% set temp_lesson = lessons|selectattr('url', 'equalto', request.path)|first %}
         <div class="quiz-card"
-            data-lesson-key="{{ temp_lesson.lesson_key if temp_lesson and temp_lesson.lesson_key else 'KEY_NOT_FOUND_IN_LESSON' }}">
+            data-lesson-key="{{ temp_lesson.lesson_key if temp_lesson and temp_lesson.lesson_key else 'KEY_NOT_FOUND_IN_LESSON' }}"
+            data-start-capture-label="{{ t('game.ml.start_capture') }}"
+            data-try-again-label="{{ t('game.ml.try_again') }}"
+            data-webcam-error="{{ t('game.ml.webcam_error') }}"
+            data-fetch-error="{{ t('game.ml.fetch_error') }}"
+            data-practice-complete="{{ t('game.ml.practice_complete') }}"
+            data-feedback-correct="{{ t('game.ml.feedback_correct') }}"
+            data-feedback-incorrect="{{ t('game.ml.feedback_incorrect') }}"
+            data-save-results-url="{{ url_for('auth.save_session_results') }}"
+            data-mark-status-url="{{ url_for('auth.mark_lesson_status') }}"
+            data-result-summary-url="{{ url_for('auth.result_summary') }}"
+            data-question-url="{{ url_for('auth.get_question_ml') }}"
+            data-predict-url="{{ url_for('auth.predict') }}">
 
             <div class="game-header">
                 <div class="header-text">
-                    <span class="module-badge">PRACTICE</span>
-                    <h1>{{ temp_lesson.title if temp_lesson else "Live Practice" }}</h1>
+                    <span class="module-badge">{{ t('game.ml.badge') }}</span>
+                    <h1>{{ t('game.ml.lesson_title') }}</h1>
                 </div>
                 <div class="progress-info">
-                    <span class="progress-label">Module Progress</span>
+                    <span class="progress-label">{{ t('game.ml.progress') }}</span>
                     <div class="module-progress-container">
                         <div class="module-progress-bar" style="width: {{ module_progress_percent }}%;"></div>
                     </div>
@@ -54,15 +70,15 @@
 
             <p class="webcam-disclaimer">
                 <i class="fa-solid fa-camera"></i>
-                For best results, stay centered in the frame.
+                {{ t('game.ml.disclaimer') }}
             </p>
 
-            <div id="question" class="question-text">Loading challenge...</div>
+            <div id="question" class="question-text">{{ t('game.ml.loading') }}</div>
 
             <div id="ml-controls" class="ml-controls-container">
                 <div id="countdown"></div>
                 <div id="result"></div>
-                <button id="start-btn" class="start-capture-button">Start Pose Capture</button>
+                <button id="start-btn" class="start-capture-button">{{ t('game.ml.start_capture') }}</button>
             </div>
 
         </div>
@@ -84,7 +100,7 @@
     <a href="{{ (frontend_app_url ~ '/ai-game') if frontend_app_url else url_for('auth.magic_touch') }}" class="skip-button"
         style="right: auto; left: 24px; background-color: var(--primary); color: white; border-color: var(--primary); text-decoration: none;">
         <i class="fa-solid fa-gamepad"></i>
-        Play Magic Touch
+        {{ t('game.ml.magic_touch') }}
     </a>
 
     <a href="{{ url_for('auth.magic_touch_advanced') }}" class="skip-button"
@@ -95,7 +111,7 @@
 
     <button class="skip-button" id="skip-button">
         <i class="fa-solid fa-forward"></i>
-        Skip Practice
+        {{ t('game.quiz.skip_button') }}
     </button>
 
     <!-- Skip Confirmation Modal -->
@@ -104,11 +120,11 @@
             <div class="modal-icon">
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
-            <h3 class="modal-title">Skip this practice?</h3>
-            <p class="modal-text">You won't earn any XP if you skip. Are you sure you want to continue?</p>
+            <h3 class="modal-title">{{ t('game.quiz.skip_title') }}</h3>
+            <p class="modal-text">{{ t('game.quiz.skip_body') }}</p>
             <div class="modal-actions">
-                <button class="modal-button cancel-button" id="cancel-skip">Cancel</button>
-                <button class="modal-button confirm-button" id="confirm-skip">Skip Practice</button>
+                <button class="modal-button cancel-button" id="cancel-skip">{{ t('game.quiz.cancel') }}</button>
+                <button class="modal-button confirm-button" id="confirm-skip">{{ t('game.quiz.confirm_skip') }}</button>
             </div>
         </div>
     </div>

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ current_language() }}">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SignQuest - Result Summary</title>
+    <title>{{ t('game.summary.page_title') }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link
@@ -15,6 +15,10 @@
 </head>
 
 <body>
+    <div class="page-language-switcher" aria-label="{{ t('language.switcher_label') }}">
+        <a class="page-language-chip{% if current_language() == 'en' %} active{% endif %}" href="{{ url_for('auth.set_language', code='en') }}?next={{ request.path }}">{{ t('language.en') }}</a>
+        <a class="page-language-chip{% if current_language() == 'ko' %} active{% endif %}" href="{{ url_for('auth.set_language', code='ko') }}?next={{ request.path }}">{{ t('language.ko') }}</a>
+    </div>
 
     <a href="{{ url_for('auth.dashboard') }}" class="back-button" style="text-decoration: none; display: flex;">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -25,8 +29,8 @@
 
     <div class="summary-wrapper">
         <div class="summary-card">
-            <h1 class="summary-title">Practice Summary</h1>
-            <p class="summary-subtitle">Here’s how you performed.</p>
+            <h1 class="summary-title">{{ t('game.summary.title') }}</h1>
+            <p class="summary-subtitle">{{ t('game.summary.subtitle') }}</p>
 
             <div id="results-container" class="results-grid">
                 <!-- Populated by JS -->
@@ -35,11 +39,11 @@
             <div class="actions">
                 <a href="{{ url_for('auth.dashboard') }}" class="dashboard-btn"
                     style="text-decoration: none; display: inline-block; text-align: center;">
-                    <i class="fa-solid fa-house"></i> Back to Dashboard
+                    <i class="fa-solid fa-house"></i> {{ t('game.summary.back_dashboard') }}
                 </a>
                 <a href="{{ url_for('auth.magic_touch') }}" class="retry-btn"
                     style="text-decoration: none; display: inline-block; text-align: center;">
-                    <i class="fa-solid fa-arrow-right"></i> Next: Magic Touch
+                    <i class="fa-solid fa-arrow-right"></i> {{ t('game.summary.next_magic') }}
                 </a>
                 <a href="{{ url_for('auth.magic_touch_advanced') }}" class="retry-btn"
                     style="text-decoration: none; display: inline-block; text-align: center; background-color: #7C3AED; border-color: #7C3AED; margin-top: 10px;">

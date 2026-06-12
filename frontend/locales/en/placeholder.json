@@ -1,4 +1,18 @@
 {
   "goBack": "Go Back",
-  "backToHome": "Back to Home"
+  "backToHome": "Back to Home",
+  "profile": {
+    "title": "Profile Coming Soon",
+    "message": "Profile customization is on its way. Soon you can upload an avatar, edit your details, and showcase your badges.",
+    "hint": "Bio, social links, and achievement showcase are all planned."
+  },
+  "notifications": {
+    "title": "No Notifications Yet",
+    "message": "You'll see activity from leagues and friends here — challenges, rank changes, and more.",
+    "hint": "Notification preferences and push alerts are coming in the next update."
+  },
+  "settings": {
+    "title": "Settings Coming Soon",
+    "message": "Settings will be available in the next update — theme, language, notification preferences, and accessibility options."
+  }
 }

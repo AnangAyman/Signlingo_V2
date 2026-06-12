@@ -90,3 +90,5 @@ Health check endpoint:
 * The old Flask runtime has been retired from the active project flow.
 * Some legacy data/model naming is still kept for migration compatibility.
 * Password handling now upgrades old plain-text rows into Django hashes after successful legacy login.
+* If the Oracle SSH tunnel on `127.0.0.1:3307` is unavailable at startup, Django falls back to the local SQLite database and prints a warning to the server terminal.
+* Authentication details, including register, login, and Google OAuth, are documented in `document/auth/authentication_flow.md`.

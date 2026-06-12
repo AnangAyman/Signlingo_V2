@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Camera, Zap } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { AppHeader } from "@/components/app-header";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,16 +17,16 @@ type PracticeMode = "magic" | "camera";
 
 const MODES: Array<{
   value: PracticeMode;
-  label: string;
   lessonKey: string;
   Icon: typeof Zap;
 }> = [
-  { value: "magic", label: "Magic Touch", lessonKey: "magic_touch", Icon: Zap },
-  { value: "camera", label: "Camera Practice", lessonKey: "show_your_signs", Icon: Camera },
+  { value: "magic", lessonKey: "magic_touch", Icon: Zap },
+  { value: "camera", lessonKey: "show_your_signs", Icon: Camera },
 ];
 
 export default function AIGamePage() {
   const router = useRouter();
+  const { t } = useTranslation("ai-game");
   const { isAuthenticated, hasCheckedSession } = useAuthStore();
   const [mode, setMode] = useState<PracticeMode>("magic");
   const [completedMessage, setCompletedMessage] = useState<string | null>(null);
@@ -36,8 +37,8 @@ export default function AIGamePage() {
 
   const markComplete = useCallback(async (lessonKey: string) => {
     await lessonsApi.markStatus(lessonKey, "completed");
-    setCompletedMessage("Progress saved to Lessons.");
-  }, []);
+    setCompletedMessage(t("progressSaved"));
+  }, [t]);
 
   if (!hasCheckedSession || !isAuthenticated) return null;
 
@@ -52,10 +53,10 @@ export default function AIGamePage() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-primary">
-                Django AI backend connected
+                {t("badge")}
               </p>
               <h1 className="text-2xl sm:text-3xl font-black text-foreground">
-                AI Practice Game
+                {t("title")}
               </h1>
             </div>
             {completedMessage && (
@@ -66,7 +67,7 @@ export default function AIGamePage() {
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {MODES.map(({ value, label, Icon }) => {
+            {MODES.map(({ value, Icon }) => {
               const active = mode === value;
               return (
                 <Button
@@ -79,7 +80,7 @@ export default function AIGamePage() {
                   className="gap-2"
                 >
                   <Icon className="h-4 w-4" />
-                  {label}
+                  {value === "magic" ? t("magicTouch.title") : t("cameraPractice.title")}
                 </Button>
               );
             })}

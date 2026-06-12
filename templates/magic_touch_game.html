@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ current_language() }}">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SignLingo - Magic Touch Mode</title>
+    <title>{{ t('game.magic.page_title') }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,8 +17,12 @@
 </head>
 
 <body>
+    <div class="page-language-switcher" aria-label="{{ t('language.switcher_label') }}">
+        <a class="page-language-chip{% if current_language() == 'en' %} active{% endif %}" href="{{ url_for('auth.set_language', code='en') }}?next={{ request.path }}">{{ t('language.en') }}</a>
+        <a class="page-language-chip{% if current_language() == 'ko' %} active{% endif %}" href="{{ url_for('auth.set_language', code='ko') }}?next={{ request.path }}">{{ t('language.ko') }}</a>
+    </div>
 
-    <a class="back-button" href="{{ frontend_dashboard_url }}/dashboard" aria-label="Back to SignLingo dashboard">
+    <a class="back-button" href="{% if frontend_dashboard_url %}{{ frontend_dashboard_url }}/dashboard{% else %}{{ url_for('auth.dashboard') }}{% endif %}" aria-label="Back to SignLingo dashboard">
         <svg width="24" height="24" viewBox="0 0 24" fill="none">
             <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                 stroke-linejoin="round" />
@@ -30,7 +34,7 @@
             <!-- UI Header -->
             <div class="game-ui-header">
                 <div class="score-container">
-                    <span class="score-label">SCORE</span>
+                    <span class="score-label">{{ t('game.magic.score') }}</span>
                     <span id="score-value">0</span>
                 </div>
                 <div class="lives-container" id="lives-container">
@@ -43,20 +47,20 @@
             <!-- Start Screen Overlay -->
             <div class="overlay-screen" id="start-screen">
                 <div class="overlay-content">
-                    <h1>Magic Touch</h1>
-                    <p>Enemies are falling! Sign the letters to pop their balloons.</p>
-                    <button class="primary-button" id="start-game-btn">Play Now</button>
+                    <h1>{{ t('game.magic.title') }}</h1>
+                    <p>{{ t('game.magic.subtitle') }}</p>
+                    <button class="primary-button" id="start-game-btn">{{ t('game.magic.play_now') }}</button>
                 </div>
             </div>
 
             <!-- Game Over Screen Overlay -->
             <div class="overlay-screen" id="game-over-screen" style="display: none;">
                 <div class="overlay-content">
-                    <h1>Game Over</h1>
-                    <p>Final Score: <span id="final-score">0</span></p>
-                    <button class="primary-button" id="restart-game-btn">Play Again</button>
+                    <h1>{{ t('game.magic.game_over') }}</h1>
+                    <p>{{ t('game.magic.final_score') }} <span id="final-score">0</span></p>
+                    <button class="primary-button" id="restart-game-btn">{{ t('game.magic.play_again') }}</button>
                     <button class="secondary-button mt-3"
-                        onclick="window.location.href='{{ frontend_dashboard_url }}/dashboard'">Return to Dashboard</button>
+                        onclick="window.location.href='{% if frontend_dashboard_url %}{{ frontend_dashboard_url }}/dashboard{% else %}{{ url_for('auth.dashboard') }}{% endif %}'">{{ t('game.magic.return_dashboard') }}</button>
                 </div>
             </div>
 

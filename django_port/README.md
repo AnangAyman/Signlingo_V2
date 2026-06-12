@@ -33,3 +33,5 @@ Notes:
 - Original explanatory comments were preserved inside the Django apps and the migration audit docs.
 - `python manage.py reset_legacy_data` is available when you need the Django-side equivalent of the old Flask init/reset seed flow.
 - `../requirements-lock.txt` keeps the full installed dependency snapshot for teammates who want a closer environment match.
+- If the Oracle SSH tunnel on `127.0.0.1:3307` is down when Django starts, the backend falls back to SQLite and prints a warning.
+- Authentication details, including register, login, and Google OAuth, are documented in `../document/auth/authentication_flow.md`.

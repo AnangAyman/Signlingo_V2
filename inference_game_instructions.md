@@ -22,8 +22,8 @@ You must implement the following split workflow:
 
 ## 2. Video Capture Length (Frame Count)
 Our model was trained on exactly **30 frames** of data per sequence (`SEQUENCE_LENGTH = 30`).
-- **Do not use a fixed time duration (e.g., 1 second)** for inference! Depending on the user's hardware, processing 30 frames with MediaPipe can take anywhere from **1 to 3 seconds**. 
-- In our test trigger (`test_webcam_trigger.py`), we simply start recording and capture exactly the next 30 frames processed by MediaPipe in real-time. 
+- **Do not use a fixed time duration (e.g., 1 second)** for inference! Depending on the user's hardware, processing 30 frames with MediaPipe can take anywhere from **1 to 3 seconds**.
+- In our test trigger (`test_webcam_trigger.py`), we simply start recording and capture exactly the next 30 frames processed by MediaPipe in real-time.
 - **Requirement:** Your JS frontend must keep appending the extracted frames to an array until it hits exactly `length == 30` before sending it to the backend.
 
 ## 3. Keypoint Extraction (MediaPipe)
@@ -37,7 +37,7 @@ For each of the 30 frames, you must extract specific landmarks to match the trai
 *(Note: 33 Pose + 74 Face + 21 L.Hand + 21 R.Hand = 149 points. 149 points * 3 coordinates (x,y,z) = 447 dimensions).*
 
 ## 4. Data Normalization (CRITICAL)
-Before flattening the keypoints, you must normalize them. Our model is translation and scale-invariant because we applied **Shoulder Normalization**. 
+Before flattening the keypoints, you must normalize them. Our model is translation and scale-invariant because we applied **Shoulder Normalization**.
 
 For **every single frame**, you must apply this exact math to all extracted `(x, y, z)` keypoints:
 

@@ -3,7 +3,8 @@
     "features": "기능",
     "leagues": "리그",
     "reviews": "후기",
-    "pricing": "요금제"
+    "pricing": "요금제",
+    "toggleMobileMenu": "모바일 메뉴 전환"
   },
   "appNav": {
     "home": "홈",
@@ -12,12 +13,41 @@
     "achievements": "업적",
     "aiGame": "AI 게임",
     "profile": "프로필",
-    "dayStreak": "{{count}}일 연속"
+    "dayStreak": "{{count}}일 연속",
+    "level": "레벨 {{level}}",
+    "leagueLabel": "{{league}} 리그",
+    "mainNavigation": "메인 내비게이션",
+    "mobileNavigation": "모바일 내비게이션",
+    "openNavigation": "내비게이션 열기",
+    "closeNavigation": "내비게이션 닫기",
+    "notifications": "알림",
+    "unreadNotifications": "읽지 않은 알림",
+    "settings": "설정",
+    "yourProfile": "내 프로필"
   },
   "auth": {
     "login": "로그인",
     "startLearning": "학습 시작",
     "logout": "로그아웃"
+  },
+  "ui": {
+    "loading": "불러오는 중",
+    "pagination": {
+      "navLabel": "페이지네이션",
+      "previousPage": "이전 페이지로 이동",
+      "previous": "이전",
+      "nextPage": "다음 페이지로 이동",
+      "next": "다음",
+      "morePages": "더 많은 페이지"
+    },
+    "carousel": {
+      "previousSlide": "이전 슬라이드",
+      "nextSlide": "다음 슬라이드"
+    },
+    "command": {
+      "title": "명령 팔레트",
+      "description": "실행할 명령을 검색하세요..."
+    }
   },
   "hero": {
     "badge": "AI 기반 학습",
@@ -29,7 +59,13 @@
     "iLoveYou": "사랑해요",
     "hello": "안녕하세요!",
     "xpChip": "+100 XP",
-    "socialProof": "5만 명+ 학습자 합류"
+    "socialProof": "50,000명+ 학습자",
+    "socialProofSubtext": "이번 달에 합류했어요"
+  },
+  "media": {
+    "mascotAlt": "SignLingo 마스코트",
+    "mascotDetailedAlt": "노란 카디건을 입고 단발머리와 안경을 한 친근한 SignLingo 마스코트",
+    "handLogoAlt": "SignLingo 손 로고"
   },
   "features": {
     "badge": "SignLingo를 선택하는 이유",
@@ -81,6 +117,31 @@
       "requirement": "주당 1500 XP 획득",
       "benefits": ["전문가 콘텐츠", "1:1 세션", "독점 보상"]
     },
+    "tiers": {
+      "bronze": {
+        "name": "브론즈",
+        "requirement": "여정을 시작하세요",
+        "benefits": ["기본 레슨", "일일 퀘스트", "커뮤니티 접근"],
+        "tooltip": "모두 여기서 시작합니다. 기본기를 배우고 기초를 다지세요."
+      },
+      "silver": {
+        "name": "실버",
+        "requirement": "주당 500 XP 획득",
+        "benefits": ["고급 레슨", "연습 파트너", "배지 잠금 해제"],
+        "tooltip": "꾸준함을 증명하세요. 브론즈 상위 10명은 매주 실버로 승급합니다."
+      },
+      "gold": {
+        "name": "골드",
+        "requirement": "주당 1500 XP 획득",
+        "benefits": ["전문가 콘텐츠", "1:1 세션", "독점 보상"],
+        "tooltip": "최고 중의 최고입니다. 뛰어난 학습자만 골드에 도달합니다."
+      }
+    },
+    "xpRequired": "필요 XP",
+    "eliteBadge": "엘리트",
+    "tooltipTitle": "{{league}} 리그",
+    "ctaPrompt": "경쟁 여정을 시작할 준비가 되셨나요?",
+    "ctaButton": "경쟁 참가하기",
     "joinLeague": "{{league}} 리그 참가",
     "yourLeague": "내 리그",
     "locked": "잠금",
@@ -94,7 +155,71 @@
     "subtitle": "SignLingo로 의사소통 능력을 향상시킨 수천 명의 행복한 학습자들과 함께하세요.",
     "leagueBadge": "{{league}} 리그",
     "previousAriaLabel": "이전 후기",
-    "nextAriaLabel": "다음 후기"
+    "nextAriaLabel": "다음 후기",
+    "dotAriaLabel": "{{index}}번 후기 보기",
+    "items": [
+      {
+        "id": 1,
+        "name": "Sarah Chen",
+        "role": "교사",
+        "avatar": "SC",
+        "quote": "SignLingo는 청각장애 학생들과 소통하는 방식을 완전히 바꿔주었습니다. AI 피드백이 매우 정확해서 단 3개월 만에 ASL을 배울 수 있었어요!",
+        "rating": 5,
+        "leagueTier": "Gold",
+        "leagueLabel": "골드"
+      },
+      {
+        "id": 2,
+        "name": "Marcus Johnson",
+        "role": "학부모",
+        "avatar": "MJ",
+        "quote": "딸이 청각장애를 갖고 태어났는데, 이 앱 덕분에 온 가족이 함께 수어를 배울 수 있었습니다. 게임화 요소가 모두의 동기를 유지해 줍니다!",
+        "rating": 5,
+        "leagueTier": "Silver",
+        "leagueLabel": "실버"
+      },
+      {
+        "id": 3,
+        "name": "Emily Rodriguez",
+        "role": "의료 종사자",
+        "avatar": "ER",
+        "quote": "간호사로서 수어로 의사소통할 수 있다는 건 정말 큰 도움이 됩니다. 짧게 구성된 레슨이 바쁜 일정에도 잘 맞아요.",
+        "rating": 5,
+        "leagueTier": "Gold",
+        "leagueLabel": "골드"
+      },
+      {
+        "id": 4,
+        "name": "David Kim",
+        "role": "학생",
+        "avatar": "DK",
+        "quote": "리그 시스템 덕분에 학습이 경쟁적이면서도 재미있어졌어요! 새로운 언어를 이렇게 신나게 배울 줄은 몰랐습니다.",
+        "rating": 5,
+        "leagueTier": "Bronze",
+        "leagueLabel": "브론즈"
+      },
+      {
+        "id": 5,
+        "name": "Lisa Thompson",
+        "role": "통역사",
+        "avatar": "LT",
+        "quote": "전문 통역사인 저도 연습과 감각 유지를 위해 SignLingo를 사용합니다. 커뮤니티 기능이 특히 훌륭해요!",
+        "rating": 5,
+        "leagueTier": "Gold",
+        "leagueLabel": "골드"
+      }
+    ],
+    "stats": [
+      { "value": "500K+", "label": "활성 학습자" },
+      { "value": "4.9", "label": "앱 스토어 평점" },
+      { "value": "50+", "label": "지원 국가" },
+      { "value": "98%", "label": "만족도" }
+    ]
+  },
+  "intro": {
+    "replayLabel": "환영 애니메이션 다시 재생",
+    "replayText": "인트로 다시 보기",
+    "skip": "인트로 건너뛰기 →"
   },
   "cta": {
     "badge": "무료로 시작",

@@ -196,6 +196,8 @@ Open:
 http://127.0.0.1:8000
 ```
 
+If the SSH tunnel on `127.0.0.1:3307` is unavailable when Django starts, the backend automatically falls back to SQLite and prints a warning in the terminal.
+
 ---
 
 ## 4. Docker Access
@@ -219,6 +221,13 @@ Then run:
 ```bash
 docker compose up --build
 ```
+
+---
+
+## Notes
+
+- See `document/auth/authentication_flow.md` for the current register, login, and Google OAuth implementation details.
+- Google OAuth depends on environment variables and live Google endpoints, so verify the active config when testing account creation.
 
 Open:
 

@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,17 +12,12 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Spinner } from "@/components/ui/spinner";
 import { Eye, EyeOff, Mail, Lock, User, Hand, ArrowLeft, Check, X } from "lucide-react";
-
-const PASSWORD_REQUIREMENTS = [
-  { label: "At least 8 characters", test: (p: string) => p.length >= 8 },
-  { label: "Contains uppercase letter", test: (p: string) => /[A-Z]/.test(p) },
-  { label: "Contains lowercase letter", test: (p: string) => /[a-z]/.test(p) },
-  { label: "Contains a number", test: (p: string) => /\d/.test(p) },
-];
+import { backendPath } from "@/lib/api";
 
 export default function SignupPage() {
   const router = useRouter();
   const { signup, isLoading } = useAuthStore();
+  const { t } = useTranslation("auth");
   
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -34,14 +30,37 @@ export default function SignupPage() {
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [step, setStep] = useState(1);
 
+  const googleSignupUrl = backendPath(
+    `/login/google?entry=register&next=${encodeURIComponent(
+      typeof window !== "undefined" ? `${window.location.origin}/dashboard` : "/dashboard"
+    )}`
+  );
+
+  const passwordRequirements = useMemo(
+    () => [
+      { label: t("signup.requirements.length"), test: (p: string) => p.length >= 8 },
+      { label: t("signup.requirements.uppercase"), test: (p: string) => /[A-Z]/.test(p) },
+      { label: t("signup.requirements.lowercase"), test: (p: string) => /[a-z]/.test(p) },
+      { label: t("signup.requirements.number"), test: (p: string) => /\d/.test(p) },
+    ],
+    [t]
+  );
+
   const passwordStrength = useMemo(() => {
-    const passed = PASSWORD_REQUIREMENTS.filter(req => req.test(password)).length;
+    const passed = passwordRequirements.filter(req => req.test(password)).length;
     return {
       score: passed,
-      label: passed === 0 ? "" : passed <= 2 ? "Weak" : passed === 3 ? "Good" : "Strong",
+      label:
+        passed === 0
+          ? ""
+          : passed <= 2
+            ? t("signup.strength.weak")
+            : passed === 3
+              ? t("signup.strength.good")
+              : t("signup.strength.strong"),
       color: passed <= 2 ? "bg-destructive" : passed === 3 ? "bg-primary" : "bg-green-500",
     };
-  }, [password]);
+  }, [password, passwordRequirements, t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,11 +68,11 @@ export default function SignupPage() {
 
     if (step === 1) {
       if (!name || !email) {
-        setError("Please fill in all fields");
+        setError(t("signup.errors.missingFields"));
         return;
       }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        setError("Please enter a valid email address");
+        setError(t("signup.errors.invalidEmail"));
         return;
       }
       setStep(2);
@@ -61,22 +80,22 @@ export default function SignupPage() {
     }
     
     if (!password || !confirmPassword) {
-      setError("Please fill in all fields");
+      setError(t("signup.errors.missingFields"));
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError(t("signup.errors.passwordMismatch"));
       return;
     }
 
     if (passwordStrength.score < 3) {
-      setError("Please choose a stronger password");
+      setError(t("signup.errors.weakPassword"));
       return;
     }
 
     if (!agreeToTerms) {
-      setError("Please agree to the terms and conditions");
+      setError(t("signup.errors.termsRequired"));
       return;
     }
 
@@ -84,7 +103,7 @@ export default function SignupPage() {
       await signup(email, password, name);
       router.push("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create account. Please try again.");
+      setError(err instanceof Error ? err.message : t("signup.errors.createFailed"));
     }
   };
 
@@ -104,7 +123,7 @@ export default function SignupPage() {
             {/* Character */}
             <motion.img
               src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Firefly_Gemini_Flash_can_you_generate_a_small__friendly_character_with_a_bob_and_glasses_with_a_yellow_and_599506-removebg-preview-f0y6dNmoZlhIHXK0EnPeZ6fVdomNYD.png"
-              alt="SignLingo Mascot"
+              alt={t("signup.mascotAlt")}
               className="w-40 sm:w-48 md:w-56 lg:w-64 aspect-square mx-auto mb-8 drop-shadow-2xl object-contain"
               animate={{
                 y: [0, -10, 0],
@@ -118,20 +137,19 @@ export default function SignupPage() {
             />
 
             <h2 className="text-2xl font-bold text-foreground mb-4">
-              Start Your Sign Language Journey
+              {t("signup.heroTitle")}
             </h2>
             <p className="text-muted-foreground mb-8">
-              Join millions of learners mastering sign language through fun, 
-              gamified lessons and AI-powered feedback.
+              {t("signup.heroSubtitle")}
             </p>
 
             {/* Benefits */}
             <div className="space-y-4 text-left">
               {[
-                { icon: "🎮", text: "Gamified learning with XP & badges" },
-                { icon: "🤖", text: "AI-powered hand gesture recognition" },
-                { icon: "🏆", text: "Compete in weekly leagues" },
-                { icon: "📱", text: "Learn anytime, anywhere" },
+                { icon: "🎮", text: t("signup.benefits.gamified") },
+                { icon: "🤖", text: t("signup.benefits.ai") },
+                { icon: "🏆", text: t("signup.benefits.leagues") },
+                { icon: "📱", text: t("signup.benefits.mobile") },
               ].map((benefit, i) => (
                 <motion.div
                   key={i}
@@ -186,7 +204,7 @@ export default function SignupPage() {
               className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8 group"
             >
               <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-              Back to home
+              {t("signup.backHome")}
             </Link>
           ) : (
             <button 
@@ -194,7 +212,7 @@ export default function SignupPage() {
               className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8 group"
             >
               <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-              Back to previous step
+              {t("signup.backStep")}
             </button>
           )}
 
@@ -204,15 +222,15 @@ export default function SignupPage() {
               <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center">
                 <Hand className="w-6 h-6 text-secondary-foreground" />
               </div>
-              <span className="text-2xl font-bold text-foreground">SignLingo</span>
+              <span className="text-2xl font-bold text-foreground">{t("brand")}</span>
             </div>
             <h1 className="text-3xl font-bold text-foreground mb-2">
-              {step === 1 ? "Create your account" : "Secure your account"}
+              {step === 1 ? t("signup.stepOneTitle") : t("signup.stepTwoTitle")}
             </h1>
             <p className="text-muted-foreground">
               {step === 1 
-                ? "Start learning sign language for free" 
-                : "Choose a strong password to protect your progress"
+                ? t("signup.stepOneSubtitle")
+                : t("signup.stepTwoSubtitle")
               }
             </p>
           </div>
@@ -230,7 +248,7 @@ export default function SignupPage() {
                 {/* Name Field */}
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-foreground font-medium">
-                    Full name
+                    {t("signup.nameLabel")}
                   </Label>
                   <div className="relative">
                     <User className={`absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${
@@ -243,7 +261,7 @@ export default function SignupPage() {
                       onChange={(e) => setName(e.target.value)}
                       onFocus={() => setFocusedField("name")}
                       onBlur={() => setFocusedField(null)}
-                      placeholder="Enter your name"
+                      placeholder={t("signup.namePlaceholder")}
                       className="pl-10 h-12 bg-card border-border focus:border-primary focus:ring-primary"
                       autoComplete="name"
                     />
@@ -253,7 +271,7 @@ export default function SignupPage() {
                 {/* Email Field */}
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-foreground font-medium">
-                    Email address
+                    {t("signup.emailLabel")}
                   </Label>
                   <div className="relative">
                     <Mail className={`absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${
@@ -266,7 +284,7 @@ export default function SignupPage() {
                       onChange={(e) => setEmail(e.target.value)}
                       onFocus={() => setFocusedField("email")}
                       onBlur={() => setFocusedField(null)}
-                      placeholder="you@example.com"
+                      placeholder={t("signup.emailPlaceholder")}
                       className="pl-10 h-12 bg-card border-border focus:border-primary focus:ring-primary"
                       autoComplete="email"
                     />
@@ -278,7 +296,7 @@ export default function SignupPage() {
                 {/* Password Field */}
                 <div className="space-y-2">
                   <Label htmlFor="password" className="text-foreground font-medium">
-                    Password
+                    {t("signup.passwordLabel")}
                   </Label>
                   <div className="relative">
                     <Lock className={`absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${
@@ -291,7 +309,7 @@ export default function SignupPage() {
                       onChange={(e) => setPassword(e.target.value)}
                       onFocus={() => setFocusedField("password")}
                       onBlur={() => setFocusedField(null)}
-                      placeholder="Create a password"
+                      placeholder={t("signup.passwordPlaceholder")}
                       className="pl-10 pr-10 h-12 bg-card border-border focus:border-primary focus:ring-primary"
                       autoComplete="new-password"
                     />
@@ -299,7 +317,7 @@ export default function SignupPage() {
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-label={showPassword ? t("signup.hidePassword") : t("signup.showPassword")}
                     >
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
@@ -324,7 +342,7 @@ export default function SignupPage() {
                         </span>
                       </div>
                       <div className="grid grid-cols-2 gap-1">
-                        {PASSWORD_REQUIREMENTS.map((req, i) => (
+                        {passwordRequirements.map((req, i) => (
                           <div key={i} className="flex items-center gap-1.5 text-xs">
                             {req.test(password) ? (
                               <Check className="w-3 h-3 text-green-500" />
@@ -344,7 +362,7 @@ export default function SignupPage() {
                 {/* Confirm Password Field */}
                 <div className="space-y-2">
                   <Label htmlFor="confirmPassword" className="text-foreground font-medium">
-                    Confirm password
+                    {t("signup.confirmPasswordLabel")}
                   </Label>
                   <div className="relative">
                     <Lock className={`absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${
@@ -357,7 +375,7 @@ export default function SignupPage() {
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       onFocus={() => setFocusedField("confirmPassword")}
                       onBlur={() => setFocusedField(null)}
-                      placeholder="Confirm your password"
+                      placeholder={t("signup.confirmPasswordPlaceholder")}
                       className="pl-10 pr-10 h-12 bg-card border-border focus:border-primary focus:ring-primary"
                       autoComplete="new-password"
                     />
@@ -365,13 +383,13 @@ export default function SignupPage() {
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                      aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                      aria-label={showConfirmPassword ? t("signup.hidePassword") : t("signup.showPassword")}
                     >
                       {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
                   {confirmPassword && password !== confirmPassword && (
-                    <p className="text-xs text-destructive">Passwords do not match</p>
+                    <p className="text-xs text-destructive">{t("signup.passwordMismatch")}</p>
                   )}
                 </div>
 
@@ -384,13 +402,13 @@ export default function SignupPage() {
                     className="mt-0.5 border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                   />
                   <Label htmlFor="terms" className="text-sm text-muted-foreground cursor-pointer leading-relaxed">
-                    I agree to the{" "}
+                    {t("signup.termsPrefix")}{" "}
                     <Link href="/terms" className="text-secondary hover:underline">
-                      Terms of Service
+                      {t("signup.termsLink")}
                     </Link>{" "}
-                    and{" "}
+                    {t("signup.termsMiddle")}{" "}
                     <Link href="/privacy" className="text-secondary hover:underline">
-                      Privacy Policy
+                      {t("signup.privacyLink")}
                     </Link>
                   </Label>
                 </div>
@@ -417,12 +435,12 @@ export default function SignupPage() {
               {isLoading ? (
                 <span className="flex items-center gap-2">
                   <Spinner className="w-5 h-5" />
-                  Creating account...
+                  {t("signup.submitting")}
                 </span>
               ) : step === 1 ? (
-                "Continue"
+                t("signup.submitStepOne")
               ) : (
-                "Create account"
+                t("signup.submitStepTwo")
               )}
             </Button>
 
@@ -435,7 +453,7 @@ export default function SignupPage() {
                   </div>
                   <div className="relative flex justify-center text-sm">
                     <span className="px-4 bg-background text-muted-foreground">
-                      Or sign up with
+                      {t("signup.divider")}
                     </span>
                   </div>
                 </div>
@@ -446,6 +464,9 @@ export default function SignupPage() {
                     type="button"
                     variant="outline"
                     className="h-12 border-border hover:bg-card"
+                    onClick={() => {
+                      window.location.href = googleSignupUrl;
+                    }}
                   >
                     <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                       <path
@@ -465,7 +486,7 @@ export default function SignupPage() {
                         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                       />
                     </svg>
-                    Google
+                    {t("providers.google")}
                   </Button>
                   <Button
                     type="button"
@@ -475,7 +496,7 @@ export default function SignupPage() {
                     <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.341-3.369-1.341-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
                     </svg>
-                    GitHub
+                    {t("providers.github")}
                   </Button>
                 </div>
               </>
@@ -483,12 +504,12 @@ export default function SignupPage() {
 
             {/* Sign In Link */}
             <p className="text-center text-muted-foreground">
-              Already have an account?{" "}
+              {t("signup.loginPrompt")}{" "}
               <Link 
                 href="/login" 
                 className="text-secondary hover:text-secondary/80 font-medium transition-colors"
               >
-                Sign in
+                {t("signup.loginLink")}
               </Link>
             </p>
           </form>

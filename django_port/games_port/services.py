@@ -227,7 +227,7 @@ def _build_gru_model(runtime, model_path):
         runtime["Dense"](40, activation='softmax', name='output'),
     ])
     model.compile(optimizer='adam', loss='categorical_crossentropy')
-    
+
     # Manually load weights using h5py to bypass Keras version deserialization issues
     with runtime["h5py"].File(str(model_path), "r") as file_handle:
         if "model_weights" in file_handle:
@@ -237,7 +237,7 @@ def _build_gru_model(runtime, model_path):
 
         layer_names = [name.decode("utf-8") if isinstance(name, bytes) else name for name in weight_group.attrs.get("layer_names", [])]
         keras_layers = [layer for layer in model.layers if layer.weights]
-        
+
         layer_index = 0
         for layer_name in layer_names:
             if layer_name not in weight_group:
@@ -248,7 +248,7 @@ def _build_gru_model(runtime, model_path):
             if weights and layer_index < len(keras_layers):
                 keras_layers[layer_index].set_weights(weights)
                 layer_index += 1
-                
+
     return model
 
 
@@ -274,10 +274,10 @@ def predict_gru_sequence(sequence):
 
     # Note: Actions need to match the ones used in training
     ACTIONS = np_module.array([
-        'Apa', 'Apa Kabar', 'Bagaimana', 'Baik', 'Belajar', 'Berapa', 'Berdiri', 'Bingung', 
-        'Dia', 'Dimana', 'Duduk', 'Halo', 'Kalian', 'Kami', 'Kamu', 'Kapan', 'Kemana', 'Kita', 
-        'Makan', 'Mandi', 'Marah', 'Melihat', 'Membaca', 'Menulis', 'Mereka', 'Minum', 'Pendek', 
-        'Ramah', 'Sabar', 'Saya', 'Sedih', 'Selamat Malam', 'Selamat Pagi', 'Selamat Siang', 
+        'Apa', 'Apa Kabar', 'Bagaimana', 'Baik', 'Belajar', 'Berapa', 'Berdiri', 'Bingung',
+        'Dia', 'Dimana', 'Duduk', 'Halo', 'Kalian', 'Kami', 'Kamu', 'Kapan', 'Kemana', 'Kita',
+        'Makan', 'Mandi', 'Marah', 'Melihat', 'Membaca', 'Menulis', 'Mereka', 'Minum', 'Pendek',
+        'Ramah', 'Sabar', 'Saya', 'Sedih', 'Selamat Malam', 'Selamat Pagi', 'Selamat Siang',
         'Selamat Sore', 'Senang', 'Siapa', 'Terima Kasih', 'Tidur', 'Tinggi'
     ])
 

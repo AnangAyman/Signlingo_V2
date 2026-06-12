@@ -1,19 +1,23 @@
 import secrets
 import time
 from urllib.parse import urlencode
+from urllib.parse import urlparse
 from smtplib import SMTPException
 
 from django.conf import settings
 from django.contrib import messages
 from django.core.mail import EmailMessage
 from django.shortcuts import redirect
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
+from django.urls import reverse
 from email_validator import EmailNotValidError, validate_email
 import requests
 
 from legacy_port.models import User
 from legacy_port.services import generate_username, get_initials
+from signlingo_django.language import set_request_language
 from shared_port.view_helpers import (
     _current_user,
     _load_signed_token,
@@ -42,12 +46,63 @@ def _real_email_delivery_enabled() -> bool:
 
 
 def _google_oauth_enabled() -> bool:
-    return bool(settings.GOOGLE_CLIENT_ID and settings.GOOGLE_CLIENT_SECRET and settings.GOOGLE_REDIRECT_URI)
+    return bool(settings.GOOGLE_CLIENT_ID and settings.GOOGLE_CLIENT_SECRET)
 
 
 def _normalize_google_name(payload: dict) -> str:
     full_name = (payload.get("name") or payload.get("given_name") or "").strip()
     return full_name or "Google User"
+
+
+def _google_entry_route(request) -> str:
+    entry = request.session.get("google_oauth_entry") or request.GET.get("entry") or "login"
+    return "auth:register" if entry == "register" else "auth:login"
+
+
+def _google_redirect_uri(request) -> str:
+    configured = (settings.GOOGLE_REDIRECT_URI or "").strip()
+    if configured:
+        parsed = urlparse(configured)
+        if parsed.netloc == request.get_host():
+            return configured
+    return request.build_absolute_uri(reverse("auth:google_callback"))
+
+
+def _google_allowed_redirect_hosts(request) -> set[str]:
+    hosts = {
+        request.get_host(),
+        "localhost:3000",
+        "127.0.0.1:3000",
+        "localhost:8000",
+        "127.0.0.1:8000",
+    }
+    frontend_url = (getattr(settings, "FRONTEND_APP_URL", "") or "").strip()
+    if frontend_url:
+        parsed = urlparse(frontend_url)
+        if parsed.netloc:
+            hosts.add(parsed.netloc)
+    return hosts
+
+
+def _google_next_target(request) -> str:
+    next_target = request.GET.get("next") or request.session.get("google_oauth_next") or "auth:dashboard"
+    if next_target.startswith("/"):
+        return next_target
+    if url_has_allowed_host_and_scheme(
+        next_target,
+        allowed_hosts=_google_allowed_redirect_hosts(request),
+        require_https=request.is_secure(),
+    ):
+        return next_target
+    return "auth:dashboard"
+
+
+def set_language(request, code):
+    set_request_language(request, code)
+    next_path = request.GET.get("next") or request.META.get("HTTP_REFERER") or "/"
+    if not url_has_allowed_host_and_scheme(next_path, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
+        next_path = "/"
+    return redirect(next_path)
 
 
 # ----------------------------------- AUTHENTICATION ------------------------------------------------
@@ -133,15 +188,17 @@ def login(request):
 def google_login(request):
     if not _google_oauth_enabled():
         messages.error(request, "Google login is not configured yet.")
-        return redirect("auth:login")
+        return redirect(_google_entry_route(request))
 
     state = secrets.token_urlsafe(32)
     request.session["google_oauth_state"] = state
-    request.session["google_oauth_next"] = request.GET.get("next") or "auth:dashboard"
+    request.session["google_oauth_entry"] = request.GET.get("entry") or "login"
+    request.session["google_oauth_next"] = _google_next_target(request)
+    redirect_uri = _google_redirect_uri(request)
 
     params = {
         "client_id": settings.GOOGLE_CLIENT_ID,
-        "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+        "redirect_uri": redirect_uri,
         "response_type": "code",
         "scope": "openid email profile",
         "state": state,
@@ -156,60 +213,72 @@ def google_login(request):
 def google_callback(request):
     if not _google_oauth_enabled():
         messages.error(request, "Google login is not configured yet.")
-        return redirect("auth:login")
+        return redirect(_google_entry_route(request))
 
     error = request.GET.get("error")
     if error:
         messages.error(request, f"Google login failed: {error}")
-        return redirect("auth:login")
+        return redirect(_google_entry_route(request))
 
     state = request.GET.get("state", "")
     expected_state = request.session.get("google_oauth_state")
     if not state or state != expected_state:
         messages.error(request, "Google login state did not match.")
-        return redirect("auth:login")
+        return redirect(_google_entry_route(request))
 
     code = request.GET.get("code")
     if not code:
         messages.error(request, "Google authorization code was missing.")
-        return redirect("auth:login")
+        return redirect(_google_entry_route(request))
 
-    token_response = requests.post(
-        "https://oauth2.googleapis.com/token",
-        data={
-            "code": code,
-            "client_id": settings.GOOGLE_CLIENT_ID,
-            "client_secret": settings.GOOGLE_CLIENT_SECRET,
-            "redirect_uri": settings.GOOGLE_REDIRECT_URI,
-            "grant_type": "authorization_code",
-        },
-        timeout=15,
-    )
+    try:
+        token_response = requests.post(
+            "https://oauth2.googleapis.com/token",
+            data={
+                "code": code,
+                "client_id": settings.GOOGLE_CLIENT_ID,
+                "client_secret": settings.GOOGLE_CLIENT_SECRET,
+                "redirect_uri": _google_redirect_uri(request),
+                "grant_type": "authorization_code",
+            },
+            timeout=15,
+        )
+    except requests.RequestException:
+        messages.error(request, "Failed to reach Google during sign-in.")
+        return redirect(_google_entry_route(request))
     if not token_response.ok:
         messages.error(request, "Failed to exchange Google authorization code.")
-        return redirect("auth:login")
+        return redirect(_google_entry_route(request))
 
     token_data = token_response.json()
     access_token = token_data.get("access_token")
     if not access_token:
         messages.error(request, "Google access token was missing.")
-        return redirect("auth:login")
+        return redirect(_google_entry_route(request))
 
-    userinfo_response = requests.get(
-        "https://openidconnect.googleapis.com/v1/userinfo",
-        headers={"Authorization": f"Bearer {access_token}"},
-        timeout=15,
-    )
+    try:
+        userinfo_response = requests.get(
+            "https://openidconnect.googleapis.com/v1/userinfo",
+            headers={"Authorization": f"Bearer {access_token}"},
+            timeout=15,
+        )
+    except requests.RequestException:
+        messages.error(request, "Failed to retrieve Google account information.")
+        return redirect(_google_entry_route(request))
     if not userinfo_response.ok:
         messages.error(request, "Failed to retrieve Google account information.")
-        return redirect("auth:login")
+        return redirect(_google_entry_route(request))
 
     profile = userinfo_response.json()
     google_id = profile.get("sub")
     email = (profile.get("email") or "").strip().lower()
+    email_verified = profile.get("email_verified")
     if not google_id or not email:
         messages.error(request, "Google account information was incomplete.")
-        return redirect("auth:login")
+        return redirect(_google_entry_route(request))
+    if email_verified is False:
+        messages.error(request, "Google account email was not verified.")
+        return redirect(_google_entry_route(request))
 
     user = User.objects.filter(email=email).first()
     if user is None:
@@ -241,6 +310,7 @@ def google_callback(request):
     request.session["user"] = user.email
     request.session["user_id"] = user.id
     request.session.pop("google_oauth_state", None)
+    request.session.pop("google_oauth_entry", None)
     next_route = request.session.pop("google_oauth_next", "auth:dashboard")
     messages.success(request, "Signed in with Google successfully.")
     return redirect(next_route)

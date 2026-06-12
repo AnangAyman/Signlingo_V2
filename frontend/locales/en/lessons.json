@@ -1,0 +1,101 @@
+{
+  "loading": "Loading lessons…",
+  "loadFailed": "Failed to load lessons",
+  "retry": "Retry",
+  "title": "Video Lessons",
+  "progressSummary": "{{completed}} of {{total}} lessons completed",
+  "progressPercent": "{{progress}}% complete",
+  "allLessons": "All Lessons",
+  "lessonTitles": {
+    "learn_with_video": "Learn with Video",
+    "quiz_challenge": "Quiz Challenge"
+  },
+  "navigation": {
+    "backToDashboard": "Back to Dashboard"
+  },
+  "backendLessonTitle": "This lesson is served by the Django backend.",
+  "backendLessonBody": "The current lesson flow still uses the migrated Django page, so open it from the connected backend instead of embedding a Vercel-local route.",
+  "openLessonFlow": "Open Lesson Flow",
+  "noVideo": "No video available for this lesson.",
+  "videoUnsupported": "Your browser does not support the video tag.",
+  "status": {
+    "not_started": "Not started",
+    "in_progress": "In progress",
+    "completed": "Completed"
+  },
+  "markComplete": "Mark as Complete",
+  "completed": "Completed",
+  "empty": "Select a lesson to start watching",
+  "activity": {
+    "round": "{{current}} / {{total}}",
+    "errors": {
+      "cameraCanvasUnavailable": "Camera canvas is not available.",
+      "cameraFrameCaptureFailed": "Could not capture a camera frame.",
+      "cameraUnavailableInBrowser": "Camera access is not available in this browser.",
+      "cameraPermissionRequired": "Camera permission is needed for this activity.",
+      "cameraStarting": "Camera is still starting.",
+      "quizLoadFailed": "Could not load quiz question.",
+      "quizSaveFailed": "Could not save quiz progress.",
+      "quizCheckFailed": "Could not check answer.",
+      "quizSkipSaveFailed": "Could not save skipped quiz.",
+      "cameraPromptLoadFailed": "Could not load camera prompt.",
+      "cameraSaveFailed": "Could not save camera progress.",
+      "predictionFailed": "Could not run prediction.",
+      "magicTouchSaveFailed": "Could not save Magic Touch progress."
+    },
+    "quiz": {
+      "title": "Quiz Challenge",
+      "subtitle": "Answer Bisindo letter questions without leaving the Next.js app.",
+      "questionPrompt": "Which Bisindo letter is shown above?",
+      "imageAlt": "Bisindo hand sign",
+      "loadingQuestion": "Loading question...",
+      "reload": "Reload",
+      "skip": "Skip",
+      "complete": "Quiz complete. You answered {{count}} of {{total}} correctly.",
+      "greatJob": "Great job.",
+      "correctAnswer": "Correct answer: {{answer}}",
+      "skipped": "Quiz skipped. Progress was not marked complete."
+    },
+    "camera": {
+      "title": "Show Your Signs",
+      "subtitle": "Use the Django prediction API from a Next.js camera screen.",
+      "targetSign": "Target sign",
+      "promptTemplate": "Show Bisindo Letter {{letter}}",
+      "loadingPrompt": "Loading...",
+      "noPrompt": "No prompt",
+      "getReady": "Get Ready",
+      "preparing": "Preparing...",
+      "captureSign": "Capture Sign",
+      "enableCamera": "Enable Camera",
+      "newPrompt": "New Prompt",
+      "complete": "Practice complete. You matched {{count}} of {{total}} signs.",
+      "detectedCorrect": "Detected {{result}}. Great job.",
+      "detectedIncorrect": "Detected {{result}}. Target was {{answer}}.",
+      "countdown": "Get ready. Capture starts in {{seconds}} seconds."
+    },
+    "magicTouch": {
+      "title": "Magic Touch",
+      "subtitle": "Letters fall from the sky. Sign the first letter to pop each target.",
+      "score": "Score {{score}}",
+      "lives": "Lives {{lives}}",
+      "target": "Target {{target}}",
+      "readyTitle": "Ready for Magic Touch?",
+      "readyBody": "Targets fall from the top. The first letter in each target is the sign to make.",
+      "currentPrediction": "Current prediction",
+      "predictionPlaceholder": "Camera prediction appears here",
+      "confidence": "{{value}}% confidence",
+      "start": "Start",
+      "restart": "Restart",
+      "checkNow": "Check Sign Now",
+      "saveScore": "Save Score",
+      "startRound": "Start the round. Falling targets pop when your hand sign matches their first letter.",
+      "startHint": "Sign the first letter of the lowest falling target.",
+      "saved": "Magic Touch saved. Final score: {{score}}.",
+      "lowConfidence": "Detected {{letter}}, but confidence is {{confidence}}%. Hold the sign clearly.",
+      "targetCleared": "Detected {{letter}}. Target cleared.",
+      "keepGoing": "Detected {{letter}}. Keep going for the next letter.",
+      "noMatchingTarget": "Detected {{letter}}, but no falling target starts with that letter right now.",
+      "gameOver": "Game over. Save or restart your round."
+    }
+  }
+}

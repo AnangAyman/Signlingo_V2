@@ -1,0 +1,20 @@
+{
+  "leaderboard.page_title": "리더보드 - SignLingo",
+  "leaderboard.nav.dashboard": "대시보드",
+  "leaderboard.nav.courses": "학습",
+  "leaderboard.nav.leaderboard": "리더보드",
+  "leaderboard.nav.shop": "상점",
+  "leaderboard.nav.premium": "프리미엄",
+  "leaderboard.nav.logout": "로그아웃",
+  "leaderboard.dropup.profile": "프로필",
+  "leaderboard.header.title": "리더보드",
+  "leaderboard.header.subtitle": "다른 사용자와 경쟁하며 순위를 올려보세요!",
+  "leaderboard.league.suffix": "리그",
+  "leaderboard.league.subtitle": "현재 경쟁 티어",
+  "leaderboard.friends.title": "친구",
+  "leaderboard.friends.subtitle": "친구와 순위를 겨뤄보세요",
+  "leaderboard.modal.title": "친구 추가",
+  "leaderboard.modal.search_placeholder": "이름으로 검색...",
+  "leaderboard.modal.helper": "이름을 입력해 친구를 찾아 추가하세요.",
+  "leaderboard.points_label": "XP"
+}

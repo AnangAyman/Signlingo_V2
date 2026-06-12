@@ -20,7 +20,7 @@ SELECTED_FACE_IDS = [
     280, 347, 352, 366, 425, 426, 427, 432, 434, 436
 ]
 
-SEQUENCE_LENGTH = 30 
+SEQUENCE_LENGTH = 30
 DATA_PATH = 'features'
 VIDEO_PATH = 'videos'
 DEBUG_PATH = 'debug_videos'
@@ -35,14 +35,14 @@ def extract_and_normalize_keypoints(results):
     """Applies Shoulder Normalization to handle translation and distance/scale"""
     cx, cy, cz = 0.0, 0.0, 0.0
     scale = 1.0  # Default scale
-    
+
     if results.pose_landmarks:
-        l_sh = results.pose_landmarks.landmark[11] 
+        l_sh = results.pose_landmarks.landmark[11]
         r_sh = results.pose_landmarks.landmark[12]
-        
+
         # Find the center point between the shoulders
         cx, cy, cz = (l_sh.x + r_sh.x)/2, (l_sh.y + r_sh.y)/2, (l_sh.z + r_sh.z)/2
-        
+
         # Calculate the Euclidean distance between the shoulders
         shoulder_dist = np.linalg.norm([l_sh.x - r_sh.x, l_sh.y - r_sh.y, l_sh.z - r_sh.z])
         if shoulder_dist > 0:
@@ -59,23 +59,23 @@ def extract_and_normalize_keypoints(results):
 
     lh, rh = norm(results.left_hand_landmarks), norm(results.right_hand_landmarks)
     face = norm(results.face_landmarks, is_face=True)
-    
+
     if results.pose_landmarks:
-        pose = np.array([[(lm.x - cx) / scale, (lm.y - cy) / scale, (lm.z - cz) / scale] 
+        pose = np.array([[(lm.x - cx) / scale, (lm.y - cy) / scale, (lm.z - cz) / scale]
                          for lm in results.pose_landmarks.landmark]).flatten()
     else:
         pose = np.zeros(33*3)
-        
+
     return np.concatenate([pose, face, lh, rh])
 
-SHOULD_DEBUG = True 
+SHOULD_DEBUG = True
 
 print("Processing manually trimmed videos...")
 with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
     for action in ACTIONS:
         vid_folder = os.path.join(VIDEO_PATH, action)
         files = [f for f in os.listdir(vid_folder) if f.endswith(('.mp4', '.avi'))]
-        
+
         for file in files:
             v_path = os.path.join(vid_folder, file)
             save_path = os.path.join(DATA_PATH, action, file.split('.')[0] + '.npy')
@@ -83,29 +83,29 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
 
             cap = cv2.VideoCapture(v_path)
             total_f = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-            
+
             # Uniform Sampling: Squeezes/Stretches video to exactly 30 frames
             targets = np.linspace(0, total_f - 1, SEQUENCE_LENGTH, dtype=int) if total_f >= SEQUENCE_LENGTH else np.arange(total_f)
-            
+
             frames_extracted, current_f, out = [], 0, None
-            
+
             while cap.isOpened():
                 ret, frame = cap.read()
                 if not ret: break
                 if current_f in targets:
                     img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     res = holistic.process(img)
-                    
+
                     if SHOULD_DEBUG:
                         if out is None:
                             h, w = frame.shape[:2]
                             out = cv2.VideoWriter(os.path.join(DEBUG_PATH, "master_debug.mp4"), cv2.VideoWriter_fourcc(*'mp4v'), 10, (w, h))
-                        
+
                         debug_img = frame.copy()
                         mp_drawing.draw_landmarks(debug_img, res.pose_landmarks, mp_holistic.POSE_CONNECTIONS)
                         mp_drawing.draw_landmarks(debug_img, res.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
                         mp_drawing.draw_landmarks(debug_img, res.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
-                        
+
                         # Draw selected face points
                         if res.face_landmarks:
                             for idx, lm in enumerate(res.face_landmarks.landmark):
@@ -118,16 +118,16 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
 
                     frames_extracted.append(extract_and_normalize_keypoints(res))
                 current_f += 1
-            
+
             cap.release()
-            if out: 
+            if out:
                 out.release()
                 cv2.destroyAllWindows()
                 SHOULD_DEBUG = False # Turn off debugging for all future videos
-            
-            while len(frames_extracted) < SEQUENCE_LENGTH: 
+
+            while len(frames_extracted) < SEQUENCE_LENGTH:
                 frames_extracted.append(frames_extracted[-1])
-            
+
             np.save(save_path, frames_extracted[:SEQUENCE_LENGTH])
             print(f"Processed: {action}/{file}")
 

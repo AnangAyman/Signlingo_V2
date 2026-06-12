@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { RewardCard } from "./RewardCard";
 import { useGamificationStore } from "./useGamificationStore";
 import { useSoundEffect } from "@/hooks/useSoundEffect";
+import { useTranslation } from "react-i18next";
 
 interface RewardsShopProps {
   reducedMotion?: boolean;
@@ -17,19 +18,22 @@ export function RewardsShop({ reducedMotion = false }: RewardsShopProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { rewards, userProgress, redeemReward } = useGamificationStore();
   const { play } = useSoundEffect();
+  const { t } = useTranslation("gamification");
 
   const handleRedeem = (rewardId: string) => {
     const reward = rewards.find((r) => r.id === rewardId);
     if (!reward) return;
 
+    const rewardName = t(`rewards.items.${reward.id}.name`);
+
     if (reward.isRedeemed) {
-      toast.info(`${reward.name} is already redeemed.`);
+      toast.info(t("rewards.alreadyRedeemedToast", { name: rewardName }));
       return;
     }
 
     if (userProgress.totalXp < reward.cost) {
       toast.error(
-        `Not enough XP! Need ${reward.cost - userProgress.totalXp} more XP.`
+        t("rewards.notEnoughXpToast", { xp: reward.cost - userProgress.totalXp })
       );
       return;
     }
@@ -37,7 +41,7 @@ export function RewardsShop({ reducedMotion = false }: RewardsShopProps) {
     const success = redeemReward(rewardId);
     if (success) {
       play("/sounds/coin.mp3");
-      toast.success(`You redeemed ${reward.name} for ${reward.cost} XP!`);
+      toast.success(t("rewards.redeemedToast", { name: rewardName, cost: reward.cost }));
     }
   };
 
@@ -54,7 +58,7 @@ export function RewardsShop({ reducedMotion = false }: RewardsShopProps) {
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
             <ShoppingCart className="w-5 h-5 text-primary" aria-hidden />
-            Rewards Shop
+            {t("rewards.title")}
           </CardTitle>
 
           {/* Scroll controls */}
@@ -64,7 +68,7 @@ export function RewardsShop({ reducedMotion = false }: RewardsShopProps) {
               size="icon"
               className="h-7 w-7"
               onClick={() => scroll("left")}
-              aria-label="Scroll rewards left"
+              aria-label={t("rewards.scrollLeft")}
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
@@ -73,7 +77,7 @@ export function RewardsShop({ reducedMotion = false }: RewardsShopProps) {
               size="icon"
               className="h-7 w-7"
               onClick={() => scroll("right")}
-              aria-label="Scroll rewards right"
+              aria-label={t("rewards.scrollRight")}
             >
               <ChevronRight className="w-4 h-4" />
             </Button>
@@ -81,7 +85,7 @@ export function RewardsShop({ reducedMotion = false }: RewardsShopProps) {
         </div>
 
         <p className="text-sm text-muted-foreground">
-          Your balance:{" "}
+          {t("rewards.balance")}{" "}
           <span className="font-semibold text-foreground">
             ⚡ {userProgress.totalXp.toLocaleString()} XP
           </span>
@@ -93,7 +97,7 @@ export function RewardsShop({ reducedMotion = false }: RewardsShopProps) {
           ref={scrollRef}
           className="flex gap-3 overflow-x-auto pb-2 [scrollbar-width:thin]"
           role="list"
-          aria-label="Available rewards"
+          aria-label={t("rewards.availableLabel")}
         >
           {rewards.map((reward, index) => (
             <div key={reward.id} role="listitem" className="flex-shrink-0">

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   Camera,
   CheckCircle,
@@ -56,20 +57,53 @@ function roundProgress(round: number): number {
   return Math.min(100, Math.round((round / TOTAL_ROUNDS) * 100));
 }
 
-async function captureFrame(video: HTMLVideoElement, canvas: HTMLCanvasElement): Promise<Blob> {
+function localizeQuizQuestion(
+  t: (key: string, options?: Record<string, unknown>) => string,
+  question?: string
+): string {
+  if (!question) return t("activity.quiz.loadingQuestion");
+  if (question === "Which Bisindo letter is shown above?") {
+    return t("activity.quiz.questionPrompt", {
+      defaultValue: "Which Bisindo letter is shown above?",
+    });
+  }
+  return question;
+}
+
+function localizeCameraPrompt(
+  t: (key: string, options?: Record<string, unknown>) => string,
+  prompt?: string
+): string {
+  if (!prompt) return t("activity.camera.noPrompt");
+  const match = /^Show Bisindo Letter\s+(.+)$/.exec(prompt);
+  if (match) {
+    return t("activity.camera.promptTemplate", {
+      letter: match[1],
+      defaultValue: `Show Bisindo Letter ${match[1]}`,
+    });
+  }
+  return prompt;
+}
+
+async function captureFrame(
+  video: HTMLVideoElement,
+  canvas: HTMLCanvasElement,
+  t: (key: string, options?: Record<string, unknown>) => string
+): Promise<Blob> {
   const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Camera canvas is not available.");
+  if (!ctx) throw new Error(t("activity.errors.cameraCanvasUnavailable"));
 
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
   const blob = await new Promise<Blob | null>((resolve) => {
     canvas.toBlob((nextBlob) => resolve(nextBlob), "image/jpeg", 0.9);
   });
 
-  if (!blob) throw new Error("Could not capture a camera frame.");
+  if (!blob) throw new Error(t("activity.errors.cameraFrameCaptureFailed"));
   return blob;
 }
 
 function useCamera() {
+  const { t } = useTranslation("lessons");
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -79,7 +113,7 @@ function useCamera() {
   const startCamera = useCallback(async () => {
     if (!navigator.mediaDevices?.getUserMedia) {
       setCameraReady(false);
-      setCameraError("Camera access is not available in this browser.");
+      setCameraError(t("activity.errors.cameraUnavailableInBrowser"));
       return;
     }
 
@@ -95,9 +129,9 @@ function useCamera() {
       setCameraReady(true);
     } catch {
       setCameraReady(false);
-      setCameraError("Camera permission is needed for this activity.");
+      setCameraError(t("activity.errors.cameraPermissionRequired"));
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     let cancelled = false;
@@ -119,10 +153,10 @@ function useCamera() {
 
   const capture = useCallback(async () => {
     if (!videoRef.current || !canvasRef.current) {
-      throw new Error("Camera is still starting.");
+      throw new Error(t("activity.errors.cameraStarting"));
     }
-    return captureFrame(videoRef.current, canvasRef.current);
-  }, []);
+    return captureFrame(videoRef.current, canvasRef.current, t);
+  }, [t]);
 
   return { videoRef, canvasRef, cameraReady, cameraError, startCamera, capture };
 }
@@ -189,6 +223,7 @@ function Feedback({
 }
 
 export function QuizPracticeActivity({ lessonKey, onCompleted }: ActivityProps) {
+  const { t } = useTranslation("lessons");
   const [question, setQuestion] = useState<ApiQuizQuestion | null>(null);
   const [round, setRound] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -208,11 +243,11 @@ export function QuizPracticeActivity({ lessonKey, onCompleted }: ActivityProps) 
     try {
       setQuestion(await gameApi.getQuestion());
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load quiz question.");
+      setError(err instanceof Error ? err.message : t("activity.errors.quizLoadFailed"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void loadQuestion();
@@ -234,15 +269,15 @@ export function QuizPracticeActivity({ lessonKey, onCompleted }: ActivityProps) 
         await onCompleted();
         setFeedback({
           type: "correct",
-          message: `Quiz complete. You answered ${finalCorrectCount} of ${TOTAL_ROUNDS} correctly.`,
+          message: t("activity.quiz.complete", { count: finalCorrectCount, total: TOTAL_ROUNDS }),
         });
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Could not save quiz progress.");
+        setError(err instanceof Error ? err.message : t("activity.errors.quizSaveFailed"));
       } finally {
         setFinishing(false);
       }
     },
-    [onCompleted]
+    [onCompleted, t]
   );
 
   const handleAnswer = async (choice: string) => {
@@ -258,7 +293,9 @@ export function QuizPracticeActivity({ lessonKey, onCompleted }: ActivityProps) 
       setRound(nextRound);
       setFeedback({
         type: result.result ? "correct" : "incorrect",
-        message: result.result ? "Great job." : `Correct answer: ${question.answer}`,
+        message: result.result
+          ? t("activity.quiz.greatJob")
+          : t("activity.quiz.correctAnswer", { answer: question.answer }),
       });
 
       if (nextRound >= TOTAL_ROUNDS) {
@@ -268,7 +305,7 @@ export function QuizPracticeActivity({ lessonKey, onCompleted }: ActivityProps) 
       }
     } catch (err) {
       setSelectedChoice(null);
-      setError(err instanceof Error ? err.message : "Could not check answer.");
+      setError(err instanceof Error ? err.message : t("activity.errors.quizCheckFailed"));
     }
   };
 
@@ -276,9 +313,9 @@ export function QuizPracticeActivity({ lessonKey, onCompleted }: ActivityProps) 
     setFinishing(true);
     try {
       await gameApi.saveSessionResults({ type: "game", xp: 0, accuracy: 0, skipped: true });
-      setFeedback({ type: "info", message: "Quiz skipped. Progress was not marked complete." });
+      setFeedback({ type: "info", message: t("activity.quiz.skipped") });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save skipped quiz.");
+      setError(err instanceof Error ? err.message : t("activity.errors.quizSkipSaveFailed"));
     } finally {
       setFinishing(false);
     }
@@ -287,8 +324,8 @@ export function QuizPracticeActivity({ lessonKey, onCompleted }: ActivityProps) 
   return (
     <ActivityShell
       icon={<Gamepad2 className="h-5 w-5" />}
-      title="Quiz Challenge"
-      subtitle="Answer Bisindo letter questions without leaving the Next.js app."
+      title={t("activity.quiz.title")}
+      subtitle={t("activity.quiz.subtitle")}
       round={round}
     >
       <div className="space-y-4">
@@ -302,7 +339,7 @@ export function QuizPracticeActivity({ lessonKey, onCompleted }: ActivityProps) 
             ) : question?.image ? (
               <img
                 src={assetUrl(question.image)}
-                alt="Bisindo hand sign"
+                alt={t("activity.quiz.imageAlt")}
                 className="max-h-[300px] max-w-full rounded-lg object-contain"
               />
             ) : (
@@ -312,7 +349,7 @@ export function QuizPracticeActivity({ lessonKey, onCompleted }: ActivityProps) 
 
           <div className="space-y-3">
             <p className="text-base font-semibold text-foreground">
-              {question?.question || "Loading question..."}
+              {localizeQuizQuestion(t, question?.question)}
             </p>
             <div className="grid grid-cols-2 gap-2">
               {(question?.choices || []).map((choice) => {
@@ -334,11 +371,11 @@ export function QuizPracticeActivity({ lessonKey, onCompleted }: ActivityProps) 
             <div className="flex flex-wrap gap-2 pt-2">
               <Button variant="outline" size="sm" onClick={() => void loadQuestion()} disabled={loading || finishing}>
                 <RefreshCcw className="mr-2 h-4 w-4" />
-                Reload
+                {t("activity.quiz.reload")}
               </Button>
               <Button variant="ghost" size="sm" onClick={() => void skip()} disabled={finishing}>
                 <SkipForward className="mr-2 h-4 w-4" />
-                Skip
+                {t("activity.quiz.skip")}
               </Button>
             </div>
           </div>
@@ -350,6 +387,7 @@ export function QuizPracticeActivity({ lessonKey, onCompleted }: ActivityProps) 
 
 export function CameraPracticeActivity({ lessonKey, onCompleted }: ActivityProps) {
   const { videoRef, canvasRef, cameraReady, cameraError, startCamera, capture } = useCamera();
+  const { t } = useTranslation("lessons");
   const [question, setQuestion] = useState<ApiMlQuestion | null>(null);
   const [round, setRound] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -369,11 +407,11 @@ export function CameraPracticeActivity({ lessonKey, onCompleted }: ActivityProps
     try {
       setQuestion(await gameApi.getMlQuestion());
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load camera prompt.");
+      setError(err instanceof Error ? err.message : t("activity.errors.cameraPromptLoadFailed"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void loadQuestion();
@@ -396,15 +434,15 @@ export function CameraPracticeActivity({ lessonKey, onCompleted }: ActivityProps
         await onCompleted();
         setFeedback({
           type: "correct",
-          message: `Practice complete. You matched ${finalCorrectCount} of ${TOTAL_ROUNDS} signs.`,
+          message: t("activity.camera.complete", { count: finalCorrectCount, total: TOTAL_ROUNDS }),
         });
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Could not save camera progress.");
+        setError(err instanceof Error ? err.message : t("activity.errors.cameraSaveFailed"));
       } finally {
         setFinishing(false);
       }
     },
-    [onCompleted]
+    [onCompleted, t]
   );
 
   const capturePrediction = async () => {
@@ -425,8 +463,11 @@ export function CameraPracticeActivity({ lessonKey, onCompleted }: ActivityProps
       setFeedback({
         type: isCorrect ? "correct" : "incorrect",
         message: isCorrect
-          ? `Detected ${prediction.result}. Great job.`
-          : `Detected ${prediction.result}. Target was ${question.answer}.`,
+          ? t("activity.camera.detectedCorrect", { result: prediction.result })
+          : t("activity.camera.detectedIncorrect", {
+              result: prediction.result,
+              answer: question.answer,
+            }),
       });
 
       if (nextRound >= TOTAL_ROUNDS) {
@@ -435,7 +476,7 @@ export function CameraPracticeActivity({ lessonKey, onCompleted }: ActivityProps
         await loadQuestion();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not run prediction.");
+      setError(err instanceof Error ? err.message : t("activity.errors.predictionFailed"));
     } finally {
       setPredicting(false);
     }
@@ -451,7 +492,7 @@ export function CameraPracticeActivity({ lessonKey, onCompleted }: ActivityProps
     setError(null);
     setFeedback({
       type: "info",
-      message: `Get ready. Capture starts in ${CAMERA_PREP_SECONDS} seconds.`,
+      message: t("activity.camera.countdown", { seconds: CAMERA_PREP_SECONDS }),
     });
     setPrepCountdown(CAMERA_PREP_SECONDS);
 
@@ -478,8 +519,8 @@ export function CameraPracticeActivity({ lessonKey, onCompleted }: ActivityProps
   return (
     <ActivityShell
       icon={<Camera className="h-5 w-5" />}
-      title="Show Your Signs"
-      subtitle="Use the Django prediction API from a Next.js camera screen."
+      title={t("activity.camera.title")}
+      subtitle={t("activity.camera.subtitle")}
       round={round}
     >
       <div className="space-y-4">
@@ -496,14 +537,16 @@ export function CameraPracticeActivity({ lessonKey, onCompleted }: ActivityProps
 
           <div className="space-y-4">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Target sign</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("activity.camera.targetSign")}</p>
               <p className="mt-1 text-2xl font-bold text-foreground">
-                {loading ? "Loading..." : question?.question || "No prompt"}
+                {loading
+                  ? t("activity.camera.loadingPrompt")
+                  : localizeCameraPrompt(t, question?.question)}
               </p>
             </div>
             {prepCountdown !== null && (
               <div className="rounded-lg border bg-primary/10 p-4 text-center text-primary">
-                <p className="text-sm font-semibold uppercase tracking-[0.18em]">Get Ready</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.18em]">{t("activity.camera.getReady")}</p>
                 <p className="mt-1 text-5xl font-black">{prepCountdown}</p>
               </div>
             )}
@@ -519,9 +562,9 @@ export function CameraPracticeActivity({ lessonKey, onCompleted }: ActivityProps
               )}
               {cameraReady
                 ? prepCountdown !== null
-                  ? "Preparing..."
-                  : "Capture Sign"
-                : "Enable Camera"}
+                  ? t("activity.camera.preparing")
+                  : t("activity.camera.captureSign")
+                : t("activity.camera.enableCamera")}
             </Button>
             <Button
               variant="outline"
@@ -530,7 +573,7 @@ export function CameraPracticeActivity({ lessonKey, onCompleted }: ActivityProps
               disabled={loading || predicting || prepCountdown !== null}
             >
               <RefreshCcw className="mr-2 h-4 w-4" />
-              New Prompt
+              {t("activity.camera.newPrompt")}
             </Button>
           </div>
         </div>
@@ -541,6 +584,7 @@ export function CameraPracticeActivity({ lessonKey, onCompleted }: ActivityProps
 
 export function MagicTouchPracticeActivity({ lessonKey, onCompleted }: ActivityProps) {
   const { videoRef, canvasRef, cameraReady, cameraError, startCamera, capture } = useCamera();
+  const { t } = useTranslation("lessons");
   const [playing, setPlaying] = useState(false);
   const [enemies, setEnemies] = useState<MagicEnemy[]>([]);
   const [score, setScore] = useState(0);
@@ -549,7 +593,7 @@ export function MagicTouchPracticeActivity({ lessonKey, onCompleted }: ActivityP
   const [lastPrediction, setLastPrediction] = useState<{ letter: string; confidence: number } | null>(null);
   const [feedback, setFeedback] = useState<{ type: "correct" | "incorrect" | "info"; message: string } | null>({
     type: "info",
-    message: "Start the round. Falling targets pop when your hand sign matches their first letter.",
+    message: t("activity.magicTouch.startRound"),
   });
   const [predicting, setPredicting] = useState(false);
   const [finishing, setFinishing] = useState(false);
@@ -570,15 +614,15 @@ export function MagicTouchPracticeActivity({ lessonKey, onCompleted }: ActivityP
         await onCompleted();
         setFeedback({
           type: "correct",
-          message: `Magic Touch saved. Final score: ${finalScore}.`,
+          message: t("activity.magicTouch.saved", { score: finalScore }),
         });
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Could not save Magic Touch progress.");
+        setError(err instanceof Error ? err.message : t("activity.errors.magicTouchSaveFailed"));
       } finally {
         setFinishing(false);
       }
     },
-    [onCompleted]
+    [onCompleted, t]
   );
 
   const makeEnemy = useCallback((): MagicEnemy => {
@@ -611,10 +655,10 @@ export function MagicTouchPracticeActivity({ lessonKey, onCompleted }: ActivityP
     setError(null);
     setFeedback({
       type: "info",
-      message: "Start the round. Falling targets pop when your hand sign matches their first letter.",
+      message: t("activity.magicTouch.startRound"),
     });
     setPlaying(false);
-  }, []);
+  }, [t]);
 
   const startGame = useCallback(() => {
     nextIdRef.current = 1;
@@ -624,9 +668,9 @@ export function MagicTouchPracticeActivity({ lessonKey, onCompleted }: ActivityP
     setDefeated(0);
     setLastPrediction(null);
     setError(null);
-    setFeedback({ type: "info", message: "Sign the first letter of the lowest falling target." });
+    setFeedback({ type: "info", message: t("activity.magicTouch.startHint") });
     setPlaying(true);
-  }, [makeEnemy]);
+  }, [makeEnemy, t]);
 
   const applyPrediction = useCallback((letter: string, confidence: number) => {
     setLastPrediction({ letter, confidence });
@@ -634,7 +678,10 @@ export function MagicTouchPracticeActivity({ lessonKey, onCompleted }: ActivityP
     if (confidence < MAGIC_CONFIDENCE_THRESHOLD) {
       setFeedback({
         type: "info",
-        message: `Detected ${letter}, but confidence is ${Math.round(confidence * 100)}%. Hold the sign clearly.`,
+        message: t("activity.magicTouch.lowConfidence", {
+          letter,
+          confidence: Math.round(confidence * 100),
+        }),
       });
       return;
     }
@@ -670,16 +717,16 @@ export function MagicTouchPracticeActivity({ lessonKey, onCompleted }: ActivityP
       setFeedback({
         type: "correct",
         message: clearedEnemy
-          ? `Detected ${letter}. Target cleared.`
-          : `Detected ${letter}. Keep going for the next letter.`,
+          ? t("activity.magicTouch.targetCleared", { letter })
+          : t("activity.magicTouch.keepGoing", { letter }),
       });
     } else {
       setFeedback({
         type: "incorrect",
-        message: `Detected ${letter}, but no falling target starts with that letter right now.`,
+        message: t("activity.magicTouch.noMatchingTarget", { letter }),
       });
     }
-  }, []);
+  }, [t]);
 
   const checkTarget = useCallback(async () => {
     if (!playing || predicting || finishing || predictionInFlightRef.current) return;
@@ -692,12 +739,12 @@ export function MagicTouchPracticeActivity({ lessonKey, onCompleted }: ActivityP
       const prediction = await gameApi.predict(blob);
       applyPrediction(prediction.result, prediction.confidence ?? 1);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not run prediction.");
+      setError(err instanceof Error ? err.message : t("activity.errors.predictionFailed"));
     } finally {
       predictionInFlightRef.current = false;
       setPredicting(false);
     }
-  }, [applyPrediction, capture, finishing, playing, predicting]);
+  }, [applyPrediction, capture, finishing, playing, predicting, t]);
 
   useEffect(() => {
     if (!playing) return;
@@ -718,7 +765,7 @@ export function MagicTouchPracticeActivity({ lessonKey, onCompleted }: ActivityP
             const nextLives = Math.max(0, currentLives - missed);
             if (nextLives === 0) {
               setPlaying(false);
-              setFeedback({ type: "incorrect", message: "Game over. Save or restart your round." });
+              setFeedback({ type: "incorrect", message: t("activity.magicTouch.gameOver") });
             }
             return nextLives;
           });
@@ -760,8 +807,8 @@ export function MagicTouchPracticeActivity({ lessonKey, onCompleted }: ActivityP
   return (
     <ActivityShell
       icon={<Zap className="h-5 w-5" />}
-      title="Magic Touch"
-      subtitle="Letters fall from the sky. Sign the first letter to pop each target."
+      title={t("activity.magicTouch.title")}
+      subtitle={t("activity.magicTouch.subtitle")}
       round={defeated}
     >
       <div className="space-y-4">
@@ -774,10 +821,10 @@ export function MagicTouchPracticeActivity({ lessonKey, onCompleted }: ActivityP
           <div className="space-y-4">
             <div className="relative min-h-[420px] overflow-hidden rounded-lg border bg-gradient-to-b from-sky-50 to-background">
               <div className="absolute left-3 top-3 z-10 flex flex-wrap gap-2">
-                <Badge variant="secondary">Score {score}</Badge>
-                <Badge variant="outline">Lives {lives}</Badge>
+                <Badge variant="secondary">{t("activity.magicTouch.score", { score })}</Badge>
+                <Badge variant="outline">{t("activity.magicTouch.lives", { lives })}</Badge>
                 <Badge variant="outline">
-                  Target {expectedLetter ?? "-"}
+                  {t("activity.magicTouch.target", { target: expectedLetter ?? "-" })}
                 </Badge>
               </div>
 
@@ -785,9 +832,9 @@ export function MagicTouchPracticeActivity({ lessonKey, onCompleted }: ActivityP
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center">
                   <Zap className="h-12 w-12 text-primary" />
                   <div>
-                    <h4 className="text-lg font-semibold text-foreground">Ready for Magic Touch?</h4>
+                    <h4 className="text-lg font-semibold text-foreground">{t("activity.magicTouch.readyTitle")}</h4>
                     <p className="mt-1 max-w-md text-sm text-muted-foreground">
-                      Targets fall from the top. The first letter in each target is the sign to make.
+                      {t("activity.magicTouch.readyBody")}
                     </p>
                   </div>
                 </div>
@@ -829,12 +876,14 @@ export function MagicTouchPracticeActivity({ lessonKey, onCompleted }: ActivityP
 
           <div className="space-y-4">
             <div className="rounded-lg border bg-card p-4 text-center">
-              <p className="text-sm text-muted-foreground">Current prediction</p>
+              <p className="text-sm text-muted-foreground">{t("activity.magicTouch.currentPrediction")}</p>
               <p className="mt-1 text-4xl font-black text-foreground">
                 {lastPrediction ? lastPrediction.letter : playing ? "..." : <Trophy className="mx-auto h-10 w-10 text-primary" />}
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
-                {lastPrediction ? `${Math.round(lastPrediction.confidence * 100)}% confidence` : "Camera prediction appears here"}
+                {lastPrediction
+                  ? t("activity.magicTouch.confidence", { value: Math.round(lastPrediction.confidence * 100) })
+                  : t("activity.magicTouch.predictionPlaceholder")}
               </p>
             </div>
 
@@ -843,10 +892,10 @@ export function MagicTouchPracticeActivity({ lessonKey, onCompleted }: ActivityP
                 onClick={cameraReady ? startGame : () => void startCamera()}
                 disabled={playing || finishing}
               >
-                {cameraReady ? "Start" : "Enable Camera"}
+                {cameraReady ? t("activity.magicTouch.start") : t("activity.camera.enableCamera")}
               </Button>
               <Button variant="outline" onClick={reset} disabled={predicting || finishing}>
-                Restart
+                {t("activity.magicTouch.restart")}
               </Button>
             </div>
             <Button
@@ -859,7 +908,7 @@ export function MagicTouchPracticeActivity({ lessonKey, onCompleted }: ActivityP
               ) : (
                 <Sparkles className="mr-2 h-4 w-4" />
               )}
-              Check Sign Now
+              {t("activity.magicTouch.checkNow")}
             </Button>
             <Button
               variant="secondary"
@@ -867,7 +916,7 @@ export function MagicTouchPracticeActivity({ lessonKey, onCompleted }: ActivityP
               disabled={finishing || score === 0}
               onClick={() => void finish(score)}
             >
-              Save Score
+              {t("activity.magicTouch.saveScore")}
             </Button>
           </div>
         </div>

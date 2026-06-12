@@ -37,7 +37,7 @@ plt.rcParams.update({
 })
 
 ACCENT   = '#7C3AED'   #
-ACCENT2  = '#06B6D4'  
+ACCENT2  = '#06B6D4'
 RED      = '#EF4444'
 GREEN    = '#22C55E'
 
@@ -54,7 +54,7 @@ RANDOM_STATE    = 42
 
 
 # ## 2 · Data Loading & Exploration
-# 
+#
 # Each **action** folder inside `features/` contains `.npy` files, one per recorded sequence.
 # Every sequence must have shape `(30, 447)` — 30 frames × 447 MediaPipe keypoints.
 
@@ -131,7 +131,7 @@ y_ints = np.argmax(y, axis=1)
 for i in range(num_classes):
     # Get all indices belonging to this class
     class_indices = np.where(y_ints == i)[0]
-    
+
     # Take up to 110 samples
     selected = class_indices[:MAX_SAMPLES_PER_CLASS]
     balanced_indices.extend(selected)
@@ -169,7 +169,7 @@ print(f'Min: {min(counts)}  |  Max: {max(counts)}  |  Mean: {np.mean(counts):.1f
 
 
 # ## 3 · Train / Validation / Test Split
-# 
+#
 # **80% train · 10% validation · 10% test** with stratified sampling to keep class balance.
 
 
@@ -245,14 +245,14 @@ def augment_sequence(data):
     # 4. Temporal Stretching (Systematically duplicate or omit frames ~10%)
     stretch = np.random.uniform(0.9, 1.1)
     new_len = int(30 * stretch)
-    
+
     # Resample and interpolate back to 30 frames to maintain input shape
     stretched_data = np.zeros((30, 447))
     for f in range(447):
         # Interpolate the sequence over the new timeline
         stretched_data[:, f] = np.interp(
-            np.linspace(0, 29, 30), 
-            np.linspace(0, 29, new_len), 
+            np.linspace(0, 29, 30),
+            np.linspace(0, 29, new_len),
             np.interp(np.linspace(0, 29, new_len), np.arange(30), aug_data[:, f])
         )
 
@@ -261,16 +261,16 @@ def augment_sequence(data):
 def apply_augmentation_pipeline(X, y, multiplier=2): # Multiplier is exchange able
     """Creates augmented copies of the training set"""
     X_aug_list, y_aug_list = [X], [y]
-    
+
     print(f"Generating {X.shape[0] * multiplier} augmented samples...")
     for i in range(multiplier):
         X_new = np.array([augment_sequence(sample) for sample in X])
         X_aug_list.append(X_new)
         y_aug_list.append(y)
-    
+
     X_final = np.concatenate(X_aug_list, axis=0)
     y_final = np.concatenate(y_aug_list, axis=0)
-    
+
     # Shuffle the final augmented training set
     idx = np.random.permutation(len(X_final))
     return X_final[idx], y_final[idx]
@@ -307,7 +307,7 @@ plt.show()
 
 
 # ## 4 · Model Architecture
-# 
+#
 # A two-layer **GRU** network with dropout regularisation, ending in a `softmax` classifier.
 
 
@@ -416,13 +416,13 @@ if param_data:
 
 
 # ## 5 · Callbacks & Training
-# 
+#
 # | Callback | Setting |
 # |----------|---------|
 # | `EarlyStopping` | `patience=15`, restores best weights |
 # | `ReduceLROnPlateau` | `factor=0.5`, `patience=5`, `min_lr=1e-6` |
 # | `ModelCheckpoint` | saves best val_loss → `signlingo_v2_gru.h5` |
-# 
+#
 
 
 early_stopping = EarlyStopping(
@@ -449,7 +449,7 @@ print('Training complete!')
 
 
 # ## 6 · Training Curves
-# 
+#
 # Visualise **loss** and **accuracy** over every epoch for both train and validation sets.
 
 
@@ -538,8 +538,8 @@ plt.show()
 
 
 # ## 8 · Confusion Matrix
-# 
-# Rows = true class · Columns = predicted class.  
+#
+# Rows = true class · Columns = predicted class.
 # The diagonal shows correct predictions; off-diagonal cells show misclassifications.
 
 
@@ -595,7 +595,7 @@ plt.show()
 
 
 # ## 9 · Per-Class Metrics
-# 
+#
 # Detailed precision, recall, and F1 for each individual sign class.
 
 

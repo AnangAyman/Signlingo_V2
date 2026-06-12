@@ -1,12 +1,16 @@
+"use client";
+
 import { PlaceholderPage } from "@/components/placeholder-page";
+import { useTranslation } from "react-i18next";
 
 export default function NotificationsPage() {
+  const { t } = useTranslation("placeholder");
   return (
     <PlaceholderPage
       icon="🔔"
-      title="No Notifications Yet"
-      message="You'll see activity from leagues and friends here — challenges, rank changes, and more."
-      hint="Notification preferences and push alerts are coming in the next update."
+      title={t("notifications.title")}
+      message={t("notifications.message")}
+      hint={t("notifications.hint")}
     />
   );
 }

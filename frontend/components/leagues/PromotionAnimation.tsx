@@ -25,6 +25,8 @@ export function PromotionAnimation({
 }: PromotionAnimationProps) {
   const { t } = useTranslation("leagues");
   const Icon = toLeague.icon;
+  const fromLeagueName = fromLeague ? t(fromLeague.displayNameKey) : "";
+  const toLeagueName = t(toLeague.displayNameKey);
 
   const triggerConfetti = useCallback(() => {
     if (reducedMotion) return;
@@ -183,7 +185,7 @@ export function PromotionAnimation({
                 animate={reducedMotion ? {} : { y: 0, opacity: 1 }}
                 transition={{ delay: 0.4 }}
               >
-                {toLeague.displayName}!
+                {toLeagueName}!
               </motion.p>
 
               {/* Stats */}
@@ -203,7 +205,7 @@ export function PromotionAnimation({
                     >
                       <fromLeague.icon className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-muted-foreground">{fromLeague.displayName}</span>
+                    <span className="text-muted-foreground">{fromLeagueName}</span>
                   </div>
                   <motion.div
                     animate={reducedMotion ? {} : { x: [0, 5, 0] }}
@@ -220,7 +222,7 @@ export function PromotionAnimation({
                     >
                       <Icon className="w-4 h-4 text-white" />
                     </div>
-                    <span className="font-semibold text-foreground">{toLeague.displayName}</span>
+                    <span className="font-semibold text-foreground">{toLeagueName}</span>
                   </div>
                 </motion.div>
               )}

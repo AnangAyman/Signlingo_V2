@@ -49,7 +49,7 @@ export function Footer() {
           {/* Brand Column */}
           <div className="col-span-2">
             <Link href="/" className="flex items-center gap-2 mb-6">
-              <SignLingoLogo className="w-10 h-10" />
+              <SignLingoLogo ariaLabel={t("media.handLogoAlt")} className="w-10 h-10" />
               <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 SignLingo
               </span>

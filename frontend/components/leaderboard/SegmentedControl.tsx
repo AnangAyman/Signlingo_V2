@@ -18,10 +18,14 @@ export function SegmentedControl({
 }: SegmentedControlProps) {
   const { t } = useTranslation("leaderboard");
 
-  const OPTIONS: { value: LeaderboardView; labelKey: string; Icon: typeof Globe }[] = [
-    { value: "global", labelKey: "global", Icon: Globe },
-    { value: "friends", labelKey: "friends", Icon: Users },
-    { value: "leagues", labelKey: "leagues", Icon: Trophy },
+  const OPTIONS: {
+    value: LeaderboardView;
+    label: string;
+    Icon: typeof Globe;
+  }[] = [
+    { value: "global", label: t("global", { defaultValue: "Global" }), Icon: Globe },
+    { value: "friends", label: t("friends", { defaultValue: "Friends" }), Icon: Users },
+    { value: "leagues", label: t("leagues", { defaultValue: "Leagues" }), Icon: Trophy },
   ];
 
   return (
@@ -30,9 +34,8 @@ export function SegmentedControl({
       aria-label={t("title")}
       className="relative flex rounded-xl bg-muted p-1 gap-0.5 overflow-x-auto"
     >
-      {OPTIONS.map(({ value: v, labelKey, Icon }) => {
+      {OPTIONS.map(({ value: v, label, Icon }) => {
         const isActive = value === v;
-        const label = t(labelKey);
         return (
           <button
             key={v}

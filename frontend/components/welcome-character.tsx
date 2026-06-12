@@ -2,6 +2,7 @@
 
 import { motion, useAnimationControls } from "framer-motion";
 import { useEffect, forwardRef, useImperativeHandle } from "react";
+import { useTranslation } from "react-i18next";
 
 // ============================================================
 // ANIMATION DURATIONS - Adjust these to tune the timing
@@ -30,6 +31,7 @@ interface WelcomeCharacterProps {
 
 const WelcomeCharacter = forwardRef<WelcomeCharacterRef, WelcomeCharacterProps>(
   ({ onAnimationComplete, skipAnimation = false }, ref) => {
+    const { t } = useTranslation();
     const characterControls = useAnimationControls();
     const leftArmControls = useAnimationControls();
     const rightArmControls = useAnimationControls();
@@ -197,7 +199,7 @@ const WelcomeCharacter = forwardRef<WelcomeCharacterRef, WelcomeCharacterProps>(
             {/* Character Image */}
             <motion.img
               src={CHARACTER_IMAGE_URL}
-              alt="SignLingo mascot - a friendly character with bob hair and glasses wearing a yellow cardigan"
+              alt={t("media.mascotDetailedAlt")}
               className="w-32 sm:w-40 md:w-52 lg:w-64 xl:w-80 h-auto aspect-auto object-contain drop-shadow-2xl"
               draggable={false}
             />
@@ -224,7 +226,10 @@ const WelcomeCharacter = forwardRef<WelcomeCharacterRef, WelcomeCharacterProps>(
           initial={{ scale: 0, rotate: -180, opacity: 0 }}
           className="absolute flex flex-col items-center gap-4"
         >
-          <SignLingoLogo className="w-32 h-32 md:w-40 md:h-40" />
+          <SignLingoLogo
+            ariaLabel={t("media.handLogoAlt")}
+            className="w-32 h-32 md:w-40 md:h-40"
+          />
           <span className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             SignLingo
           </span>
@@ -237,14 +242,20 @@ const WelcomeCharacter = forwardRef<WelcomeCharacterRef, WelcomeCharacterProps>(
 WelcomeCharacter.displayName = "WelcomeCharacter";
 
 // SignLingo Logo Component (Hand + Text)
-function SignLingoLogo({ className }: { className?: string }) {
+function SignLingoLogo({
+  ariaLabel,
+  className,
+}: {
+  ariaLabel: string;
+  className?: string;
+}) {
   return (
     <svg
       viewBox="0 0 100 100"
       className={className}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      aria-label="SignLingo hand logo"
+      aria-label={ariaLabel}
     >
       {/* Palm */}
       <ellipse cx="50" cy="55" rx="25" ry="30" className="fill-primary" />

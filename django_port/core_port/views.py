@@ -2,11 +2,22 @@ from django.http import JsonResponse
 
 from legacy_port.models import User
 from shared_port.view_helpers import _build_streak_data, _lesson_context, _render, _require_user, _user_shell_context
+from signlingo_django.language import SESSION_KEY as LANGUAGE_SESSION_KEY
 
 
 def home(request):
-    # Reset the temporary session state when the landing page is revisited.
-    request.session.flush()
+    # Keep the selected UI language while clearing transient game/result state.
+    preserved_language = request.session.get(LANGUAGE_SESSION_KEY)
+    for key in (
+        "result_summary",
+        "game_results",
+        "ml_results",
+        "google_oauth_state",
+        "google_oauth_entry",
+    ):
+        request.session.pop(key, None)
+    if preserved_language:
+        request.session[LANGUAGE_SESSION_KEY] = preserved_language
     return _render(request, "landing_page.html", {"user": None})
 
 

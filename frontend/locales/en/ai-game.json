@@ -1,0 +1,16 @@
+{
+  "badge": "Django AI backend connected",
+  "title": "AI Practice Game",
+  "subtitle": "The new Next.js frontend now links to the existing Django camera and prediction flow while the full React game UI is being integrated.",
+  "magicTouch": {
+    "title": "Magic Touch Game",
+    "description": "Open the Django-powered game page that uses the current MediaPipe/static letter prediction backend.",
+    "button": "Open Magic Touch"
+  },
+  "cameraPractice": {
+    "title": "Camera Practice",
+    "description": "Use the existing Django camera capture page to test live recognition before the final frontend game screen is finished.",
+    "button": "Open Camera Practice"
+  },
+  "progressSaved": "Progress saved to Lessons."
+}

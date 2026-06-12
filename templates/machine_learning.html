@@ -1,16 +1,20 @@
-<html lang="en">
+<html lang="{{ current_language() }}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SignQuest Pose Capture</title>
+  <title>{{ t('game.machine.page_title') }}</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/ml_game.css">
 </head>
 <body>
+  <div class="page-language-switcher" aria-label="{{ t('language.switcher_label') }}">
+    <a class="page-language-chip{% if current_language() == 'en' %} active{% endif %}" href="{{ url_for('auth.set_language', code='en') }}?next={{ request.path }}">{{ t('language.en') }}</a>
+    <a class="page-language-chip{% if current_language() == 'ko' %} active{% endif %}" href="{{ url_for('auth.set_language', code='ko') }}?next={{ request.path }}">{{ t('language.ko') }}</a>
+  </div>
   <video id="webcam" autoplay playsinline width="320" height="240"></video>
   <canvas id="canvas" width="224" height="224" style="display:none;"></canvas>
   <div id="countdown"></div>
-  <button id="start-btn">Start Pose Capture</button>
+  <button id="start-btn">{{ t('game.machine.start_capture') }}</button>
   <div id="result"></div>
 
   <script src="/static/js/ml_logic.js"></script>

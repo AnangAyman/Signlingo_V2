@@ -38,10 +38,7 @@ export const MOCK_USER_PROGRESS: UserProgress = {
 export const MOCK_BADGES: Badge[] = [
   {
     id: "first-sign",
-    name: "First Sign",
-    description: "Complete your first lesson",
     icon: "🤟",
-    requirement: "Complete 1 lesson",
     requiredValue: 1,
     currentProgress: 1,
     isLocked: false,
@@ -51,10 +48,7 @@ export const MOCK_BADGES: Badge[] = [
   },
   {
     id: "streak-starter",
-    name: "Streak Starter",
-    description: "Maintain a 3-day streak",
     icon: "🔥",
-    requirement: "3-day streak",
     requiredValue: 3,
     currentProgress: 3,
     isLocked: false,
@@ -64,10 +58,7 @@ export const MOCK_BADGES: Badge[] = [
   },
   {
     id: "week-warrior",
-    name: "Week Warrior",
-    description: "Maintain a 7-day streak",
     icon: "⚡",
-    requirement: "7-day streak",
     requiredValue: 7,
     currentProgress: 5,
     isLocked: true,
@@ -76,10 +67,7 @@ export const MOCK_BADGES: Badge[] = [
   },
   {
     id: "lesson-master",
-    name: "Lesson Master",
-    description: "Complete 10 lessons",
     icon: "📚",
-    requirement: "Complete 10 lessons",
     requiredValue: 10,
     currentProgress: 7,
     isLocked: true,
@@ -88,10 +76,7 @@ export const MOCK_BADGES: Badge[] = [
   },
   {
     id: "quiz-ace",
-    name: "Quiz Ace",
-    description: "Score 100% on 5 quizzes",
     icon: "🎯",
-    requirement: "Perfect score on 5 quizzes",
     requiredValue: 5,
     currentProgress: 2,
     isLocked: true,
@@ -100,10 +85,7 @@ export const MOCK_BADGES: Badge[] = [
   },
   {
     id: "bronze-champion",
-    name: "Bronze Champion",
-    description: "Reach the Silver league",
     icon: "🥉",
-    requirement: "Promote from Bronze",
     requiredValue: 1,
     currentProgress: 1,
     isLocked: false,
@@ -113,10 +95,7 @@ export const MOCK_BADGES: Badge[] = [
   },
   {
     id: "silver-star",
-    name: "Silver Star",
-    description: "Reach the Gold league",
     icon: "🥈",
-    requirement: "Promote from Silver",
     requiredValue: 1,
     currentProgress: 0,
     isLocked: true,
@@ -125,10 +104,7 @@ export const MOCK_BADGES: Badge[] = [
   },
   {
     id: "gold-legend",
-    name: "Gold Legend",
-    description: "Reach the Platinum league",
     icon: "🥇",
-    requirement: "Promote from Gold",
     requiredValue: 1,
     currentProgress: 0,
     isLocked: true,
@@ -137,10 +113,7 @@ export const MOCK_BADGES: Badge[] = [
   },
   {
     id: "ai-explorer",
-    name: "AI Explorer",
-    description: "Practice with AI camera 20 times",
     icon: "🤖",
-    requirement: "Use AI camera 20 times",
     requiredValue: 20,
     currentProgress: 12,
     isLocked: true,
@@ -149,10 +122,7 @@ export const MOCK_BADGES: Badge[] = [
   },
   {
     id: "month-master",
-    name: "Month Master",
-    description: "Maintain a 30-day streak",
     icon: "🏆",
-    requirement: "30-day streak",
     requiredValue: 30,
     currentProgress: 5,
     isLocked: true,
@@ -165,32 +135,24 @@ export const MOCK_BADGES: Badge[] = [
 export const MOCK_REWARDS: Reward[] = [
   {
     id: "streak-freeze",
-    name: "Streak Freeze",
-    description: "Protect your streak for one day",
     cost: 200,
     icon: "🧊",
     isRedeemed: false,
   },
   {
     id: "double-xp",
-    name: "Double XP (1hr)",
-    description: "Earn double XP for one hour",
     cost: 350,
     icon: "⚡",
     isRedeemed: false,
   },
   {
     id: "custom-avatar",
-    name: "Custom Avatar",
-    description: "Unlock a special avatar frame",
     cost: 500,
     icon: "🎨",
     isRedeemed: false,
   },
   {
     id: "bonus-lesson",
-    name: "Bonus Lesson",
-    description: "Access an exclusive bonus lesson",
     cost: 300,
     icon: "🎁",
     isRedeemed: true,
@@ -198,8 +160,6 @@ export const MOCK_REWARDS: Reward[] = [
   },
   {
     id: "hint-pack",
-    name: "Hint Pack (5)",
-    description: "Get 5 hints for difficult signs",
     cost: 150,
     icon: "💡",
     isRedeemed: false,
@@ -210,7 +170,6 @@ export const MOCK_REWARDS: Reward[] = [
 export const MOCK_DAILY_QUESTS: DailyQuest[] = [
   {
     id: "quest-lesson",
-    description: "Complete 3 lessons",
     xpReward: 50,
     progress: 2,
     total: 3,
@@ -220,7 +179,6 @@ export const MOCK_DAILY_QUESTS: DailyQuest[] = [
   },
   {
     id: "quest-quiz",
-    description: "Score 80%+ on a quiz",
     xpReward: 30,
     progress: 1,
     total: 1,
@@ -229,7 +187,6 @@ export const MOCK_DAILY_QUESTS: DailyQuest[] = [
   },
   {
     id: "quest-practice",
-    description: "Practice with AI camera",
     xpReward: 25,
     progress: 0,
     total: 1,

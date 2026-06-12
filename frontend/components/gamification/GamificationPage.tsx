@@ -13,6 +13,7 @@ import { LevelUpModal } from "./LevelUpModal";
 import { useGamificationStore } from "./useGamificationStore";
 import { AppHeader } from "@/components/app-header";
 import { useTranslation } from "react-i18next";
+import { useAuthStore } from "@/lib/store";
 
 interface GamificationPageProps {
   /** Optionally force reduced-motion (defaults to system preference). */
@@ -32,8 +33,10 @@ export function GamificationPage({
     newlyEarnedBadge,
     clearNewBadge,
     addXp,
+    syncFromUser,
     resetDemo,
   } = useGamificationStore();
+  const { user } = useAuthStore();
   const { t } = useTranslation("gamification");
 
   // Detect system reduced-motion preference
@@ -53,11 +56,20 @@ export function GamificationPage({
   useEffect(() => {
     if (newlyEarnedBadge) {
       toast.success(
-        t("badges.newBadgeToast", { name: newlyEarnedBadge.name, icon: newlyEarnedBadge.icon })
+        t("badges.newBadgeToast", {
+          name: t(`badges.items.${newlyEarnedBadge.id}.name`),
+          icon: newlyEarnedBadge.icon,
+        })
       );
       clearNewBadge();
     }
   }, [newlyEarnedBadge, clearNewBadge]);
+
+  useEffect(() => {
+    if (user) {
+      syncFromUser(user);
+    }
+  }, [user, syncFromUser]);
 
   const handleAddXp = (amount: number) => {
     addXp(amount, "demo");
@@ -84,16 +96,16 @@ export function GamificationPage({
               variant="outline"
               size="sm"
               onClick={() => handleAddXp(50)}
-              aria-label="Add 50 XP (demo)"
+              aria-label={t("addXpSmallLabel")}
             >
               <Zap className="w-4 h-4 mr-1 text-primary" aria-hidden />
-              +50 XP
+              {t("addXpBtn")}
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => handleAddXp(200)}
-              aria-label="Add 200 XP (demo)"
+              aria-label={t("addXpLargeLabel")}
             >
               <Zap className="w-4 h-4 mr-1 text-amber-500" aria-hidden />
               {t("addXpLargeBtn")}
@@ -105,8 +117,8 @@ export function GamificationPage({
                 resetDemo();
                 toast.info(t("resetToast"));
               }}
-              aria-label="Reset demo state"
-              title="Reset demo"
+              aria-label={t("resetLabel")}
+              title={t("resetLabel")}
             >
               <RotateCcw className="w-4 h-4" />
             </Button>
