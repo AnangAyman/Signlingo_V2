@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Spinner } from "@/components/ui/spinner";
 import { Eye, EyeOff, Mail, Lock, Hand, ArrowLeft } from "lucide-react";
+import { backendPath } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -24,6 +25,12 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [focusedField, setFocusedField] = useState<string | null>(null);
+
+  const googleLoginUrl = backendPath(
+    `/login/google?entry=login&next=${encodeURIComponent(
+      typeof window !== "undefined" ? `${window.location.origin}/dashboard` : "/dashboard"
+    )}`
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -199,6 +206,9 @@ export default function LoginPage() {
                 type="button"
                 variant="outline"
                 className="h-12 border-border hover:bg-card"
+                onClick={() => {
+                  window.location.href = googleLoginUrl;
+                }}
               >
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                   <path

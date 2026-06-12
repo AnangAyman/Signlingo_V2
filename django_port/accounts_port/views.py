@@ -1,6 +1,7 @@
 import secrets
 import time
 from urllib.parse import urlencode
+from urllib.parse import urlparse
 from smtplib import SMTPException
 
 from django.conf import settings
@@ -10,6 +11,7 @@ from django.shortcuts import redirect
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
+from django.urls import reverse
 from email_validator import EmailNotValidError, validate_email
 import requests
 
@@ -44,7 +46,7 @@ def _real_email_delivery_enabled() -> bool:
 
 
 def _google_oauth_enabled() -> bool:
-    return bool(settings.GOOGLE_CLIENT_ID and settings.GOOGLE_CLIENT_SECRET and settings.GOOGLE_REDIRECT_URI)
+    return bool(settings.GOOGLE_CLIENT_ID and settings.GOOGLE_CLIENT_SECRET)
 
 
 def _normalize_google_name(payload: dict) -> str:
@@ -55,6 +57,44 @@ def _normalize_google_name(payload: dict) -> str:
 def _google_entry_route(request) -> str:
     entry = request.session.get("google_oauth_entry") or request.GET.get("entry") or "login"
     return "auth:register" if entry == "register" else "auth:login"
+
+
+def _google_redirect_uri(request) -> str:
+    configured = (settings.GOOGLE_REDIRECT_URI or "").strip()
+    if configured:
+        parsed = urlparse(configured)
+        if parsed.netloc == request.get_host():
+            return configured
+    return request.build_absolute_uri(reverse("auth:google_callback"))
+
+
+def _google_allowed_redirect_hosts(request) -> set[str]:
+    hosts = {
+        request.get_host(),
+        "localhost:3000",
+        "127.0.0.1:3000",
+        "localhost:8000",
+        "127.0.0.1:8000",
+    }
+    frontend_url = (getattr(settings, "FRONTEND_APP_URL", "") or "").strip()
+    if frontend_url:
+        parsed = urlparse(frontend_url)
+        if parsed.netloc:
+            hosts.add(parsed.netloc)
+    return hosts
+
+
+def _google_next_target(request) -> str:
+    next_target = request.GET.get("next") or request.session.get("google_oauth_next") or "auth:dashboard"
+    if next_target.startswith("/"):
+        return next_target
+    if url_has_allowed_host_and_scheme(
+        next_target,
+        allowed_hosts=_google_allowed_redirect_hosts(request),
+        require_https=request.is_secure(),
+    ):
+        return next_target
+    return "auth:dashboard"
 
 
 def set_language(request, code):
@@ -153,11 +193,12 @@ def google_login(request):
     state = secrets.token_urlsafe(32)
     request.session["google_oauth_state"] = state
     request.session["google_oauth_entry"] = request.GET.get("entry") or "login"
-    request.session["google_oauth_next"] = request.GET.get("next") or "auth:dashboard"
+    request.session["google_oauth_next"] = _google_next_target(request)
+    redirect_uri = _google_redirect_uri(request)
 
     params = {
         "client_id": settings.GOOGLE_CLIENT_ID,
-        "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+        "redirect_uri": redirect_uri,
         "response_type": "code",
         "scope": "openid email profile",
         "state": state,
@@ -197,7 +238,7 @@ def google_callback(request):
                 "code": code,
                 "client_id": settings.GOOGLE_CLIENT_ID,
                 "client_secret": settings.GOOGLE_CLIENT_SECRET,
-                "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+                "redirect_uri": _google_redirect_uri(request),
                 "grant_type": "authorization_code",
             },
             timeout=15,

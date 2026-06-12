@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Spinner } from "@/components/ui/spinner";
 import { Eye, EyeOff, Mail, Lock, User, Hand, ArrowLeft, Check, X } from "lucide-react";
+import { backendPath } from "@/lib/api";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -28,6 +29,12 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [step, setStep] = useState(1);
+
+  const googleSignupUrl = backendPath(
+    `/login/google?entry=register&next=${encodeURIComponent(
+      typeof window !== "undefined" ? `${window.location.origin}/dashboard` : "/dashboard"
+    )}`
+  );
 
   const passwordRequirements = useMemo(
     () => [
@@ -457,6 +464,9 @@ export default function SignupPage() {
                     type="button"
                     variant="outline"
                     className="h-12 border-border hover:bg-card"
+                    onClick={() => {
+                      window.location.href = googleSignupUrl;
+                    }}
                   >
                     <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                       <path
