@@ -16,6 +16,9 @@ export interface User {
   league: "bronze" | "silver" | "gold" | "platinum" | "diamond";
   dailyStreak: number;
   lives: number;
+  lessonsCompleted: number;
+  quizzesCompleted: number;
+  aiPracticesCompleted: number;
 }
 
 interface AuthState {
@@ -41,6 +44,9 @@ function mapApiUser(u: ApiUser): User {
     league: u.league.toLowerCase() as User["league"],
     dailyStreak: u.dailyStreak,
     lives: u.lives,
+    lessonsCompleted: u.lessonsCompleted ?? 0,
+    quizzesCompleted: u.quizzesCompleted ?? 0,
+    aiPracticesCompleted: u.aiPracticesCompleted ?? 0,
   };
 }
 

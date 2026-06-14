@@ -85,6 +85,33 @@ def _lesson_context(user):
     )
 
 
+def compute_current_streak(user) -> int:
+    """Consecutive days (ending today or yesterday) the user has any lesson activity.
+
+    The stored `user.streak` column was never incremented, so badges/streak widgets
+    read a permanent 0. This derives the streak from real activity (UserLessonStatus
+    timestamps, Jakarta tz) instead — unbounded, unlike the weekly _build_streak_data.
+    """
+    today = timezone.localtime(timezone.now(), JAKARTA_TIMEZONE).date()
+    dates = set()
+    for status in user.lesson_statuses.only("last_updated"):
+        if status.last_updated:
+            dates.add(timezone.localtime(status.last_updated, JAKARTA_TIMEZONE).date())
+    if not dates:
+        return 0
+    cursor = today
+    if cursor not in dates:
+        # Allow the streak to still count if the last activity was yesterday.
+        cursor = today - timedelta(days=1)
+        if cursor not in dates:
+            return 0
+    streak = 0
+    while cursor in dates:
+        streak += 1
+        cursor -= timedelta(days=1)
+    return streak
+
+
 def _build_streak_data(user):
     # ----------------- WEEKLY STREAK (Monday -> Sunday of current week) -----------------
     # Preserve the original Flask routes.py behavior, which calculated streaks in Asia/Jakarta.

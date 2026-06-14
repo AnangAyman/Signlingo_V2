@@ -9,6 +9,8 @@ import { RewardCard } from "./RewardCard";
 import { useGamificationStore } from "./useGamificationStore";
 import { useSoundEffect } from "@/hooks/useSoundEffect";
 import { useTranslation } from "react-i18next";
+import { gamificationApi } from "@/lib/api";
+import { useAuthStore } from "@/lib/store";
 
 interface RewardsShopProps {
   reducedMotion?: boolean;
@@ -17,10 +19,11 @@ interface RewardsShopProps {
 export function RewardsShop({ reducedMotion = false }: RewardsShopProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { rewards, userProgress, redeemReward } = useGamificationStore();
+  const { refreshUser } = useAuthStore();
   const { play } = useSoundEffect();
   const { t } = useTranslation("gamification");
 
-  const handleRedeem = (rewardId: string) => {
+  const handleRedeem = async (rewardId: string) => {
     const reward = rewards.find((r) => r.id === rewardId);
     if (!reward) return;
 
@@ -42,6 +45,14 @@ export function RewardsShop({ reducedMotion = false }: RewardsShopProps) {
     if (success) {
       play("/sounds/coin.mp3");
       toast.success(t("rewards.redeemedToast", { name: rewardName, cost: reward.cost }));
+      try {
+        // Persist the XP spend so it survives navigation/reload, then re-sync
+        // the authoritative balance from the server.
+        await gamificationApi.spendXp(reward.cost);
+        await refreshUser();
+      } catch {
+        // Network/auth error: keep the optimistic deduction; next sync corrects it.
+      }
     }
   };
 

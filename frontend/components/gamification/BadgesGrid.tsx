@@ -192,7 +192,9 @@ export function BadgesGrid({ badges, reducedMotion = false }: BadgesGridProps) {
                     <Check className="w-6 h-6 text-green-500 mx-auto mb-2" />
                     <p className="text-sm text-green-500">{t("badges.earnedOn")}</p>
                     <p className="text-foreground font-medium">
-                      {selectedBadge.earnedAt?.toLocaleDateString()}
+                      {selectedBadge.earnedAt
+                        ? new Date(selectedBadge.earnedAt).toLocaleDateString()
+                        : ""}
                     </p>
                   </div>
                 )}

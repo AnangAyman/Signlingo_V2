@@ -13,12 +13,13 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
-from legacy_port.models import User
+from legacy_port.models import User, UserLessonStatus
 from legacy_port.services import generate_username, get_initials
 from shared_port.view_helpers import (
     _current_user,
     _leaderboard_lists,
     _lesson_context,
+    compute_current_streak,
 )
 
 
@@ -36,9 +37,14 @@ def _user_to_json(user: User) -> dict:
         "bestGameScore": user.best_game_score,
         "level": max(1, user.points // 500 + 1),
         "league": user.league.lower(),
-        "dailyStreak": user.streak,
+        "dailyStreak": compute_current_streak(user),
         "lives": user.lives,
         "username": user.username or "",
+        "lessonsCompleted": UserLessonStatus.objects.filter(
+            user=user, status="completed"
+        ).count(),
+        "quizzesCompleted": user.quizzes_completed,
+        "aiPracticesCompleted": user.ai_practices_completed,
     }
 
 
@@ -149,6 +155,91 @@ def api_add_xp(request):
     amount = max(0, min(amount, 1000))
 
     user.points = (user.points or 0) + amount
+    user.save(update_fields=["points"])
+    return JsonResponse({"success": True, "xp": user.points})
+
+
+@csrf_exempt
+def api_reset_progress(request):
+    """Reset the current user's gamification state to a clean slate.
+
+    Backs the "reset demo state" button so a fresh demo recording starts from
+    zero (XP, best game score, streak) instead of injecting fake demo numbers.
+    Lesson completion history is intentionally left untouched.
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+    user = _current_user(request)
+    if user is None:
+        return JsonResponse({"error": "Not authenticated"}, status=401)
+
+    user.points = 0
+    user.best_game_score = 0
+    user.streak = 0
+    user.quizzes_completed = 0
+    user.ai_practices_completed = 0
+    user.save(update_fields=[
+        "points", "best_game_score", "streak", "quizzes_completed", "ai_practices_completed",
+    ])
+    # Also clear lesson progress so a demo run starts from a fully clean slate.
+    UserLessonStatus.objects.filter(user=user).delete()
+    return JsonResponse({"success": True, "user": _user_to_json(user)})
+
+
+@csrf_exempt
+def api_quiz_completed(request):
+    """Increment the user's completed-quiz counter (drives the quiz badge)."""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+    user = _current_user(request)
+    if user is None:
+        return JsonResponse({"error": "Not authenticated"}, status=401)
+
+    user.quizzes_completed = (user.quizzes_completed or 0) + 1
+    user.save(update_fields=["quizzes_completed"])
+    return JsonResponse({"success": True, "quizzesCompleted": user.quizzes_completed})
+
+
+@csrf_exempt
+def api_ai_practice_completed(request):
+    """Increment the AI camera practice counter (drives the AI Explorer badge)."""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+    user = _current_user(request)
+    if user is None:
+        return JsonResponse({"error": "Not authenticated"}, status=401)
+
+    user.ai_practices_completed = (user.ai_practices_completed or 0) + 1
+    user.save(update_fields=["ai_practices_completed"])
+    return JsonResponse({"success": True, "aiPracticesCompleted": user.ai_practices_completed})
+
+
+@csrf_exempt
+def api_spend_xp(request):
+    """Deduct XP from the user's points when redeeming a reward in the shop.
+
+    Mirror of `api_add_xp`: the rewards shop decrements XP client-side, but that
+    gain was never written back, so the spend reverted on the next server re-sync.
+    This commits the deduction (never below zero).
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+    user = _current_user(request)
+    if user is None:
+        return JsonResponse({"error": "Not authenticated"}, status=401)
+
+    data = _parse_json_body(request)
+    try:
+        amount = int(data.get("amount", 0))
+    except (TypeError, ValueError):
+        amount = 0
+    amount = max(0, min(amount, 1000))
+
+    current = user.points or 0
+    if amount > current:
+        return JsonResponse({"error": "Not enough XP", "xp": current}, status=400)
+
+    user.points = current - amount
     user.save(update_fields=["points"])
     return JsonResponse({"success": True, "xp": user.points})
 

@@ -44,6 +44,10 @@ export interface ApiUser {
   dailyStreak: number;
   lives: number;
   username: string;
+  bestGameScore?: number;
+  lessonsCompleted?: number;
+  quizzesCompleted?: number;
+  aiPracticesCompleted?: number;
 }
 
 export interface ApiLeaderboardEntry {
@@ -236,6 +240,31 @@ export const gamificationApi = {
     request<{ success: boolean; xp: number }>("/api/add-xp", {
       method: "POST",
       body: JSON.stringify({ amount }),
+    }),
+
+  // Deduct XP when redeeming a reward (server clamps at zero).
+  spendXp: (amount: number) =>
+    request<{ success: boolean; xp: number }>("/api/spend-xp", {
+      method: "POST",
+      body: JSON.stringify({ amount }),
+    }),
+
+  // Reset the user's gamification state to zero (for the demo reset button).
+  resetProgress: () =>
+    request<{ success: boolean }>("/api/reset-progress", {
+      method: "POST",
+    }),
+
+  // Increment the completed-quiz counter (drives the quiz badge).
+  quizCompleted: () =>
+    request<{ success: boolean; quizzesCompleted: number }>("/api/quiz-completed", {
+      method: "POST",
+    }),
+
+  // Increment the AI camera practice counter (drives the AI Explorer badge).
+  aiPracticeCompleted: () =>
+    request<{ success: boolean; aiPracticesCompleted: number }>("/api/ai-practice-completed", {
+      method: "POST",
     }),
 
   // Record the best Magic Touch game score (server keeps the max).
