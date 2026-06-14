@@ -11,6 +11,7 @@ import {
   Gamepad2,
   BookOpen,
   Bot,
+  Languages,
   Bell,
   Settings,
   User,
@@ -34,6 +35,7 @@ const NAV_LINK_CONFIGS = [
   { href: "/leaderboard", labelKey: "appNav.leaderboard", icon: Trophy },
   { href: "/gamification", labelKey: "appNav.achievements", icon: Gamepad2 },
   { href: "/ai-game", labelKey: "appNav.aiGame", icon: Bot },
+  { href: "/translation", labelKey: "appNav.translation", icon: Languages },
 ] as const;
 
 export function AppHeader() {

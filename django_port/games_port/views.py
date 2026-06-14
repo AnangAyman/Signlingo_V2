@@ -243,11 +243,19 @@ def translate_sequence(request):
     if redirect_response:
         return JsonResponse({"error": "unauthorized"}, status=401)
 
+    # Map the frontend UI language code to a Gemini-friendly language name so the
+    # result can carry a localized translation alongside the Indonesian sentence.
+    TARGET_LANGUAGES = {"ko": "Korean", "en": "English"}
+
     try:
         payload = json.loads(request.body or "{}")
         words = payload.get("words", [])
         if not words:
             return JsonResponse({"error": "No words provided."}, status=400)
+
+        # Optional UI language ("ko"/"en"). "id" or unknown → no extra translation.
+        target_code = str(payload.get("target", "") or "").lower()
+        target_language = TARGET_LANGUAGES.get(target_code)
 
         if not genai:
             return JsonResponse({"error": "google-genai library is not installed."}, status=500)
@@ -257,29 +265,50 @@ def translate_sequence(request):
             return JsonResponse({"error": "GEMINI_API_KEY environment variable is not set."}, status=500)
 
         client = genai.Client(api_key=api_key)
-        prompt = (
-            "You are given a list of words. Combine them into one natural Indonesian sentence.\n"
-            "Add connecting words such as 'dan', 'karena', 'lalu', 'di', or 'ke' when needed. "
-            "Do not just list the words.\n\n"
-            "Examples:\n"
-            "Words: Saya, Makan, Tidur\n"
-            'Translation: {"translation": "Saya makan dan tidur."}\n\n'
-            "Words: Saya, Makan, Tidur, Mereka, Bingung\n"
-            'Translation: {"translation": "Mereka bingung karena saya makan dan tidur."}\n\n'
-            "Words: Bapak, Beli, Baju, Celana\n"
-            'Translation: {"translation": "Bapak membeli baju dan celana."}\n\n'
-            "Now process this sequence:\n"
-            f"Words: {', '.join(str(word) for word in words)}\n"
-        )
+
+        if target_language:
+            prompt = (
+                "You are given a list of words. Combine them into one natural Indonesian sentence.\n"
+                "Add connecting words such as 'dan', 'karena', 'lalu', 'di', or 'ke' when needed. "
+                "Do not just list the words.\n"
+                f'Then translate that Indonesian sentence into {target_language} for the "localized" field.\n\n'
+                "Examples:\n"
+                "Words: Saya, Makan, Tidur\n"
+                'Translation: {"translation": "Saya makan dan tidur.", "localized": "<the sentence in '
+                f'{target_language}>"}}\n\n'
+                "Now process this sequence:\n"
+                f"Words: {', '.join(str(word) for word in words)}\n"
+            )
+            system_instruction = (
+                'Respond only with a valid JSON object containing the "translation" key '
+                f'(natural Indonesian) and the "localized" key (the same sentence in {target_language}). '
+                "Never output markdown formatting or additional commentary."
+            )
+        else:
+            prompt = (
+                "You are given a list of words. Combine them into one natural Indonesian sentence.\n"
+                "Add connecting words such as 'dan', 'karena', 'lalu', 'di', or 'ke' when needed. "
+                "Do not just list the words.\n\n"
+                "Examples:\n"
+                "Words: Saya, Makan, Tidur\n"
+                'Translation: {"translation": "Saya makan dan tidur."}\n\n'
+                "Words: Saya, Makan, Tidur, Mereka, Bingung\n"
+                'Translation: {"translation": "Mereka bingung karena saya makan dan tidur."}\n\n'
+                "Words: Bapak, Beli, Baju, Celana\n"
+                'Translation: {"translation": "Bapak membeli baju dan celana."}\n\n'
+                "Now process this sequence:\n"
+                f"Words: {', '.join(str(word) for word in words)}\n"
+            )
+            system_instruction = (
+                'Respond only with a valid JSON object containing the "translation" key. '
+                "Never output markdown formatting or additional commentary."
+            )
 
         response = client.models.generate_content(
             model="gemini-2.5-flash",
             contents=prompt,
             config={
-                "system_instruction": (
-                    'Respond only with a valid JSON object containing the "translation" key. '
-                    "Never output markdown formatting or additional commentary."
-                ),
+                "system_instruction": system_instruction,
                 "response_mime_type": "application/json",
             },
         )
@@ -293,9 +322,9 @@ def translate_sequence(request):
             raw_text = raw_text[:-3]
         raw_text = raw_text.strip()
 
+        response_data = {}
         try:
             response_data = json.loads(raw_text)
-            translated_text = response_data.get("translation", raw_text)
         except Exception:
             import re
 
@@ -303,14 +332,21 @@ def translate_sequence(request):
             if json_match:
                 try:
                     response_data = json.loads(json_match.group())
-                    translated_text = response_data.get("translation", raw_text)
                 except Exception:
-                    translated_text = raw_text
-            else:
-                translated_text = raw_text
+                    response_data = {}
+
+        translated_text = response_data.get("translation", raw_text) if response_data else raw_text
+        localized_text = response_data.get("localized", "") if response_data else ""
 
         request.session["today_login"] = True
-        return JsonResponse({"translated": translated_text, "user_id": user.id})
+        return JsonResponse(
+            {
+                "translated": translated_text,
+                "localized": localized_text,
+                "targetLang": target_code if target_language else "",
+                "user_id": user.id,
+            }
+        )
     except Exception as exc:
         print(f"Translation Error: {exc}")
         return JsonResponse({"error": "Translation failed due to an error."}, status=500)

@@ -21,7 +21,6 @@ import {
   Play,
 } from "lucide-react";
 import Link from "next/link";
-import { backendPath } from "@/lib/api";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -42,7 +41,7 @@ export default function DashboardPage() {
   const quickActions = [
     { icon: Play, label: t("actions.continueLearning"), href: "/lessons", color: "text-primary", external: false },
     { icon: BookOpen, label: t("actions.practiceCamera"), href: "/ai-game", color: "text-secondary", external: false },
-    { icon: Languages, label: t("actions.translationMode"), href: backendPath("/translation_mode"), color: "text-violet-500", external: true },
+    { icon: Languages, label: t("actions.translationMode"), href: "/translation", color: "text-violet-500", external: false },
     { icon: Trophy, label: t("actions.viewAchievements"), href: "/gamification", color: "text-amber-500", external: false },
   ];
 

@@ -232,6 +232,38 @@ export const gameApi = {
 };
 
 // ---------------------------------------------------------------------------
+// Translation mode — GRU sequence prediction + Gemini sentence translation
+// ---------------------------------------------------------------------------
+
+export interface ApiGruPrediction {
+  result: string;
+  confidence: number;
+  error?: string;
+}
+
+export const translationApi = {
+  // Send a 30-frame sequence of normalized MediaPipe keypoints to the GRU model.
+  predictGru: (sequence: number[][]) =>
+    request<ApiGruPrediction>("/predict_gru", {
+      method: "POST",
+      body: JSON.stringify({ sequence }),
+    }),
+
+  // Combine the recognized words into a natural Indonesian sentence (Gemini).
+  // Pass the UI language ("ko"/"en") to also receive a localized translation.
+  translateSequence: (words: string[], target?: string) =>
+    request<{
+      translated: string;
+      localized?: string;
+      targetLang?: string;
+      user_id?: string;
+    }>("/translate_sequence", {
+      method: "POST",
+      body: JSON.stringify({ words, target }),
+    }),
+};
+
+// ---------------------------------------------------------------------------
 // Gamification — persist earned XP to the backend (user.points)
 // ---------------------------------------------------------------------------
 

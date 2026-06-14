@@ -1,0 +1,47 @@
+{
+  "pageTitle": "번역 모드",
+  "badge": "수어 → 텍스트",
+  "title": "실시간 수어 번역",
+  "subtitle": "수어를 단어 단위로 인식한 뒤, 자연스러운 인도네시아어 문장으로 번역하세요.",
+  "camera": {
+    "title": "카메라",
+    "starting": "카메라를 켜는 중…",
+    "loadingModel": "인식 모델을 불러오는 중…",
+    "permissionHint": "수어를 시작하려면 카메라 접근을 허용하세요.",
+    "recordHint": "버튼을 누르거나 Space 키로 수어를 녹화하세요 (약 1.5초)."
+  },
+  "status": {
+    "ready": "준비됨",
+    "recording": "녹화 중…",
+    "predicting": "예측 중…",
+    "tooLow": "신뢰도가 낮습니다 — 다시 시도하세요",
+    "error": "예측 오류"
+  },
+  "buttons": {
+    "record": "수어 녹화",
+    "recording": "녹화 중…",
+    "translate": "번역하기",
+    "translating": "번역 중…",
+    "clear": "지우기",
+    "speak": "음성 재생",
+    "removeWord": "단어 삭제"
+  },
+  "words": {
+    "title": "인식된 단어",
+    "empty": "아직 녹화된 수어가 없습니다. 수어를 녹화하면 여기에 추가됩니다."
+  },
+  "result": {
+    "title": "번역 결과",
+    "indonesianLabel": "인도네시아어",
+    "localizedLabel": "한국어",
+    "empty": "번역된 문장이 여기에 표시됩니다."
+  },
+  "errors": {
+    "modelLoadFailed": "인식 모델을 불러오지 못했습니다. 연결을 확인하고 새로고침하세요.",
+    "cameraUnavailable": "이 브라우저에서는 카메라를 사용할 수 없습니다.",
+    "cameraDenied": "카메라 접근이 거부되었습니다. 브라우저 설정에서 허용하세요.",
+    "recordFirst": "먼저 수어를 하나 이상 녹화하세요.",
+    "translationFailed": "번역에 실패했습니다. 다시 시도하세요.",
+    "ttsUnsupported": "이 브라우저는 음성 합성을 지원하지 않습니다."
+  }
+}
