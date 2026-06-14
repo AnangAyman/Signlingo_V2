@@ -33,6 +33,7 @@ def _user_to_json(user: User) -> dict:
         "name": user.name,
         "email": user.email,
         "xp": user.points,
+        "bestGameScore": user.best_game_score,
         "level": max(1, user.points // 500 + 1),
         "league": user.league.lower(),
         "dailyStreak": user.streak,
@@ -152,6 +153,28 @@ def api_add_xp(request):
     return JsonResponse({"success": True, "xp": user.points})
 
 
+@csrf_exempt
+def api_game_score(request):
+    """Record the best Magic Touch game score (shown next to XP on the leaderboard)."""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+    user = _current_user(request)
+    if user is None:
+        return JsonResponse({"error": "Not authenticated"}, status=401)
+
+    data = _parse_json_body(request)
+    try:
+        score = int(data.get("score", 0))
+    except (TypeError, ValueError):
+        score = 0
+    score = max(0, min(score, 1_000_000))
+
+    if score > (user.best_game_score or 0):
+        user.best_game_score = score
+        user.save(update_fields=["best_game_score"])
+    return JsonResponse({"success": True, "bestGameScore": user.best_game_score})
+
+
 # ---------------------------------------------------------------------------
 # Dashboard
 # ---------------------------------------------------------------------------
@@ -207,6 +230,7 @@ def api_leaderboard(request):
             "username": u.username or u.name,
             "xp": u.points,
             "weeklyXp": u.points,
+            "bestGameScore": u.best_game_score,
             "isCurrentUser": u.id == user.id,
             "isFriend": u.id in friend_ids,
             "league": u.league.lower(),

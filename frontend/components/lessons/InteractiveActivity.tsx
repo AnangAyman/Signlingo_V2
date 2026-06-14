@@ -24,6 +24,7 @@ import { Progress } from "@/components/ui/progress";
 import {
   backendPath,
   gameApi,
+  gamificationApi,
   type ApiMlQuestion,
   type ApiQuizQuestion,
 } from "@/lib/api";
@@ -612,6 +613,8 @@ export function MagicTouchPracticeActivity({ lessonKey, onCompleted }: ActivityP
           accuracy: Math.min(100, finalScore),
           skipped: false,
         });
+        // Persist the best Magic Touch score for the leaderboard.
+        await gamificationApi.saveGameScore(finalScore);
         await onCompleted();
         setFeedback({
           type: "correct",

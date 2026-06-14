@@ -52,6 +52,7 @@ export interface ApiLeaderboardEntry {
   username: string;
   xp: number;
   weeklyXp: number;
+  bestGameScore?: number;
   isCurrentUser: boolean;
   isFriend: boolean;
   league: string;
@@ -235,6 +236,13 @@ export const gamificationApi = {
     request<{ success: boolean; xp: number }>("/api/add-xp", {
       method: "POST",
       body: JSON.stringify({ amount }),
+    }),
+
+  // Record the best Magic Touch game score (server keeps the max).
+  saveGameScore: (score: number) =>
+    request<{ success: boolean; bestGameScore: number }>("/api/game-score", {
+      method: "POST",
+      body: JSON.stringify({ score }),
     }),
 };
 

@@ -256,6 +256,16 @@ function LeaderboardRowComponent({
         )}
       </div>
 
+      {/* ── best game score (Magic Touch) ── */}
+      {entry.bestGameScore != null && entry.bestGameScore > 0 && (
+        <div className="text-right shrink-0">
+          <p className="text-sm font-bold text-foreground">
+            {formatNumber(entry.bestGameScore)}
+          </p>
+          <p className="text-xs text-muted-foreground" aria-label="game score">🎈</p>
+        </div>
+      )}
+
       {/* ── XP ── */}
       <div className="text-right shrink-0">
         <p

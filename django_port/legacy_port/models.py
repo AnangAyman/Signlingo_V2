@@ -15,6 +15,8 @@ class User(models.Model):
     password = models.CharField(max_length=128)
     google_id = models.CharField(max_length=128, blank=True, null=True, unique=True)
     points = models.IntegerField(default=0)
+    # Best score achieved in the Magic Touch balloon game (shown on the leaderboard).
+    best_game_score = models.IntegerField(default=0)
     is_verified = models.BooleanField(default=False)
     lives = models.IntegerField(default=5)
     username = models.CharField(max_length=80, unique=True, blank=True, null=True)

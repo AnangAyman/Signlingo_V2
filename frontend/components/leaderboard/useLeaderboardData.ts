@@ -17,6 +17,7 @@ export interface LeaderboardEntry {
   username: string;
   xp: number;
   weeklyXp?: number;
+  bestGameScore?: number;
   avatarUrl?: string;
   countryCode?: string;
   isOnline: boolean;
@@ -53,6 +54,7 @@ function mapEntry(e: ApiLeaderboardEntry): LeaderboardEntry {
     username: e.username,
     xp: e.xp,
     weeklyXp: e.weeklyXp,
+    bestGameScore: e.bestGameScore,
     isOnline: e.isOnline,
     weeklyChange: e.weeklyChange,
     isFriend: e.isFriend,
