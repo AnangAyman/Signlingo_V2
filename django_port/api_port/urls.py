@@ -7,6 +7,8 @@ urlpatterns = [
     path("api/auth/register", views.api_register, name="api_register"),
     path("api/auth/logout", views.api_logout, name="api_logout"),
     path("api/auth/me", views.api_me, name="api_me"),
+    # Gamification — persist earned XP to the database
+    path("api/add-xp", views.api_add_xp, name="api_add_xp"),
     # Dashboard
     path("api/dashboard", views.api_dashboard, name="api_dashboard"),
     # Leaderboard

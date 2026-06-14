@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import {
@@ -689,24 +690,30 @@ export function MagicTouchPracticeActivity({ lessonKey, onCompleted }: ActivityP
     let hit = false;
     let clearedEnemy = false;
 
-    setEnemies((current) => {
-      const matchingEnemy = current
-        .filter((enemy) => enemy.balloons[0] === letter)
-        .sort((a, b) => b.y - a.y)[0];
+    // flushSync forces the enemies updater to run synchronously so the `hit` /
+    // `clearedEnemy` flags it sets are available immediately below. Without it
+    // React defers the updater and the flags are still false when we read them,
+    // so the score, defeated count, and feedback never update on a hit.
+    flushSync(() => {
+      setEnemies((current) => {
+        const matchingEnemy = current
+          .filter((enemy) => enemy.balloons[0] === letter)
+          .sort((a, b) => b.y - a.y)[0];
 
-      if (!matchingEnemy) return current;
+        if (!matchingEnemy) return current;
 
-      hit = true;
-      return current.flatMap((enemy) => {
-        if (enemy.id !== matchingEnemy.id) return [enemy];
+        hit = true;
+        return current.flatMap((enemy) => {
+          if (enemy.id !== matchingEnemy.id) return [enemy];
 
-        const remainingBalloons = enemy.balloons.slice(1);
-        if (remainingBalloons.length === 0) {
-          clearedEnemy = true;
-          return [];
-        }
+          const remainingBalloons = enemy.balloons.slice(1);
+          if (remainingBalloons.length === 0) {
+            clearedEnemy = true;
+            return [];
+          }
 
-        return [{ ...enemy, balloons: remainingBalloons }];
+          return [{ ...enemy, balloons: remainingBalloons }];
+        });
       });
     });
 

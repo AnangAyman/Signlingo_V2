@@ -125,6 +125,33 @@ def api_me(request):
     return JsonResponse({"user": _user_to_json(user)})
 
 
+@csrf_exempt
+def api_add_xp(request):
+    """Persist earned XP to the user's points so it survives navigation/reload.
+
+    XP shown in the app is `user.points`; client-side gamification gains were not
+    written back, so they reset whenever the store re-synced from the server.
+    This endpoint commits a gain to the database.
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+    user = _current_user(request)
+    if user is None:
+        return JsonResponse({"error": "Not authenticated"}, status=401)
+
+    data = _parse_json_body(request)
+    try:
+        amount = int(data.get("amount", 0))
+    except (TypeError, ValueError):
+        amount = 0
+    # Clamp to a sane per-call range to avoid runaway or abusive values.
+    amount = max(0, min(amount, 1000))
+
+    user.points = (user.points or 0) + amount
+    user.save(update_fields=["points"])
+    return JsonResponse({"success": True, "xp": user.points})
+
+
 # ---------------------------------------------------------------------------
 # Dashboard
 # ---------------------------------------------------------------------------

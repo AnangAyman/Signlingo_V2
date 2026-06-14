@@ -28,9 +28,16 @@ export function LanguageToggle({ className }: LanguageToggleProps) {
       aria-label={t("language.toggle")}
       className={`flex items-center gap-1.5 font-semibold text-sm px-2.5 h-8 ${className ?? ""}`}
     >
-      <span className="text-base leading-none" aria-hidden>
-        {isKorean ? "🇺🇸" : "🇰🇷"}
-      </span>
+      {/* Emoji flags do not render on Windows, so use local SVG flag images. */}
+      <img
+        src={isKorean ? "/flags/us.svg" : "/flags/kr.svg"}
+        alt=""
+        width={20}
+        height={14}
+        className="rounded-[2px] shadow-sm"
+        aria-hidden
+      />
+
       <span>{isKorean ? t("language.en") : t("language.ko")}</span>
     </Button>
   );

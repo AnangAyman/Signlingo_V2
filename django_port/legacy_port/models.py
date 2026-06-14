@@ -27,13 +27,15 @@ class User(models.Model):
 
     @property
     def league(self) -> str:
-        if self.points < 1000:
+        # Thresholds must match the frontend league config (components/leagues/useLeagueData.ts)
+        # so a tier unlocked client-side stays unlocked after re-fetching from the server.
+        if self.points < 500:
             return "Bronze"
-        if self.points < 3000:
+        if self.points < 1500:
             return "Silver"
-        if self.points < 6000:
+        if self.points < 3000:
             return "Gold"
-        if self.points < 10000:
+        if self.points < 5000:
             return "Platinum"
         return "Diamond"
 

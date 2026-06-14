@@ -60,11 +60,13 @@ def _google_entry_route(request) -> str:
 
 
 def _google_redirect_uri(request) -> str:
+    # When GOOGLE_REDIRECT_URI is explicitly configured, trust it. Behind a proxy
+    # (e.g. Vercel rewrites in front of Cloud Run) request.get_host() is the
+    # internal backend host, so a host match check would wrongly discard the
+    # configured public callback URL.
     configured = (settings.GOOGLE_REDIRECT_URI or "").strip()
     if configured:
-        parsed = urlparse(configured)
-        if parsed.netloc == request.get_host():
-            return configured
+        return configured
     return request.build_absolute_uri(reverse("auth:google_callback"))
 
 

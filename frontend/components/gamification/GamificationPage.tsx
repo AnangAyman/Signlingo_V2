@@ -14,6 +14,7 @@ import { useGamificationStore } from "./useGamificationStore";
 import { AppHeader } from "@/components/app-header";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/lib/store";
+import { gamificationApi } from "@/lib/api";
 
 interface GamificationPageProps {
   /** Optionally force reduced-motion (defaults to system preference). */
@@ -36,7 +37,7 @@ export function GamificationPage({
     syncFromUser,
     resetDemo,
   } = useGamificationStore();
-  const { user } = useAuthStore();
+  const { user, refreshUser } = useAuthStore();
   const { t } = useTranslation("gamification");
 
   // Detect system reduced-motion preference
@@ -71,8 +72,17 @@ export function GamificationPage({
     }
   }, [user, syncFromUser]);
 
-  const handleAddXp = (amount: number) => {
+  const handleAddXp = async (amount: number) => {
+    // Optimistic local update (instant feedback + level-up animation).
     addXp(amount, "demo");
+    try {
+      // Persist to the backend so the XP survives navigation/reload, then pull
+      // the authoritative value back (syncFromUser reconciles the store).
+      await gamificationApi.addXp(amount);
+      await refreshUser();
+    } catch {
+      // Network/auth error: keep the optimistic value; next sync will correct it.
+    }
   };
 
   return (

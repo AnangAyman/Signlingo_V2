@@ -20,6 +20,8 @@ import {
   Calendar,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { gamificationApi } from "@/lib/api";
+import { useAuthStore } from "@/lib/store";
 import { LeagueCard } from "./LeagueCard";
 import { PromotionAnimation } from "./PromotionAnimation";
 import { DemotionWarning } from "./DemotionWarning";
@@ -74,11 +76,20 @@ export default function LeagueTiers({
     return () => mediaQuery.removeEventListener("change", handler);
   }, []);
 
+  const { refreshUser } = useAuthStore();
+
   const handleAddXp = useCallback(
-    (amount: number) => {
-      addXp(amount);
+    async (amount: number) => {
+      addXp(amount); // local league UI (promotion animation, weekly XP)
+      try {
+        // Persist to the backend (user.points) so the XP survives navigation/reload.
+        await gamificationApi.addXp(amount);
+        await refreshUser();
+      } catch {
+        // Keep the optimistic local value on failure; next sync corrects it.
+      }
     },
-    [addXp]
+    [addXp, refreshUser]
   );
 
   if (loading) {

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 24" role="img" aria-label="South Korea flag">
+  <rect width="36" height="24" fill="#fff"/>
+  <!-- Taegeuk -->
+  <circle cx="18" cy="12" r="6" fill="#cd2e3a"/>
+  <path d="M18,6 A3,3 0 0,1 18,12 A3,3 0 0,0 18,18 A6,6 0 0,1 18,6 Z" fill="#0047a0"/>
+  <!-- Trigrams -->
+  <g fill="#000">
+    <!-- top-left: geon (3 solid) -->
+    <rect x="3" y="4" width="6" height="1"/>
+    <rect x="3" y="6" width="6" height="1"/>
+    <rect x="3" y="8" width="6" height="1"/>
+    <!-- top-right: gam (broken, solid, broken) -->
+    <rect x="27" y="4" width="2.5" height="1"/><rect x="30.5" y="4" width="2.5" height="1"/>
+    <rect x="27" y="6" width="6" height="1"/>
+    <rect x="27" y="8" width="2.5" height="1"/><rect x="30.5" y="8" width="2.5" height="1"/>
+    <!-- bottom-left: ri (solid, broken, solid) -->
+    <rect x="3" y="15" width="6" height="1"/>
+    <rect x="3" y="17" width="2.5" height="1"/><rect x="5.5" y="17" width="2.5" height="1"/>
+    <rect x="3" y="19" width="6" height="1"/>
+    <!-- bottom-right: gon (3 broken) -->
+    <rect x="27" y="15" width="2.5" height="1"/><rect x="30.5" y="15" width="2.5" height="1"/>
+    <rect x="27" y="17" width="2.5" height="1"/><rect x="30.5" y="17" width="2.5" height="1"/>
+    <rect x="27" y="19" width="2.5" height="1"/><rect x="30.5" y="19" width="2.5" height="1"/>
+  </g>
+</svg>

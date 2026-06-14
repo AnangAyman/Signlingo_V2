@@ -1,31 +1,34 @@
-# Use the specific Python 3.10.4 runtime as the base image. Keep parity with the Django container.
+# Cloud Run / container image for the SignLingo Django + ML backend.
+# Python 3.10 base keeps parity with the local environment.
 FROM python:3.10.4-slim
 
-# Set environment variables.
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-ENV MPLCONFIGDIR=/app/django_instance/.matplotlib
+# Cloud Run's filesystem is read-only except /tmp; keep matplotlib's cache writable.
+ENV MPLCONFIGDIR=/tmp/matplotlib
 
-# Set the working directory inside the container.
 WORKDIR /app
 
-# Install system dependencies.
+# System libs required by OpenCV / MediaPipe.
 RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the Python requirements file.
 COPY requirements.txt ./
-
-# Install Python dependencies.
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application's code.
 COPY . .
 
-# Expose the port that the Django app runs on.
-EXPOSE 8000
+# Bake static files into the image at build time (no DB needed).
+# A dummy secret keeps settings importable during collectstatic.
+RUN DJANGO_SECRET_KEY=build-time-only DJANGO_DEBUG=false \
+    python django_port/manage.py collectstatic --noinput
 
-# Run migrations, seed starter data, collect static files, and launch Gunicorn.
-CMD ["sh", "-c", "python django_port/manage.py migrate && python django_port/manage.py bootstrap_legacy_data && python django_port/manage.py collectstatic --noinput && gunicorn signlingo_django.wsgi:application --chdir django_port --bind 0.0.0.0:${PORT:-8000}"]
+EXPOSE 8080
+
+# Cloud Run injects PORT (8080). Migrations are NOT run here — they run once as a
+# separate step (Cloud Run Job or local) so cold starts stay fast.
+# Single worker keeps the TensorFlow model's memory footprint low; threads handle
+# concurrent requests while TF releases the GIL during inference.
+CMD ["sh", "-c", "gunicorn signlingo_django.wsgi:application --chdir django_port --bind 0.0.0.0:${PORT:-8080} --workers 1 --threads 8 --timeout 120"]

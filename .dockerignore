@@ -3,9 +3,13 @@
 venv
 __pycache__
 *.pyc
+.env
+.env.*
 django_instance
 instance
 node_modules
-frontend/.next
-frontend/.vercel
-frontend/node_modules
+frontend
+DOCX
+document
+*.ipynb
+Oracle_DB

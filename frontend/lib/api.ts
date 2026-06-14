@@ -227,6 +227,18 @@ export const gameApi = {
 };
 
 // ---------------------------------------------------------------------------
+// Gamification — persist earned XP to the backend (user.points)
+// ---------------------------------------------------------------------------
+
+export const gamificationApi = {
+  addXp: (amount: number) =>
+    request<{ success: boolean; xp: number }>("/api/add-xp", {
+      method: "POST",
+      body: JSON.stringify({ amount }),
+    }),
+};
+
+// ---------------------------------------------------------------------------
 // Friends / Social
 // ---------------------------------------------------------------------------
 

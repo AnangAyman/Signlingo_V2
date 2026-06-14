@@ -18,6 +18,8 @@ import { UserProfileModal } from "./UserProfileModal";
 import { LeagueOverview } from "./LeagueOverview";
 import { useLeaderboardData, type LeaderboardEntry } from "./useLeaderboardData";
 import { useTranslation } from "react-i18next";
+import { gamificationApi } from "@/lib/api";
+import { useAuthStore } from "@/lib/store";
 
 // ============================================================
 // PROPS
@@ -143,13 +145,21 @@ export default function Leaderboard({
   );
 
   // ── practice XP ──────────────────────────────────────────
+  const { refreshUser } = useAuthStore();
   const handlePractice = useCallback(
-    (_userId: string, amount: number) => {
-      const { changedIds } = addXpToCurrentUser(amount);
+    async (_userId: string, amount: number) => {
+      const { changedIds } = addXpToCurrentUser(amount); // local leaderboard re-rank
       setRankChangedIds(new Set(changedIds));
       toast.success(t("xpEarnedToast", { amount }));
+      try {
+        // Persist to the backend (user.points) so the XP survives navigation/reload.
+        await gamificationApi.addXp(amount);
+        await refreshUser();
+      } catch {
+        // Keep optimistic local value on failure.
+      }
     },
-    [addXpToCurrentUser]
+    [addXpToCurrentUser, refreshUser, t]
   );
 
   // ── user row click ────────────────────────────────────────

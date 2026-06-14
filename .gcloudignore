@@ -3,8 +3,10 @@
 .gcloudignore
 
 .env
+.env.*
 .qodo
 .vscode/
+.codex
 
 venv/
 env/
@@ -12,11 +14,26 @@ env/
 __pycache__/
 *.pyc
 
+# Secrets / keys — must never upload to Cloud Build
+Oracle_DB/
+*.key
+*.pem
+ca.pem
+
+# Frontend is deployed separately on Vercel
+frontend/
+
+# Docs, notebooks, datasets not needed in the backend image
+DOCX/
+document/
+*.ipynb
+
+# Large unused legacy models (current code only loads the two smaller ones)
+models/Best Model.h5
+models/EfficientNet Model.h5
+models/MobileNet Model.h5
+
 django_instance/
 instance/
 static/uploads/
-
 node_modules/
-frontend/node_modules/
-frontend/.next/
-frontend/.vercel/
