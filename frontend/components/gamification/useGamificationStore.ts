@@ -268,7 +268,7 @@ export const useGamificationStore = create<GamificationStore>()(
 
       addXp: (amount: number, source: string) => {
         const { userProgress, checkBadges } = get();
-        let newTotalXp = userProgress.totalXp + amount;
+        const newTotalXp = userProgress.totalXp + amount;
         let newLevel = userProgress.level;
         let newXpToNext = userProgress.xpToNextLevel - amount;
         let showLevelUp = false;

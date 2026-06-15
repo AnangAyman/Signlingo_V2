@@ -335,7 +335,8 @@ class LegacyPortFlowTests(TestCase):
 
         dashboard_body = dashboard_response.content.decode("utf-8")
         roadmap_body = roadmap_response.content.decode("utf-8")
-        self.assertIn("Resume Magic Touch", dashboard_body)
+        self.assertIn("<strong>Magic Touch</strong>", dashboard_body)
+        self.assertIn("Resume Learning", dashboard_body)
         self.assertIn("window.location.href='/magic_touch'", dashboard_body)
         self.assertIn("Next lesson: Magic Touch", roadmap_body)
 
@@ -621,7 +622,8 @@ class LegacyPortFlowTests(TestCase):
         lessons = list(Lesson.objects.order_by("order"))
 
         initial_dashboard = self.client.get("/dashboard").content.decode("utf-8")
-        self.assertIn("Resume Learn with Video", initial_dashboard)
+        self.assertIn("<strong>Learn with Video</strong>", initial_dashboard)
+        self.assertIn("Resume Learning", initial_dashboard)
         self.assertIn("window.location.href='/video_learning'", initial_dashboard)
 
         for expected_title, lesson in zip(
@@ -635,7 +637,8 @@ class LegacyPortFlowTests(TestCase):
             )
             self.assertEqual(mark_response.status_code, 200)
             dashboard_body = self.client.get("/dashboard").content.decode("utf-8")
-            self.assertIn(f"Resume {expected_title}", dashboard_body)
+            self.assertIn(f"<strong>{expected_title}</strong>", dashboard_body)
+            self.assertIn("Resume Learning", dashboard_body)
 
         final_mark_response = self.client.post(
             "/mark-lesson-status",

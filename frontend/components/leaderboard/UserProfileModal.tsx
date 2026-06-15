@@ -32,8 +32,8 @@ export function UserProfileModal({
   isCurrentUser = false,
   reducedMotion = false,
 }: UserProfileModalProps) {
-  if (!user) return null;
   const { t } = useTranslation("leaderboard");
+  if (!user) return null;
 
   const leagueTier =
     user.xp >= 8_000
