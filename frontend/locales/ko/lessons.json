@@ -71,7 +71,9 @@
       "complete": "연습 완료. {{total}}개 수어 중 {{count}}개를 맞혔습니다.",
       "detectedCorrect": "{{result}}를 감지했습니다. 잘했어요.",
       "detectedIncorrect": "{{result}}를 감지했습니다. 목표는 {{answer}}였습니다.",
-      "countdown": "{{seconds}}초 후 캡처를 시작합니다. 준비하세요."
+      "countdown": "{{seconds}}초 후 캡처를 시작합니다. 준비하세요.",
+      "referenceSign": "참조 수어 이미지",
+      "nextSign": "다음 수어"
     },
     "magicTouch": {
       "title": "Magic Touch",

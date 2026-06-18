@@ -9,6 +9,10 @@ urlpatterns = [
     path("api/auth/me", views.api_me, name="api_me"),
     # Gamification — persist earned XP to the database
     path("api/add-xp", views.api_add_xp, name="api_add_xp"),
+    path("api/spend-xp", views.api_spend_xp, name="api_spend_xp"),
+    path("api/reset-progress", views.api_reset_progress, name="api_reset_progress"),
+    path("api/quiz-completed", views.api_quiz_completed, name="api_quiz_completed"),
+    path("api/ai-practice-completed", views.api_ai_practice_completed, name="api_ai_practice_completed"),
     path("api/game-score", views.api_game_score, name="api_game_score"),
     # Dashboard
     path("api/dashboard", views.api_dashboard, name="api_dashboard"),

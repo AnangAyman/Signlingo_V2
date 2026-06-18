@@ -19,6 +19,7 @@ import {
 } from "@/components/lessons/InteractiveActivity";
 import { useAuthStore } from "@/lib/store";
 import { backendPath, lessonsApi, type ApiLesson } from "@/lib/api";
+import { reportQuestAction } from "@/components/gamification/useGamificationStore";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -148,6 +149,8 @@ export default function LessonsPage() {
         setProgress(total ? Math.round((next / total) * 100) : 0);
         return next;
       });
+      // Advance the "complete lessons" daily quest on a genuinely new completion.
+      void reportQuestAction("complete_lesson");
     }
   };
 

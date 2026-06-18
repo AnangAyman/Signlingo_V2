@@ -10,6 +10,7 @@ import enDashboard from "@/locales/en/dashboard.json";
 import enAuth from "@/locales/en/auth.json";
 import enLessons from "@/locales/en/lessons.json";
 import enAiGame from "@/locales/en/ai-game.json";
+import enTranslation from "@/locales/en/translation.json";
 
 import koCommon from "@/locales/ko/common.json";
 import koLeaderboard from "@/locales/ko/leaderboard.json";
@@ -20,6 +21,7 @@ import koDashboard from "@/locales/ko/dashboard.json";
 import koAuth from "@/locales/ko/auth.json";
 import koLessons from "@/locales/ko/lessons.json";
 import koAiGame from "@/locales/ko/ai-game.json";
+import koTranslation from "@/locales/ko/translation.json";
 
 const resources = {
   en: {
@@ -32,6 +34,7 @@ const resources = {
     auth: enAuth,
     lessons: enLessons,
     "ai-game": enAiGame,
+    translation: enTranslation,
   },
   ko: {
     common: koCommon,
@@ -43,6 +46,7 @@ const resources = {
     auth: koAuth,
     lessons: koLessons,
     "ai-game": koAiGame,
+    translation: koTranslation,
   },
 };
 
@@ -51,7 +55,7 @@ if (!i18n.isInitialized) {
     resources,
     lng: "en",
     fallbackLng: "en",
-    ns: ["common", "leaderboard", "gamification", "placeholder", "leagues", "dashboard", "auth", "lessons", "ai-game"],
+    ns: ["common", "leaderboard", "gamification", "placeholder", "leagues", "dashboard", "auth", "lessons", "ai-game", "translation"],
     defaultNS: "common",
     interpolation: {
       escapeValue: false,

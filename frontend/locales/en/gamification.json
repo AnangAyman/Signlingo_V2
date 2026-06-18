@@ -1,178 +1,178 @@
 {
-  "pageTitle": "Achievements",
-  "addXpBtn": "+50 XP",
-  "addXpLargeBtn": "+200 XP",
-  "addXpSmallLabel": "Add 50 XP (demo)",
-  "addXpLargeLabel": "Add 200 XP (demo)",
-  "resetLabel": "Reset demo state",
-  "resetToast": "Demo state reset to defaults.",
-  "xpSummary": {
-    "level": "Level {{level}}",
-    "xpToNext": "{{xp}} XP to next level",
-    "streak": "🔥 {{days}}-day streak"
+ "pageTitle": "Achievements",
+ "addXpBtn": "+50 XP",
+ "addXpLargeBtn": "+200 XP",
+ "addXpSmallLabel": "Add 50 XP (demo)",
+ "addXpLargeLabel": "Add 200 XP (demo)",
+ "resetLabel": "Reset demo state",
+ "resetToast": "Demo state reset to defaults.",
+ "xpSummary": {
+  "level": "Level {{level}}",
+  "xpToNext": "{{xp}} XP to next level",
+  "streak": "🔥 {{days}}-day streak"
+ },
+ "earnMore": {
+  "title": "💡 Earn more XP by:",
+  "items": [
+   "Completing daily quests",
+   "Finishing lessons in the course",
+   "Scoring 80%+ on quizzes",
+   "Practising with the AI camera"
+  ]
+ },
+ "levelCard": {
+  "levelLabel": "Level",
+  "xpLabel": "XP",
+  "xpToNext": "{{xp}} XP to level {{level}}",
+  "streakDays": "{{days}}-day streak!",
+  "keepItUp": "Keep it up!",
+  "dayStreak": "day streak",
+  "celebrateBtn": "Celebrate"
+ },
+ "badges": {
+  "title": "Badges",
+  "newBadgeToast": "New badge unlocked: {{name}}! {{icon}}",
+  "lockedLabel": "locked",
+  "unlockedLabel": "unlocked",
+  "unlockedOn": "Unlocked on {{date}}",
+  "moreToUnlock": "{{remaining}} more to unlock",
+  "unlockRequirement": "{{requirement}} to unlock",
+  "earnedOn": "Earned on",
+  "earnedInline": "Earned {{date}}",
+  "progressLabel": "{{name}} progress",
+  "cardStateLabel": {
+   "locked": "{{name}} badge – locked",
+   "unlocked": "{{name}} badge – unlocked"
   },
-  "earnMore": {
-    "title": "💡 Earn more XP by:",
-    "items": [
-      "Completing daily quests",
-      "Finishing lessons in the course",
-      "Scoring 80%+ on quizzes",
-      "Practising with the AI camera"
-    ]
+  "items": {
+   "first-sign": {
+    "name": "First Sign",
+    "description": "Complete your first lesson",
+    "requirement": "Complete 1 lesson"
+   },
+   "streak-starter": {
+    "name": "Streak Starter",
+    "description": "Maintain a 3-day streak",
+    "requirement": "3-day streak"
+   },
+   "week-warrior": {
+    "name": "Week Warrior",
+    "description": "Maintain a 7-day streak",
+    "requirement": "7-day streak"
+   },
+   "lesson-master": {
+    "name": "Lesson Master",
+    "description": "Complete 10 lessons",
+    "requirement": "Complete 10 lessons"
+   },
+   "quiz-ace": {
+    "name": "Quiz Ace",
+    "description": "Score 100% on 5 quizzes",
+    "requirement": "Perfect score on 5 quizzes"
+   },
+   "bronze-champion": {
+    "name": "Bronze Champion",
+    "description": "Reach the Silver league",
+    "requirement": "Promote from Bronze"
+   },
+   "silver-star": {
+    "name": "Silver Star",
+    "description": "Reach the Gold league",
+    "requirement": "Promote from Silver"
+   },
+   "gold-legend": {
+    "name": "Gold Legend",
+    "description": "Reach the Platinum league",
+    "requirement": "Promote from Gold"
+   },
+   "ai-explorer": {
+    "name": "AI Explorer",
+    "description": "Practice with AI camera 20 times",
+    "requirement": "Use AI camera 20 times"
+   },
+   "month-master": {
+    "name": "Month Master",
+    "description": "Maintain a 30-day streak",
+    "requirement": "30-day streak"
+   }
   },
-  "levelCard": {
-    "levelLabel": "Level",
-    "xpLabel": "XP",
-    "xpToNext": "{{xp}} XP to level {{level}}",
-    "streakDays": "{{days}}-day streak!",
-    "keepItUp": "Keep it up!",
-    "dayStreak": "day streak",
-    "celebrateBtn": "Celebrate"
-  },
-  "badges": {
-    "title": "Badges",
-    "newBadgeToast": "New badge unlocked: {{name}}! {{icon}}",
-    "lockedLabel": "locked",
-    "unlockedLabel": "unlocked",
-    "unlockedOn": "Unlocked on {{date}}",
-    "moreToUnlock": "{{remaining}} more to unlock",
-    "unlockRequirement": "{{requirement}} to unlock",
-    "earnedOn": "Earned on",
-    "earnedInline": "Earned {{date}}",
-    "progressLabel": "{{name}} progress",
-    "cardStateLabel": {
-      "locked": "{{name}} badge – locked",
-      "unlocked": "{{name}} badge – unlocked"
-    },
-    "items": {
-      "first-sign": {
-        "name": "First Sign",
-        "description": "Complete your first lesson",
-        "requirement": "Complete 1 lesson"
-      },
-      "streak-starter": {
-        "name": "Streak Starter",
-        "description": "Maintain a 3-day streak",
-        "requirement": "3-day streak"
-      },
-      "week-warrior": {
-        "name": "Week Warrior",
-        "description": "Maintain a 7-day streak",
-        "requirement": "7-day streak"
-      },
-      "lesson-master": {
-        "name": "Lesson Master",
-        "description": "Complete 10 lessons",
-        "requirement": "Complete 10 lessons"
-      },
-      "quiz-ace": {
-        "name": "Quiz Ace",
-        "description": "Score 100% on 5 quizzes",
-        "requirement": "Perfect score on 5 quizzes"
-      },
-      "bronze-champion": {
-        "name": "Bronze Champion",
-        "description": "Reach the Silver league",
-        "requirement": "Promote from Bronze"
-      },
-      "silver-star": {
-        "name": "Silver Star",
-        "description": "Reach the Gold league",
-        "requirement": "Promote from Silver"
-      },
-      "gold-legend": {
-        "name": "Gold Legend",
-        "description": "Reach the Platinum league",
-        "requirement": "Promote from Gold"
-      },
-      "ai-explorer": {
-        "name": "AI Explorer",
-        "description": "Practice with AI camera 20 times",
-        "requirement": "Use AI camera 20 times"
-      },
-      "month-master": {
-        "name": "Month Master",
-        "description": "Maintain a 30-day streak",
-        "requirement": "30-day streak"
-      }
-    },
-    "rarity": {
-      "common": "Common",
-      "rare": "Rare",
-      "epic": "Epic"
-    }
-  },
-  "quests": {
-    "title": "Daily Quests",
-    "xpAvailable": "{{xp}} XP available today",
-    "allComplete": "🎉 All quests complete for today!",
-    "simulateNewDay": "Simulate New Day",
-    "simulateNewDayLabel": "Simulate a new day to reset daily quests",
-    "simulateNewDayToast": "Simulated a new day – quests have been reset!",
-    "questCompleteToast": "+{{xp}} XP – Quest complete!",
-    "questNotReady": "Quest not ready: {{description}}",
-    "markComplete": "Mark complete: {{description}}",
-    "completed": "{{description}} – completed",
-    "progress": "{{current}}/{{total}}",
-    "progressLabel": "{{description}} progress",
-    "simulateProgressLabel": "Simulate one step of progress for: {{description}}",
-    "items": {
-      "quest-lesson": {
-        "description": "Complete 3 lessons"
-      },
-      "quest-quiz": {
-        "description": "Score 80%+ on a quiz"
-      },
-      "quest-practice": {
-        "description": "Practice with AI camera"
-      }
-    }
-  },
-  "rewards": {
-    "title": "Rewards Shop",
-    "balance": "Your balance:",
-    "availableLabel": "Available rewards",
-    "scrollLeft": "Scroll rewards left",
-    "scrollRight": "Scroll rewards right",
-    "alreadyRedeemedToast": "{{name}} is already redeemed.",
-    "notEnoughXpToast": "Not enough XP! Need {{xp}} more XP.",
-    "redeemedToast": "You redeemed {{name}} for {{cost}} XP!",
-    "redeemed": "Redeemed",
-    "redeem": "Redeem",
-    "cost": "{{cost}} XP",
-    "redeemedOnLabel": "Redeemed on {{date}}",
-    "redeemLabel": "Redeem {{name}} for {{cost}} XP",
-    "items": {
-      "streak-freeze": {
-        "name": "Streak Freeze",
-        "description": "Protect your streak for one day"
-      },
-      "double-xp": {
-        "name": "Double XP (1hr)",
-        "description": "Earn double XP for one hour"
-      },
-      "custom-avatar": {
-        "name": "Custom Avatar",
-        "description": "Unlock a special avatar frame"
-      },
-      "bonus-lesson": {
-        "name": "Bonus Lesson",
-        "description": "Access an exclusive bonus lesson"
-      },
-      "hint-pack": {
-        "name": "Hint Pack (5)",
-        "description": "Get 5 hints for difficult signs"
-      }
-    }
-  },
-  "levelUp": {
-    "title": "Level Up!",
-    "message": "You've reached Level {{level}}! Keep signing to unlock more rewards and badges!",
-    "ctaBtn": "Awesome, keep going!",
-    "closeLabel": "Close level up modal",
-    "dismissLabel": "Dismiss level up modal and continue",
-    "ariaLabel": "Level up – you reached level {{level}}",
-    "levelBadgeLabel": "Level {{level}}",
-    "toast": "Congratulations! You reached level {{level}}!"
+  "rarity": {
+   "common": "Common",
+   "rare": "Rare",
+   "epic": "Epic"
   }
+ },
+ "quests": {
+  "title": "Daily Quests",
+  "xpAvailable": "{{xp}} XP available today",
+  "allComplete": "🎉 All quests complete for today!",
+  "simulateNewDay": "Simulate New Day",
+  "simulateNewDayLabel": "Simulate a new day to reset daily quests",
+  "simulateNewDayToast": "Simulated a new day – quests have been reset!",
+  "questCompleteToast": "+{{xp}} XP – Quest complete!",
+  "questNotReady": "Quest not ready: {{description}}",
+  "markComplete": "Mark complete: {{description}}",
+  "completed": "{{description}} – completed",
+  "progress": "{{current}}/{{total}}",
+  "progressLabel": "{{description}} progress",
+  "simulateProgressLabel": "Simulate one step of progress for: {{description}}",
+  "items": {
+   "quest-lesson": {
+    "description": "Complete 3 lessons"
+   },
+   "quest-quiz": {
+    "description": "Score 80%+ on a quiz"
+   },
+   "quest-practice": {
+    "description": "Practice with AI camera"
+   }
+  }
+ },
+ "rewards": {
+  "title": "Rewards Shop",
+  "balance": "Your balance:",
+  "availableLabel": "Available rewards",
+  "scrollLeft": "Scroll rewards left",
+  "scrollRight": "Scroll rewards right",
+  "alreadyRedeemedToast": "{{name}} is already redeemed.",
+  "notEnoughXpToast": "Not enough XP! Need {{xp}} more XP.",
+  "redeemedToast": "You redeemed {{name}} for {{cost}} XP!",
+  "redeemed": "Redeemed",
+  "redeem": "Redeem",
+  "cost": "{{cost}} XP",
+  "redeemedOnLabel": "Redeemed on {{date}}",
+  "redeemLabel": "Redeem {{name}} for {{cost}} XP",
+  "items": {
+   "streak-freeze": {
+    "name": "Streak Freeze",
+    "description": "Protect your streak for one day"
+   },
+   "double-xp": {
+    "name": "Double XP (1hr)",
+    "description": "Earn double XP for one hour"
+   },
+   "custom-avatar": {
+    "name": "Custom Avatar",
+    "description": "Unlock a special avatar frame"
+   },
+   "bonus-lesson": {
+    "name": "Bonus Lesson",
+    "description": "Access an exclusive bonus lesson"
+   },
+   "hint-pack": {
+    "name": "Hint Pack (5)",
+    "description": "Get 5 hints for difficult signs"
+   }
+  }
+ },
+ "levelUp": {
+  "title": "Level Up!",
+  "message": "You've reached Level {{level}}! Keep signing to unlock more rewards and badges!",
+  "ctaBtn": "Awesome, keep going!",
+  "closeLabel": "Close level up modal",
+  "dismissLabel": "Dismiss level up modal and continue",
+  "ariaLabel": "Level up – you reached level {{level}}",
+  "levelBadgeLabel": "Level {{level}}",
+  "toast": "Congratulations! You reached level {{level}}!"
+ }
 }

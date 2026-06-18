@@ -71,7 +71,9 @@
       "complete": "Practice complete. You matched {{count}} of {{total}} signs.",
       "detectedCorrect": "Detected {{result}}. Great job.",
       "detectedIncorrect": "Detected {{result}}. Target was {{answer}}.",
-      "countdown": "Get ready. Capture starts in {{seconds}} seconds."
+      "countdown": "Get ready. Capture starts in {{seconds}} seconds.",
+      "referenceSign": "Reference sign",
+      "nextSign": "Next sign"
     },
     "magicTouch": {
       "title": "Magic Touch",

@@ -1,0 +1,47 @@
+{
+  "pageTitle": "Translation Mode",
+  "badge": "Sign → Text",
+  "title": "Live Sign Translation",
+  "subtitle": "Sign word by word, then translate the sequence into a natural Indonesian sentence.",
+  "camera": {
+    "title": "Camera",
+    "starting": "Starting camera…",
+    "loadingModel": "Loading the recognition model…",
+    "permissionHint": "Allow camera access to begin signing.",
+    "recordHint": "Press the button or hit Space to record a sign (about 1.5 seconds)."
+  },
+  "status": {
+    "ready": "Ready",
+    "recording": "Recording…",
+    "predicting": "Predicting…",
+    "tooLow": "Confidence too low — try again",
+    "error": "Prediction error"
+  },
+  "buttons": {
+    "record": "Record Sign",
+    "recording": "Recording…",
+    "translate": "Translate",
+    "translating": "Translating…",
+    "clear": "Clear",
+    "speak": "Play audio",
+    "removeWord": "Remove word"
+  },
+  "words": {
+    "title": "Recognized Words",
+    "empty": "No signs recorded yet. Record a sign to add it here."
+  },
+  "result": {
+    "title": "Translation",
+    "indonesianLabel": "Indonesian",
+    "localizedLabel": "English",
+    "empty": "Your translated sentence will appear here."
+  },
+  "errors": {
+    "modelLoadFailed": "Failed to load the recognition model. Check your connection and refresh.",
+    "cameraUnavailable": "Camera is not available in this browser.",
+    "cameraDenied": "Camera access was denied. Enable it in your browser settings.",
+    "recordFirst": "Please record at least one sign first.",
+    "translationFailed": "Translation failed. Please try again.",
+    "ttsUnsupported": "Text-to-speech is not supported in this browser."
+  }
+}

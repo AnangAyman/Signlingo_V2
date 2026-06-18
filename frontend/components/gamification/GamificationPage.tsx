@@ -10,7 +10,7 @@ import { BadgesGrid } from "./BadgesGrid";
 import { RewardsShop } from "./RewardsShop";
 import { DailyQuests } from "./DailyQuests";
 import { LevelUpModal } from "./LevelUpModal";
-import { useGamificationStore } from "./useGamificationStore";
+import { useGamificationStore, syncBadgesFromStats } from "./useGamificationStore";
 import { AppHeader } from "@/components/app-header";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/lib/store";
@@ -66,9 +66,25 @@ export function GamificationPage({
     }
   }, [newlyEarnedBadge, clearNewBadge]);
 
+  // Pull the latest server stats on entry so badges reflect activity done
+  // elsewhere (lessons, quizzes, AI practice) since the last visit.
+  useEffect(() => {
+    void refreshUser();
+    // Mount only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     if (user) {
       syncFromUser(user);
+      // Recompute badges from real stats so achievements reflect actual activity.
+      syncBadgesFromStats({
+        streak: user.dailyStreak,
+        lessonsCompleted: user.lessonsCompleted,
+        quizzesCompleted: user.quizzesCompleted,
+        aiPractices: user.aiPracticesCompleted,
+        league: user.league,
+      });
     }
   }, [user, syncFromUser]);
 
@@ -123,8 +139,16 @@ export function GamificationPage({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => {
+              onClick={async () => {
+                // Clear the local store immediately, then zero the server-side
+                // state and re-sync so the reset survives navigation/reload.
                 resetDemo();
+                try {
+                  await gamificationApi.resetProgress();
+                  await refreshUser();
+                } catch {
+                  // Network/auth error: local reset stands; next sync reconciles.
+                }
                 toast.info(t("resetToast"));
               }}
               aria-label={t("resetLabel")}

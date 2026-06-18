@@ -2,7 +2,8 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { User } from "@/lib/store";
+import { useAuthStore, type User } from "@/lib/store";
+import { gamificationApi } from "@/lib/api";
 
 // ============================================================
 // TYPES
@@ -371,9 +372,24 @@ export const useGamificationStore = create<GamificationStore>()(
       },
 
       resetDemo: () => {
+        // Full reset to a clean slate (XP 0, no badges earned, nothing redeemed).
+        // The server-side counterpart (points/best_game_score/streak) is zeroed by
+        // the reset-progress endpoint; the caller re-syncs afterwards.
         set({
-          userProgress: INITIAL_PROGRESS,
-          badges: INITIAL_BADGES,
+          userProgress: {
+            level: 1,
+            totalXp: 0,
+            xpToNextLevel: 500,
+            levelProgressPercent: 0,
+            dailyStreak: 0,
+            lastActiveDate: new Date().toISOString().split("T")[0],
+          },
+          badges: INITIAL_BADGES.map((b) => ({
+            ...b,
+            isLocked: true,
+            currentProgress: 0,
+            earnedAt: undefined,
+          })),
           rewards: INITIAL_REWARDS.map((r) => ({ ...r, isRedeemed: false, redeemedAt: undefined })),
           dailyQuests: INITIAL_QUESTS.map((q) => ({ ...q, progress: 0, completed: false })),
           showLevelUpModal: false,
@@ -425,3 +441,119 @@ export const useGamificationStore = create<GamificationStore>()(
     }
   )
 );
+
+// ============================================================
+// QUEST EVENT BRIDGE
+// ============================================================
+
+/**
+ * Advance any incomplete daily quests that match a real user action and persist
+ * the reward XP. Call this from the actual event sites (lesson completion, quiz
+ * pass, AI practice) so quests reflect real activity instead of demo buttons.
+ */
+export async function reportQuestAction(
+  actionType: DailyQuest["actionType"],
+  count = 1
+): Promise<void> {
+  const { dailyQuests, addXp } = useGamificationStore.getState();
+  const hasMatch = dailyQuests.some(
+    (q) => q.actionType === actionType && !q.completed
+  );
+  if (!hasMatch) return;
+
+  let awardedXp = 0;
+  const updated = dailyQuests.map((q) => {
+    if (q.actionType !== actionType || q.completed) return q;
+    const progress = Math.min(q.progress + count, q.total);
+    const completed = progress >= q.total;
+    if (completed) awardedXp += q.xpReward;
+    return { ...q, progress, completed };
+  });
+  useGamificationStore.setState({ dailyQuests: updated });
+
+  if (awardedXp > 0) {
+    // Instant local feedback…
+    addXp(awardedXp, `quest:${actionType}`);
+    try {
+      // …then persist so the quest reward survives navigation/reload.
+      await gamificationApi.addXp(awardedXp);
+      await useAuthStore.getState().refreshUser();
+    } catch {
+      // Keep the optimistic value; the next server sync reconciles.
+    }
+  }
+}
+
+// ============================================================
+// BADGE EVENT BRIDGE
+// ============================================================
+
+// League tiers in ascending order; used to evaluate league badges.
+const LEAGUE_ORDER = ["bronze", "silver", "gold", "platinum", "diamond"];
+// Minimum league tier (1-based: bronze=1, silver=2, gold=3, platinum=4, diamond=5)
+// each league badge requires. Each badge is earned by promoting ONE tier above its
+// namesake — e.g. Bronze Champion unlocks on reaching Silver.
+const LEAGUE_BADGE_TIER: Record<string, number> = {
+  "bronze-champion": 2, // reach Silver
+  "silver-star": 3, // reach Gold
+  "gold-legend": 4, // reach Platinum
+};
+
+export interface BadgeStats {
+  streak: number;
+  lessonsCompleted: number;
+  quizzesCompleted: number;
+  aiPractices: number;
+  league: string;
+}
+
+/**
+ * Recompute every badge's progress from real user stats and unlock the ones that
+ * now qualify. Replaces the frozen demo seed values so badges reflect actual
+ * activity (streak / league / lessons / quizzes).
+ */
+export function syncBadgesFromStats(stats: BadgeStats): void {
+  const { badges } = useGamificationStore.getState();
+  const leagueTier = LEAGUE_ORDER.indexOf((stats.league || "bronze").toLowerCase()) + 1;
+
+  let changed = false;
+  let newlyEarned: Badge | null = null;
+
+  const updated = badges.map((b) => {
+    let progress = b.currentProgress;
+    switch (b.category) {
+      case "streak":
+        progress = stats.streak;
+        break;
+      case "lessons":
+        // ai-explorer is seeded under the "lessons" category but tracks AI camera use.
+        progress = b.id === "ai-explorer" ? stats.aiPractices : stats.lessonsCompleted;
+        break;
+      case "quizzes":
+        progress = stats.quizzesCompleted;
+        break;
+      case "league": {
+        const requiredTier = LEAGUE_BADGE_TIER[b.id] ?? 1;
+        progress = leagueTier >= requiredTier ? b.requiredValue : 0;
+        break;
+      }
+    }
+
+    const meets = progress >= b.requiredValue;
+    const isLocked = !meets;
+    const earnedAt = meets ? b.earnedAt ?? new Date() : undefined;
+
+    if (progress !== b.currentProgress || isLocked !== b.isLocked) {
+      changed = true;
+      if (meets && b.isLocked && !newlyEarned) {
+        newlyEarned = { ...b, isLocked, currentProgress: progress, earnedAt };
+      }
+    }
+    return { ...b, currentProgress: progress, isLocked, earnedAt };
+  });
+
+  if (changed) {
+    useGamificationStore.setState({ badges: updated });
+    if (newlyEarned) useGamificationStore.setState({ newlyEarnedBadge: newlyEarned });
+  }
+}

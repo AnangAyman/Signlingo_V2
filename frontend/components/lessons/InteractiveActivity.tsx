@@ -28,6 +28,7 @@ import {
   type ApiMlQuestion,
   type ApiQuizQuestion,
 } from "@/lib/api";
+import { reportQuestAction } from "@/components/gamification/useGamificationStore";
 
 const TOTAL_ROUNDS = 10;
 const CAMERA_PREP_SECONDS = 5;
@@ -269,6 +270,13 @@ export function QuizPracticeActivity({ lessonKey, onCompleted }: ActivityProps) 
           skipped: false,
         });
         await onCompleted();
+        // Bump the server-side quiz counter (drives the quiz badge), then advance the quest.
+        try {
+          await gamificationApi.quizCompleted();
+        } catch {
+          // Non-fatal; the badge will catch up on the next sync.
+        }
+        void reportQuestAction("score_quiz");
         setFeedback({
           type: "correct",
           message: t("activity.quiz.complete", { count: finalCorrectCount, total: TOTAL_ROUNDS }),
@@ -398,6 +406,9 @@ export function CameraPracticeActivity({ lessonKey, onCompleted }: ActivityProps
   const [predicting, setPredicting] = useState(false);
   const [prepCountdown, setPrepCountdown] = useState<number | null>(null);
   const [finishing, setFinishing] = useState(false);
+  // After a capture we pause on the result (feedback + reference image) until the
+  // learner chooses to move on, instead of auto-advancing to the next sign.
+  const [awaitingNext, setAwaitingNext] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const countdownIntervalRef = useRef<number | null>(null);
   const captureTimeoutRef = useRef<number | null>(null);
@@ -406,6 +417,7 @@ export function CameraPracticeActivity({ lessonKey, onCompleted }: ActivityProps
     setLoading(true);
     setFeedback(null);
     setError(null);
+    setAwaitingNext(false);
     try {
       setQuestion(await gameApi.getMlQuestion());
     } catch (err) {
@@ -434,6 +446,7 @@ export function CameraPracticeActivity({ lessonKey, onCompleted }: ActivityProps
           skipped: false,
         });
         await onCompleted();
+        void reportQuestAction("practice_ai");
         setFeedback({
           type: "correct",
           message: t("activity.camera.complete", { count: finalCorrectCount, total: TOTAL_ROUNDS }),
@@ -456,6 +469,8 @@ export function CameraPracticeActivity({ lessonKey, onCompleted }: ActivityProps
     try {
       const blob = await capture();
       const prediction = await gameApi.predict(blob);
+      // Each AI camera prediction counts toward the AI Explorer badge.
+      void gamificationApi.aiPracticeCompleted();
       const isCorrect = prediction.result === question.answer;
       const nextCorrectCount = correctCount + (isCorrect ? 1 : 0);
       const nextRound = round + 1;
@@ -475,7 +490,8 @@ export function CameraPracticeActivity({ lessonKey, onCompleted }: ActivityProps
       if (nextRound >= TOTAL_ROUNDS) {
         await finish(nextCorrectCount);
       } else {
-        await loadQuestion();
+        // Hold on the result so the learner sees right/wrong + the reference sign.
+        setAwaitingNext(true);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : t("activity.errors.predictionFailed"));
@@ -484,12 +500,17 @@ export function CameraPracticeActivity({ lessonKey, onCompleted }: ActivityProps
     }
   };
 
+  const goToNextSign = () => {
+    setAwaitingNext(false);
+    void loadQuestion();
+  };
+
   const startPreparedCapture = async () => {
     if (!cameraReady) {
       await startCamera();
       return;
     }
-    if (!question || predicting || finishing || prepCountdown !== null) return;
+    if (!question || predicting || finishing || prepCountdown !== null || awaitingNext) return;
 
     setError(null);
     setFeedback({
@@ -546,28 +567,51 @@ export function CameraPracticeActivity({ lessonKey, onCompleted }: ActivityProps
                   : localizeCameraPrompt(t, question?.question)}
               </p>
             </div>
+            {!loading && question?.answer && (
+              <div className="rounded-lg border bg-muted/30 p-3 text-center">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  {t("activity.camera.referenceSign")}
+                </p>
+                <img
+                  src={`/static/Assets/bisindo/${question.answer.toLowerCase()}.png`}
+                  alt={t("activity.camera.referenceSign")}
+                  className="mx-auto mt-2 h-40 w-auto object-contain"
+                />
+              </div>
+            )}
             {prepCountdown !== null && (
               <div className="rounded-lg border bg-primary/10 p-4 text-center text-primary">
                 <p className="text-sm font-semibold uppercase tracking-[0.18em]">{t("activity.camera.getReady")}</p>
                 <p className="mt-1 text-5xl font-black">{prepCountdown}</p>
               </div>
             )}
-            <Button
-              className="w-full"
-              disabled={(cameraReady && !question) || predicting || finishing || prepCountdown !== null}
-              onClick={() => void startPreparedCapture()}
-            >
-              {predicting || prepCountdown !== null ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Camera className="mr-2 h-4 w-4" />
-              )}
-              {cameraReady
-                ? prepCountdown !== null
-                  ? t("activity.camera.preparing")
-                  : t("activity.camera.captureSign")
-                : t("activity.camera.enableCamera")}
-            </Button>
+            {awaitingNext ? (
+              <Button
+                className="w-full"
+                disabled={finishing}
+                onClick={goToNextSign}
+              >
+                <RefreshCcw className="mr-2 h-4 w-4" />
+                {t("activity.camera.nextSign")}
+              </Button>
+            ) : (
+              <Button
+                className="w-full"
+                disabled={(cameraReady && !question) || predicting || finishing || prepCountdown !== null}
+                onClick={() => void startPreparedCapture()}
+              >
+                {predicting || prepCountdown !== null ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Camera className="mr-2 h-4 w-4" />
+                )}
+                {cameraReady
+                  ? prepCountdown !== null
+                    ? t("activity.camera.preparing")
+                    : t("activity.camera.captureSign")
+                  : t("activity.camera.enableCamera")}
+              </Button>
+            )}
             <Button
               variant="outline"
               className="w-full"
@@ -616,6 +660,7 @@ export function MagicTouchPracticeActivity({ lessonKey, onCompleted }: ActivityP
         // Persist the best Magic Touch score for the leaderboard.
         await gamificationApi.saveGameScore(finalScore);
         await onCompleted();
+        void reportQuestAction("practice_ai");
         setFeedback({
           type: "correct",
           message: t("activity.magicTouch.saved", { score: finalScore }),
