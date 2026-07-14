@@ -1,0 +1,37 @@
+[
+  {
+    "Model": "Raw Keras .h5 (eager)",
+    "Processing (ms)": 1453.736,
+    "Model Inference (ms)": 100.96,
+    "Total Processing Latency (ms)": 1554.696,
+    "Total incl. Capture Wall-Clock (ms)": 2353.806
+  },
+  {
+    "Model": "Float32 (baseline)",
+    "Processing (ms)": 1453.736,
+    "Model Inference (ms)": 1.331,
+    "Total Processing Latency (ms)": 1455.067,
+    "Total incl. Capture Wall-Clock (ms)": 2254.177
+  },
+  {
+    "Model": "Float16",
+    "Processing (ms)": 1453.736,
+    "Model Inference (ms)": 1.4,
+    "Total Processing Latency (ms)": 1455.136,
+    "Total incl. Capture Wall-Clock (ms)": 2254.246
+  },
+  {
+    "Model": "Dynamic Range",
+    "Processing (ms)": 1453.736,
+    "Model Inference (ms)": 1.029,
+    "Total Processing Latency (ms)": 1454.764,
+    "Total incl. Capture Wall-Clock (ms)": 2253.875
+  },
+  {
+    "Model": "Full INT8",
+    "Processing (ms)": 1453.736,
+    "Model Inference (ms)": 1.202,
+    "Total Processing Latency (ms)": 1454.938,
+    "Total incl. Capture Wall-Clock (ms)": 2254.048
+  }
+]
