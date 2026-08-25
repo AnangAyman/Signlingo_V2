@@ -1,37 +1,57 @@
 [
   {
     "Model": "Raw Keras .h5 (eager)",
-    "Processing (ms)": 1453.736,
-    "Model Inference (ms)": 100.96,
-    "Total Processing Latency (ms)": 1554.696,
-    "Total incl. Capture Wall-Clock (ms)": 2353.806
+    "N": 10,
+    "Processing Mean (ms)": 1526.88,
+    "Processing Std (ms)": 76.337,
+    "Model Inference Mean (ms)": 107.309,
+    "Model Inference Std (ms)": 5.665,
+    "Total Processing Mean (ms)": 1634.189,
+    "Total Processing Std (ms)": 80.057,
+    "Total incl. Capture Wall-Clock (ms)": 2277.412
   },
   {
     "Model": "Float32 (baseline)",
-    "Processing (ms)": 1453.736,
-    "Model Inference (ms)": 1.331,
-    "Total Processing Latency (ms)": 1455.067,
-    "Total incl. Capture Wall-Clock (ms)": 2254.177
+    "N": 10,
+    "Processing Mean (ms)": 1526.88,
+    "Processing Std (ms)": 76.337,
+    "Model Inference Mean (ms)": 1.458,
+    "Model Inference Std (ms)": 0.24,
+    "Total Processing Mean (ms)": 1528.338,
+    "Total Processing Std (ms)": 76.505,
+    "Total incl. Capture Wall-Clock (ms)": 2171.561
   },
   {
     "Model": "Float16",
-    "Processing (ms)": 1453.736,
-    "Model Inference (ms)": 1.4,
-    "Total Processing Latency (ms)": 1455.136,
-    "Total incl. Capture Wall-Clock (ms)": 2254.246
+    "N": 10,
+    "Processing Mean (ms)": 1526.88,
+    "Processing Std (ms)": 76.337,
+    "Model Inference Mean (ms)": 1.574,
+    "Model Inference Std (ms)": 0.069,
+    "Total Processing Mean (ms)": 1528.454,
+    "Total Processing Std (ms)": 76.318,
+    "Total incl. Capture Wall-Clock (ms)": 2171.677
   },
   {
     "Model": "Dynamic Range",
-    "Processing (ms)": 1453.736,
-    "Model Inference (ms)": 1.029,
-    "Total Processing Latency (ms)": 1454.764,
-    "Total incl. Capture Wall-Clock (ms)": 2253.875
+    "N": 10,
+    "Processing Mean (ms)": 1526.88,
+    "Processing Std (ms)": 76.337,
+    "Model Inference Mean (ms)": 1.083,
+    "Model Inference Std (ms)": 0.051,
+    "Total Processing Mean (ms)": 1527.963,
+    "Total Processing Std (ms)": 76.367,
+    "Total incl. Capture Wall-Clock (ms)": 2171.186
   },
   {
     "Model": "Full INT8",
-    "Processing (ms)": 1453.736,
-    "Model Inference (ms)": 1.202,
-    "Total Processing Latency (ms)": 1454.938,
-    "Total incl. Capture Wall-Clock (ms)": 2254.048
+    "N": 10,
+    "Processing Mean (ms)": 1526.88,
+    "Processing Std (ms)": 76.337,
+    "Model Inference Mean (ms)": 1.224,
+    "Model Inference Std (ms)": 0.032,
+    "Total Processing Mean (ms)": 1528.104,
+    "Total Processing Std (ms)": 76.338,
+    "Total incl. Capture Wall-Clock (ms)": 2171.327
   }
 ]

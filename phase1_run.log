@@ -1,0 +1,73 @@
+Loading dataset...
+  Raw: 4628 sequences
+  De-duplicated: removed 55, 4573 remain
+  Balanced: 4400 sequences across 40 classes
+  Per-signer: {'Signer_A_numeric': 966, 'Signer_B_dash': 776, 'Signer_C_underscore': 694, 'Signer_D_bisindo': 1957, 'Signer_UNK': 7}
+
+Mirror self-check: Signer_B distance to others 0.855 -> 0.241 when mirrored
+  pose: corr_x=+0.9950  corr_y=+0.9928  mean|dy|=0.1606
+  face: corr_x=+1.0000  corr_y=+0.9998  mean|dy|=0.0031
+  OK -- mirror mapping validated (involution + Signer_B + x/y pair geometry)
+
+============================================================
+STRATIFIED REFERENCE (de-duplicated, Full features)
+============================================================
+  accuracy=98.64%  f1=0.9863
+
+LOSO pool: 4393 sequences (7 unclassifiable dropped)
+
+============================================================
+ARM: Hand-only   (mirror=True, delta=False)
+============================================================
+  Signer_A_numeric       n_test=966   acc= 63.56%  f1=0.6122
+  Signer_B_dash          n_test=776   acc= 70.23%  f1=0.6556
+  Signer_C_underscore    n_test=694   acc= 66.57%  f1=0.6263
+  Signer_D_bisindo       n_test=1957  acc= 69.80%  f1=0.6661
+  -> mean 67.54% +/- 2.70%
+
+============================================================
+ARM: Hand+Pose   (mirror=True, delta=False)
+============================================================
+  Signer_A_numeric       n_test=966   acc= 49.48%  f1=0.4500
+  Signer_B_dash          n_test=776   acc= 63.79%  f1=0.5961
+  Signer_C_underscore    n_test=694   acc= 56.92%  f1=0.5337
+  Signer_D_bisindo       n_test=1957  acc= 63.21%  f1=0.6016
+  -> mean 58.35% +/- 5.79%
+
+============================================================
+ARM: Full   (mirror=True, delta=False)
+============================================================
+  Signer_A_numeric       n_test=966   acc= 51.04%  f1=0.4751
+  Signer_B_dash          n_test=776   acc= 54.90%  f1=0.5057
+  Signer_C_underscore    n_test=694   acc= 49.14%  f1=0.4429
+  Signer_D_bisindo       n_test=1957  acc= 59.38%  f1=0.5572
+  -> mean 53.61% +/- 3.92%
+
+============================================================
+ARM: Full + delta   (mirror=True, delta=True)
+============================================================
+  Signer_A_numeric       n_test=966   acc= 54.76%  f1=0.5194
+  Signer_B_dash          n_test=776   acc= 32.47%  f1=0.2982
+  Signer_C_underscore    n_test=694   acc= 46.97%  f1=0.4536
+  Signer_D_bisindo       n_test=1957  acc= 60.50%  f1=0.5637
+  -> mean 48.68% +/- 10.51%
+
+Saved -> phase1_results.json
+
+============================================================
+PHASE 1 SUMMARY
+============================================================
+Stratified reference (de-duplicated, Full): 98.64%
+Baseline LOSO (Full, no mirror, with dupes): 41.33% +/- 12.97%
+
+  Hand-only           67.54% +/-  2.70%
+  Hand+Pose           58.35% +/-  5.79%
+  Full                53.61% +/-  3.92%
+  Full + delta        48.68% +/- 10.51%
+
+Per-fold accuracy by arm (%):
+Arm                            A_numeric                B_dash          C_underscore             D_bisindo
+Hand-only                         63.56%                70.23%                66.57%                69.80%
+Hand+Pose                         49.48%                63.79%                56.92%                63.21%
+Full                              51.04%                54.90%                49.14%                59.38%
+Full + delta                      54.76%                32.47%                46.97%                60.50%
