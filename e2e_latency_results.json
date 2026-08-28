@@ -1,0 +1,57 @@
+[
+  {
+    "Model": "Raw Keras .h5 (eager)",
+    "N": 10,
+    "Processing Mean (ms)": 1526.88,
+    "Processing Std (ms)": 76.337,
+    "Model Inference Mean (ms)": 107.309,
+    "Model Inference Std (ms)": 5.665,
+    "Total Processing Mean (ms)": 1634.189,
+    "Total Processing Std (ms)": 80.057,
+    "Total incl. Capture Wall-Clock (ms)": 2277.412
+  },
+  {
+    "Model": "Float32 (baseline)",
+    "N": 10,
+    "Processing Mean (ms)": 1526.88,
+    "Processing Std (ms)": 76.337,
+    "Model Inference Mean (ms)": 1.458,
+    "Model Inference Std (ms)": 0.24,
+    "Total Processing Mean (ms)": 1528.338,
+    "Total Processing Std (ms)": 76.505,
+    "Total incl. Capture Wall-Clock (ms)": 2171.561
+  },
+  {
+    "Model": "Float16",
+    "N": 10,
+    "Processing Mean (ms)": 1526.88,
+    "Processing Std (ms)": 76.337,
+    "Model Inference Mean (ms)": 1.574,
+    "Model Inference Std (ms)": 0.069,
+    "Total Processing Mean (ms)": 1528.454,
+    "Total Processing Std (ms)": 76.318,
+    "Total incl. Capture Wall-Clock (ms)": 2171.677
+  },
+  {
+    "Model": "Dynamic Range",
+    "N": 10,
+    "Processing Mean (ms)": 1526.88,
+    "Processing Std (ms)": 76.337,
+    "Model Inference Mean (ms)": 1.083,
+    "Model Inference Std (ms)": 0.051,
+    "Total Processing Mean (ms)": 1527.963,
+    "Total Processing Std (ms)": 76.367,
+    "Total incl. Capture Wall-Clock (ms)": 2171.186
+  },
+  {
+    "Model": "Full INT8",
+    "N": 10,
+    "Processing Mean (ms)": 1526.88,
+    "Processing Std (ms)": 76.337,
+    "Model Inference Mean (ms)": 1.224,
+    "Model Inference Std (ms)": 0.032,
+    "Total Processing Mean (ms)": 1528.104,
+    "Total Processing Std (ms)": 76.338,
+    "Total incl. Capture Wall-Clock (ms)": 2171.327
+  }
+]

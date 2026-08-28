@@ -1,0 +1,73 @@
+{
+  "exact_duplicate_pairs": 41,
+  "near_duplicate_pairs": 50,
+  "near_duplicate_pairs_cross_signer": 0,
+  "silhouette_signer": 0.0448935404419899,
+  "silhouette_class": -0.013481387868523598,
+  "linear_signer_classifier_acc": 0.9972727272727273,
+  "signer_majority_baseline": 0.4459090909090909,
+  "per_signer_missing_rate": {
+    "Signer_A_numeric": {
+      "pose": 0.0,
+      "face": 0.001160013647219379,
+      "left_hand": 0.8609689525759127,
+      "right_hand": 0.5260320709655407
+    },
+    "Signer_B_dash": {
+      "pose": 0.0,
+      "face": 0.003158344003414426,
+      "left_hand": 0.2475032010243278,
+      "right_hand": 0.7145966709346991
+    },
+    "Signer_C_underscore": {
+      "pose": 0.0,
+      "face": 9.891196834817012e-05,
+      "left_hand": 0.7701285855588527,
+      "right_hand": 0.38625123639960435
+    },
+    "Signer_D_bisindo": {
+      "pose": 0.0,
+      "face": 3.397893306150187e-05,
+      "left_hand": 0.7718994223581379,
+      "right_hand": 0.35125722052327557
+    },
+    "Signer_UNK": {
+      "pose": 0.0,
+      "face": 0.005555555555555556,
+      "left_hand": 0.8777777777777778,
+      "right_hand": 0.48333333333333334
+    }
+  },
+  "per_signer_block_magnitude": {
+    "Signer_A_numeric": {
+      "pose": 20.467355728149414,
+      "face": 9.21537971496582,
+      "left_hand": 3.602430820465088,
+      "right_hand": 4.100997447967529
+    },
+    "Signer_B_dash": {
+      "pose": 21.935840606689453,
+      "face": 9.398947715759277,
+      "left_hand": 4.070235729217529,
+      "right_hand": 4.69105863571167
+    },
+    "Signer_C_underscore": {
+      "pose": 20.979949951171875,
+      "face": 12.477664947509766,
+      "left_hand": 6.196078300476074,
+      "right_hand": 5.9054460525512695
+    },
+    "Signer_D_bisindo": {
+      "pose": 18.008747100830078,
+      "face": 7.995538711547852,
+      "left_hand": 4.831329822540283,
+      "right_hand": 4.342215061187744
+    },
+    "Signer_UNK": {
+      "pose": 20.908300399780273,
+      "face": 9.522967338562012,
+      "left_hand": 3.793724775314331,
+      "right_hand": 4.0222249031066895
+    }
+  }
+}
