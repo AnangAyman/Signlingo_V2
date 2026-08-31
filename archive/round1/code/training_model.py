@@ -117,6 +117,7 @@ for bar, cnt in zip(bars, counts):
     ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.3,
             str(cnt), ha='center', va='bottom', fontsize=8, fontweight='bold')
 plt.tight_layout()
+plt.savefig('samples_per_class.pdf')
 plt.show()
 print(f'Min: {min(counts)}  |  Max: {max(counts)}  |  Mean: {np.mean(counts):.1f}')
 
