@@ -1410,6 +1410,14 @@
       "size_kb": 292.9,
       "accuracy": 0.9977272727272727,
       "reduction_pct": 70.7
+    },
+    {
+      "format": "Full INT8",
+      "path": "signlingo_r2_int8.tflite",
+      "size_kb": 1474.4,
+      "needs_flex_delegate": false,
+      "accuracy": 0.9977272727272727,
+      "reduction_pct": -47.4
     }
   ],
   "recommended_format": "Dynamic Range"
