@@ -33,6 +33,29 @@ excute.md
 !DOCX/excute_django.md
 
 features/
+features_compact/
 kt_tuner_logs/
+
+# ── Training: large generated datasets ──────────────────────────────────────
+training/features/
+training/features_compact/
+training/dataset.npz
+training/dataset_meta.json
+training/compact_features_meta.json
+
+# ── Training: exported models & saved model dirs ─────────────────────────────
+training/models/
+training/**/*_saved_model_tmp/
+training/**/*.tflite
+training/signlingo_r2_saved_model_tmp/
+training/signlingo_saved_model_tmp/
+
+# ── Root-level model files ────────────────────────────────────────────────────
+*.h5
+*.tflite
+
+# ── Jupyter checkpoints ───────────────────────────────────────────────────────
+**/.ipynb_checkpoints/
+*.ipynb_checkpoints
 # session notes, local only
 changes.md
