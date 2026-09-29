@@ -39,6 +39,7 @@ kt_tuner_logs/
 # ── Training: large generated datasets ──────────────────────────────────────
 training/features/
 training/features_compact/
+training/features_new_jason/
 training/dataset.npz
 training/dataset_meta.json
 training/compact_features_meta.json
